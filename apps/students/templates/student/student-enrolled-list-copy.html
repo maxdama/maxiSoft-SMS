@@ -1,0 +1,202 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Students Enrolled List{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+{% endblock stylesheets %}
+
+{% load humanize %}
+{% block content %}
+
+    <div class="content">
+        <div class="page-inner">
+
+            <div class="page-header">
+                    <h3 class=" fa-font-awesome">Students Enrolled</h3>
+                    <!-- <p class=""><a href="/students/new" class="">New Registration</a></p> -->
+                    <!-- <p class=""><a href="/index.html" class="">Dashboard</a></p> -->
+                    <ul class="breadcrumbs">
+                        <li class="nav-home">
+                            <a href="/index.html">
+                                <i class="flaticon-home"> Dashboard</i>
+                            </a>
+                        </li>
+                        <li class="separator">
+                            <i class="flaticon-right-arrow"></i>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/students/new">New Registration</a>
+                        </li>
+                        <li class="separator">
+                            <i class="flaticon-right-arrow"></i>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/students/list">Registered List</a>
+                        </li>
+                    </ul>
+                </div>
+
+            <div class="row ">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="d-flex align-items-center">
+								<h4 class="card-title">{{title}}</h4>
+
+								<button class="btn btn-success btn-round ml-auto new" data-toggle="modal">
+									<i class="fa fa-plus"></i>
+									 Enroll Student
+								</button>
+							</div>
+						</div>
+
+
+						<div class="card-body">
+							<!--  Table Starts Here   -->
+							<div class="table-responsive">
+								<table id="add-row" class="table-hover border-bottom" >
+									<thead>
+										<tr class="text-small text-secondary ">
+											<th>S/N</th>
+											<th>Reg. Number</th>
+											<th>Student Names</th>
+											<th class="text-right">Sex</th>
+											<th>Batch</th>
+											<th>Due Date</th>
+                                            <th class="text-center">Due Amt</th>
+											<th class="text-center">Status</th>
+											<th  class="icon-book-open "> Action</th>
+										</tr>
+									</thead>
+
+									<tbody>
+										{% for enrolled in enrollments %}
+										<tr height="25px" class="text-small">
+											<td class="text-center">{{ forloop.counter }}</td>
+											<td>{{enrolled.reg_no}}</td>
+											<td>{{enrolled.student.surname}} {{enrolled.student.first_name}} {{enrolled.student.middle_name}}</td>
+											<td class="text-center pr-3">{{enrolled.student.gender|first}}</td>
+                                            <td>{{enrolled.classroom.class_abr}}{{enrolled.classroom.arm}}</td>
+											<!--<td class="text-left">{{enrolled.trans_date|date:'d-m-Y'}}</td> -->
+											<td class="text-left">{{enrolled.due.date|date:'d-m-Y'}}</td>
+											<td  class="text-right pr-2">{{enrolled.amount.due|floatformat:2|intcomma}} </td>
+											<td class="text-left">{{enrolled.status}}</td>
+
+											<td class="">
+												<div class="btn-group form-button-action">
+												  <button class="btn btn-secondary btn-xs  dropdown-toggle btn-border btn-round" type="button" data-toggle="dropdown" >
+													<b class="icon-pencil"></b>
+												  </button>
+												  <div class="dropdown-menu">
+													  <a class="dropdown-item" href="">Payment</a>
+													  {% if enrolled.status == 'Enrolled' %}
+													  	<div class="dropdown-divider"></div>
+													  	<a class="dropdown-item" href="">Update</a>
+													  	<a class="dropdown-item  cancel"  href="{% url 'cancel-enrollment' enrolled.id %}">Cancel</a>
+													  {% endif %}
+
+												  </div>
+												</div>
+											</td>
+										</tr>
+										{% endfor %}
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+        </div>
+
+    </div>
+
+{% endblock content %}
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+	{% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<script type="text/javascript"  >
+
+		$(document).ready(function() {
+
+			// Add Row
+			$('#add-row').DataTable({
+				"pageLength": 25,
+			});
+
+			$('.cancel').click(function(e){
+				var self = $(this);
+				console.log(self.data('title'));
+				e.preventDefault();
+
+				let title = "Cancel! .. Are you sure? "
+				let msg = "You won't be able to reverse this again! "
+
+				sweet_alert(title, msg, self)
+
+			});
+
+
+			function sweet_alert(title, msg, self)
+			{
+				swal({
+				title: title,
+				text: msg,
+				type: 'warning',
+				buttons:{
+					confirm: {
+						text : 'YES, Go ahead!',
+						className : 'btn btn-success'
+					},
+					cancel: {
+						text: 'NO, Stop!',
+						visible: true,
+						className: 'btn btn-danger'
+					}
+				}
+				}).then((go) => {
+					if (go) {
+						location.href = self.attr('href');
+
+					} else {
+						swal({
+							title: 'Abort!',
+							text: 'The operation is aborted \n The record is retained.',
+							type: 'info',
+							buttons : {
+								confirm: {
+									className : 'btn btn-info'
+								}
+							}
+						});
+						swal.close();
+					}
+				});
+			};
+
+		});
+
+	</script>
+
+{% endblock javascripts %}
+

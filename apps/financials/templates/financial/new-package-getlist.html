@@ -1,0 +1,236 @@
+
+{% extends "layouts/base.html" %}
+{% load custom_template_tag %}
+
+{% block title %} UI Alerts {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+
+    <style class="">
+        span {
+            margin: 0px;
+            display: inline-block;
+        }
+        hr {width: 95%;margin: 0px; padding: 0px}
+
+    </style>
+
+
+{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="content">
+    <div class="page-inner">
+
+        <div class="container-fluid">
+                <div class="row my-4">
+                    <div class="col-md-10 mx-auto">
+                        <div class="card shadow">
+
+                            <div class="card-header">
+                                <h4 class="card-title"><span class="fw-light fa-school">Fees</span>   Package</h4>
+                                <div id="output" class="text-center"></div>
+                            </div>
+
+                            <div class="card-body p-4">
+                            <!--    <form action="#" method="POST" id="add_form" class="" >
+                                    {% csrf_token %}  -->
+
+                                    <div class="row">
+                                           <div class="col-md-5 ">
+                                               <input name="school" id="sch_id"  type="text"  class="form-control form-control-sm" value="{{package.sch_id}}"  >
+                                           </div>
+                                           <div class="col-md-5 ">
+                                              <input  name="timeline" id="timeline" value="{{package.timeline}}" type="text" class="form-control form-control-sm "   >
+                                           </div>
+                                       </div>
+
+                                    <div class="row ">
+                                            <div class="col-md-5 ">
+                                                <div class="form-group" style="padding:5px" >
+                                                    <label for="descx">Package Description</label><br>
+                                                    <input  name="description" id="descx" value="{{package.descx}}" type="text" class="form-control form-control-sm " placeholder="eg. New Admission 2021/2022 Fees" required >
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 offset-md-2 ">
+                                               <div class="form-group" style="padding:5px">
+                                                   <label for="status">Status</label>
+                                                   <input  name="status" id="status" value="{{package.status}}" type="text" class="form-control form-control-sm"  >
+                                               </div>
+                                            </div>
+                                       </div>
+
+                                <form action="#" method="POST" id="add_form" class="" >
+                                    {% csrf_token %}
+
+                                    <div class="row mb-1">
+                                        <div class="col-md-4 ">
+                                            <label >Item Description</label>
+                                        </div>
+                                        <div class="col-md-2 ">
+                                          <label >Item Qty</label>
+                                        </div>
+                                        <div class="col-md-2 ">
+                                            <label >Item Value</label>
+                                        </div>
+                                        <div class="col-md-2 ">
+                                            <label>Amount</label>
+                                        </div>
+                                       <div class="col-md-2 ">
+                                           <label class="">Action</label>
+                                        </div>
+                                        <hr>
+                                    </div>
+
+
+                                    <div class="" id="show_item">
+                                        <div class="row ">
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group" style="padding:0px">
+                                                   <input  name="item_descx" id="" value="{{package.descx}}" type="text" class="form-control form-control-sm mb-0"  >
+                                               </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input  name="qty" id="qty" value="{{package.qty}}" type="number" width="10"  min="0" max="100" class="form-control form-control-sm" class="form-control form-control-sm" >
+                                            </div>
+                                            <div class="col-md-2 mb-3 ">
+                                                <input name="unit_value" id="itemvalue" type="number" onchange="setTwoNumberDecimal" min="0" max="1000000000" step="0.25" value="0.00" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-2 mb-3 ">
+                                               <input name="amount" id="amount" type="number" onchange="setTwoNumberDecimal" min="0" max="1000000000000" step="0.25" value="0.00" class="form-control form-control-sm" />
+                                            </div>
+                                           <div class="col-md-2 mb-3 d-grid ">
+                                               <button class="btn-success add_item_btn">Add More</button>
+                                            </div>
+
+                                       </div>
+                                    </div>
+
+                                    <div class="">
+                                        <input type="submit" value="SAVE" class="btn-primary w-25" id="add_btn" />
+                                    </div>
+
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+           </div>
+
+    </div>
+</div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <script class="">
+                toastr.options.timeOut=105000
+                toastr.options["body-output-type"]="trustedHtml"
+            </script>
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project!
+	<script src="/static/assets/js/setting-demo2.js"></script> -->
+	<script >
+		$(document).ready(function() {
+
+            //function setTwoNumberDecimal(event) {
+            //    alert('Testing')
+            //    this.value = parseFloat(this.value).toFixed(2);
+            //}
+
+             //$(".add_item_btn").click(function() {
+             //   $('#add_form #show_item:last').clone(true).insertAfter('#add_form #show_item:last');
+             //   return false;
+
+            // });
+
+            $(".add_item_btn").click(function (e) {
+                e.preventDefault();
+                 $("#show_item").prepend('<div class="row append_item">\n' +
+                     '                                            \n' +
+                     '                                            <div class="col-md-4 mb-3">\n' +
+                     '                                                <div class="form-group" style="padding:0px">\n' +
+                     '                                                   <input  name="item_descx" id="" value="{{package.descx}}" type="text" class="form-control form-control-sm mb-0"  >\n' +
+                     '                                               </div>\n' +
+                     '                                            </div>\n' +
+                     '                                            <div class="col-md-2">\n' +
+                     '                                                <input  name="qty" id="qty" value="{{package.qty}}" type="number" width="10"  min="0" max="100" class="form-control form-control-sm" class="form-control form-control-sm" >\n' +
+                     '                                            </div>\n' +
+                     '                                            <div class="col-md-2 mb-3 ">\n' +
+                     '                                                <input name="unit_value" id="itemvalue" type="number" onchange="setTwoNumberDecimal" min="0" max="1000000000" step="0.25" value="0.00" class="form-control form-control-sm" />\n' +
+                     '                                            </div>\n' +
+                     '                                            <div class="col-md-2 mb-3 ">\n' +
+                     '                                               <input name="amount" id="amount" type="number" onchange="setTwoNumberDecimal" min="0" max="1000000000000" step="0.25" value="0.00" class="form-control form-control-sm" />\n' +
+                     '                                            </div>\n' +
+                     '                                           <div class="col-md-2 mb-3 d-grid ">\n' +
+                     '                                               <button class="btn-danger remove_item_btn">Remove</button>\n' +
+                     '                                            </div>\n' +
+                     '\n' +
+                     '                                       </div>');
+            });
+
+            $(document).on('click', '.remove_item_btn', function (e) {
+                e.preventDefault();
+
+                let row_item = $(this).parent().parent();
+                $(row_item).remove();
+            });
+
+            // ajax request to insert all form data
+            $("#add_form").submit(function(e){
+                e.preventDefault();
+                $("#add_btn").val('Saving . . .');
+
+                csrfmiddlewaretoken = $("#add_form").find("input[name='csrfmiddlewaretoken']" ).val();
+                formData = $('#add_form').serializeArray();
+                formData = JSON.stringify(formData);
+
+                $.ajax({
+                    method: "POST",
+                    url: "new-package",
+                    async: "True",
+                    dataType: "json",
+
+                    data: $(this).serializeArray(),
+                    success: function( data) {
+                        //console.log(response);
+                        $('#output').html(data.msg) /* response message */
+                        $("#add_btn").val('SAVE');
+                        // $("#add_form")[0].reset();
+                        // $(".append_item").remove()
+                    },
+                    failure: function(response){
+                        alert("An Error occured.");
+                    }
+                });
+            });
+
+
+		});
+	</script>
+
+{% endblock javascripts %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

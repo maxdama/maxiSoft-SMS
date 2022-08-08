@@ -1,0 +1,360 @@
+
+{% extends "layouts/base.html" %}
+{% load custom_template_tag %}
+
+{% block title %} UI Alerts {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+
+    <style class="">
+        span {
+            margin: 0px;
+            display: inline-block;
+        }
+        hr {width: 95%;margin: 0px; padding: 0px}
+
+    </style>
+
+
+{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="content">
+    <div class="page-inner">
+
+        <div class="container-fluid">
+                <div class="row my-4">
+                    <div class="col-md-10 mx-auto">
+                        <div class="card shadow">
+
+                            <div class="card-header">
+                                <h4 class="card-title"><span class="fw-light fa-school">Fees</span>   Package</h4>
+                                <div id="output" class="text-center"></div>
+                            </div>
+
+                            <div class="card-body p-4">
+                                <form action="#" method="POST" id="add_form" class="form_items" >
+                                    {% csrf_token %}
+
+                                    <div class="row">
+                                       <div class="col-md-5 ">
+                                           <input name="school" id="sch_id"  type="text"  class="form-control form-control-sm" value="{{package.sch_id}}" hidden  >
+                                       </div>
+                                       <div class="col-md-5 ">
+                                          <input  name="timeline" id="timeline" value="{{package.timeline}}" type="text" class="form-control form-control-sm " hidden  >
+                                       </div>
+                                    </div>
+
+                                    <div class="row ">
+                                        <div class="col-md-5 ">
+                                            <div class="form-group" style="padding:5px" >
+                                                <label for="descx">Package Type</label>
+                                                <input  name="description" id="descx" value="{{package.descx}}" tabindex="1" autofocus type="text" class="form-control form-control-sm " placeholder="eg. New Admission 2021/2022 Fees" required >
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2" >
+                                            <div class="form-group" style="padding:5px" >
+                                                <label for="status_1" class="">Status</label>
+                                                <div class="row">
+                                                <div class="col-md-11 form-group w_90 ">
+                                                    <select name="status" id="status_1" tabindex="2" class="form-control form-control-sm" type="select"  >
+                                                          <option>-- Select --</option>
+                                                          <option>Active</option>
+                                                          <option>In-active</option>
+                                                      </select>
+                                                </div>
+                                             </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3 offset-md-2 ">
+                                           <div class="form-group" style="padding:5px">
+                                               <label for="total_fees">Total Fees</label>
+                                               <input  name="total_fees" id="total_fees" value="{{package.totalfees}}" type="text" tabindex="-1" class="form-control form-control-sm"  >
+                                           </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row mb-1">
+                                        <div class="col-md-4 ">
+                                            <label >Item Description</label>
+                                        </div>
+                                        <div class="col-md-2 ">
+                                          <label >Item Qty</label>
+                                        </div>
+                                        <div class="col-md-2 ">
+                                            <label >Item Value</label>
+                                        </div>
+                                        <div class="col-md-2 ">
+                                            <label>Amount</label>
+                                        </div>
+                                       <div class="col-md-2 ">
+                                           <label class="">Action</label>
+                                        </div>
+                                        <hr>
+                                    </div>
+
+
+                                    <div class="item_row_group" id="show_item">
+                                        <div class="row remove_item_row">
+
+                                            <div class="col-md-4 mb-3">
+                                                <div class="form-group" style="padding:0px">
+                                                   <input  name="item_descx" id="item_descx_1" value="{{package.descx}}"  type="text" required class="form-control form-control-sm mb-0 itemdescx"  >
+                                               </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <input  name="qty" id="qty_1" value="{{package.qty}}" type="number"   min="0" max="100" class="itemqty form-control form-control-sm" >
+                                            </div>
+                                            <div class="col-md-2 mb-3 ">
+                                                <input name="unit_value" id="itemvalue_1" type="number" change="setTwoNumberDecimal" min="0" max="1000000000" step="0.25" value="0.00" class="form-control form-control-sm itemvalue" />
+                                            </div>
+                                            <div class="col-md-2 mb-3 ">
+                                               <input name="amount" id="amount_1" type="number" tabindex="-1" onchange="setTwoNumberDecimal" min="0" max="1000000000000" step="0.25" value="0.00" class="form-control form-control-sm amount" />
+                                            </div>
+                                           <div class="col-md-2 mb-3 d-grid ">
+                                               <button class="btn-success btn-round add_item_btn" tabindex="-1">Add More</button>
+                                            </div>
+
+                                       </div>
+                                    </div>
+
+                                    <div class="">
+                                        <input type="submit" value="SAVE" class="btn-primary w-25" id="add_btn" />
+                                    </div>
+
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+           </div>
+
+    </div>
+</div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <script class="">
+                toastr.options.timeOut=105000
+                toastr.options["body-output-type"]="trustedHtml"
+            </script>
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project!
+	<script src="/static/assets/js/setting-demo2.js"></script> -->
+	<script >
+        function sum_amount() {
+            // Sum Amount column and send result to total_fee id
+            let sum = 0;
+
+            $('.amount').each(function() {
+                sum += Number($(this).val());
+            });
+            //alert( "The Total Amount is: " +  sum.toString() );
+            $("#total_fees").val(sum)
+        }
+
+		$(document).ready(function() {
+
+            document.getElementById("qty_1").defaultValue = "1";
+
+            ///======Clone or Copy
+            $("body").on("click", ".add_item_btn", function (e) {
+                 e.preventDefault();
+
+                let index = $(e.target).closest(".form_items").find(".item_row_group").length + 1;
+                var cloned_el = $(e.target).closest(".item_row_group").last().clone(true); // Clone row
+
+                //$(e.target).closest(".form_items").find(".item_row_group").last().find("input[type='text']").attr("id", "amount_"+index);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("button").attr("class", "btn-danger btn-round remove_item_btn"); // Change Button
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("button").html('< Remove');  //Change Button Text to '< Remove'
+
+                 $(e.target).closest(".item_row_group").last().append(cloned_el); // Append Cloned row
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("button").attr("class", "btn-success btn-round add_item_btn"); // Change Button
+
+                // change Input id
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("input[type='text']").attr("id", "item_descx_"+index);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("input[type='text']").attr("id", "qty_"+index);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("input[type='text']").attr("id", "item_value_"+index);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find("input[type='text']").attr("id", "amount_"+index);
+
+                 // Re-Set the values of the Cloned row
+                $(e.target).closest(".form_items").find(".item_row_group").last().find('[class*="itemdescx"]').val(null);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find('[class*="itemqty"]').val(1);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find('[class*="itemvalue"]').val(0.00);
+                $(e.target).closest(".form_items").find(".item_row_group").last().find('[class*="amount"]').val(0.00);
+
+                $(e.target).closest(".form_items").find(".item_row_group").last().find('[class*="itemdescx"]').focus();
+
+                console.log(cloned_el);
+                return false;
+
+             });
+
+/*
+            $(".itemqty").on({change: function() {
+
+                    alert('Qty Value is change');
+                }
+            });
+*/
+
+            // ajax request to insert all form data
+            $("#add_form").submit(function(e){
+                e.preventDefault();
+                $("#add_btn").val('Saving . . .');
+
+                csrfmiddlewaretoken = $("#add_form").find("input[name='csrfmiddlewaretoken']" ).val();
+                formData = $('#add_form').serializeArray();
+                formData = JSON.stringify(formData);
+
+                $.ajax({
+                    method: "POST",
+                    url: "new-package",
+                    async: "True",
+                    dataType: "json",
+
+                    data: $(this).serializeArray(),
+                    success: function( data) {
+                        //console.log(response);
+                        $('#output').html(data.msg) /* response message */
+                        $("#add_btn").val('SAVE');
+
+                        let status = data.status
+                        if (status == 'pass'){
+                            $("#add_form")[0].reset();
+                            $(".append_item").remove()
+                        };
+
+                    },
+                    failure: function(response){
+                        alert("An Error occured.");
+                    }
+                });
+            });
+
+
+		});
+/*
+        $(document).on("click", function(event){
+            alert(event.target.className);
+        });
+
+        $(window).ready(function() {
+        $("input").on("keypress", function (event) {
+            console.log("aaya");
+            let is_found = $(this).closest(".item_row_group").last().find('[class*="remove_item_btn"]').length;
+            //let is_found = $('.remove_item_btn').length;
+            //alert(is_found);
+
+            var keyPressed = event.keyCode || event.which;
+            if (keyPressed === 13 && is_found > 0) {
+                //alert("You pressed the Enter key!!");
+                event.preventDefault();
+                return false;
+            }
+        });
+        });
+*/
+        $("input").on("keypress",function (event) {
+            var keyPressed = event.keyCode || event.which;
+
+            let is_remove = $(this).closest(".item_row_group").find('[class*="remove_item_btn"]').length;
+            let is_add = $(this).closest(".item_row_group").find('[class*="add_item_btn"]').length;
+
+            //alert('Remove:- ' + is_remove.toString() + ' ' + 'Add: ' + is_add.toString());
+
+            if(keyPressed === 13){
+
+                if(is_remove === 0 && is_add === 1 ){
+                    //alert('Add New Row')
+                    //$(this).closest(".item_row_group").last().find('[class*="add_item_btn"]').click
+                    //$(event.target).closest(".item_row_group").find(".remove_item_row").last().find('[class*="add_item_btn"]').click;
+                    $( ".add_item_btn" ).click();
+                }
+                else{
+                    //event.preventDefault();
+                    //return false;
+                    alert('Do Nothing')
+                }
+
+                //alert(is_remove.toString() + ' ' + is_add.toString());
+
+            }
+
+        });
+
+        $(document).ready(function(){
+            //===== delete the form field rows
+            $("body").on("click", ".remove_item_btn", function (e) {
+                 e.preventDefault();
+
+                $(e.target).closest(".remove_item_row").remove();
+                sum_amount();
+                console.log("success");
+                return false;
+            });
+
+             // Item-Qty change event handler
+            $(".itemqty").on({change: function() {
+                let item_value = $(this).closest(".item_row_group").find('[class*="itemvalue"]').val();
+                let item_qty = $(this).val();
+
+                if (item_value > 0){
+                    amount = item_qty * item_value;
+                   $(this).closest(".item_row_group").find('[class*="amount"]').val(amount);
+
+                   sum_amount();
+                   return false;
+                }
+            }
+            });
+
+
+            // Item-Value change event handler
+            $(".itemvalue").on({change: function(event) {
+
+                //Calculate row Amount
+                let item_qty = $(this).closest(".item_row_group").find('[class*="itemqty"]').val()
+                let amount = item_qty * $(this).val();
+                $(this).closest(".item_row_group").find('[class*="amount"]').val(amount);
+
+                sum_amount();
+
+                event.preventDefault();
+                return false;
+            }
+            });
+
+        });
+
+	</script>
+
+{% endblock javascripts %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

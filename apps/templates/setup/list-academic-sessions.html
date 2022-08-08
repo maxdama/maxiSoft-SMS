@@ -1,0 +1,110 @@
+{% extends "layouts/base.html" %}
+{% load custom_template_tag %}
+
+{% block title %} UI Datatables {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+	<div class="content">
+		<div class="page-inner">
+			<div class="page-header">
+				<h4 class="page-title"><span class="fw-light fa-school">Academic</span> Calender</h4>
+
+
+			</div>
+
+			<div class="row">
+				<div class="col-md-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="d-flex align-items-left">
+								<h5 class="card-title">Sessions List</h5>
+							</div>
+							<span class="float-right ">
+								<a href="/settings/academic-calender" class="btn btn-round btn-outline-dark btn-sm  " role="button" >{{action}}</a>
+							</span>
+						</div>
+						<div class="card-body" style="margin:0px; padding:0px">
+
+							<div class="table-responsive">
+								<table id="add-row" class="table table-hover table-bordered   "  >
+
+									<thead>
+										<tr class="text-secondary small" >
+											<th>Session</th>
+
+											<th>First-Term Starts</th>
+											<th>First-Term Ends</th>
+
+											<th>Second-Term Starts</th>
+											<th>Second-Term Ends</th>
+
+											<th>Third-Term Starts</th>
+											<th>Third-Term Ends</th>
+											<th>Status</th>
+
+										</tr>
+									</thead>
+
+									<tbody>
+										{% for tl in timeline %}
+
+											<tr  class="small" style="padding:0px; margin:0px">
+												<td>{{tl.descx}}</td>
+
+												<td>{{tl.s1_starts|date:'d-m-Y'}}</td>
+												<td>{{tl.s1_ends|date:'d-m-Y'}}</td>
+
+												<td>{{tl.s2_starts|date:'d-m-Y'}}</td>
+												<td>{{tl.s2_ends|date:'d-m-Y'}}</td>
+
+												<td>{{tl.s3_starts|date:'d-m-Y'}}</td>
+												<td>{{tl.s3_ends|date:'d-m-Y'}}</td>
+
+												<td>{{tl.status|capfirst}}</td>
+
+											</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+	{% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+	<script src="/static/assets/js/setting-demo2.js"></script>
+	<script >
+		$(document).ready(function() {
+
+
+
+		});
+	</script>
+
+{% endblock javascripts %}

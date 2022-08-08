@@ -1,0 +1,486 @@
+
+{% extends "layouts/base.html" %}
+{% load custom_template_tag %}
+
+{% block title %} UI Alerts {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+
+    <style class="">
+        .btn_arc{
+          width: 75px;
+          height: 35px;
+          display: inline-block;
+          border-radius: 15%;
+          text-align: center;
+          line-height: 35px;
+          margin-left: 10px;
+          border:1px solid #ccc;
+          cursor: pointer;
+        }
+        .btn_arc:hover{
+          color:#fff;
+          background: #40cc30;
+          border:1px solid #40cc30;
+        }
+
+        .btn_round{
+          width: 35px;
+          height: 35px;
+          display: inline-block;
+          border-radius: 50%;
+          text-align: center;
+          line-height: 35px;
+          margin-left: 10px;
+          border:1px solid #ccc;
+          cursor: pointer;
+        }
+        .btn_round:hover{
+          color:#fff;
+          background:#6b4acc;
+          border:1px solid #6b4acc;
+        }
+
+        .btn_content_outer{
+        display: inline-block;
+        width: 85%;
+        }
+        .close_c_btn{
+          width: 30px;
+          height: 30px;
+          position: absolute;
+          right: 10px;
+          top: 0px;
+          line-height: 30px;
+          border-radius: 50%;
+          background: #ededed;
+          border: 1px solid #ccc;
+          color: #ff5c5c;
+          text-align: center;
+          cursor: pointer;
+        }
+
+        .add_icon{
+          padding:10px;
+          border: 1px dashed #aaa;
+          display: inline-block;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+        .add_group_btn{
+          display: flex;
+        }
+        .add_group_btn i{
+         font-size: 32px;
+         display: inline-block;
+         margin-right: 10px;
+
+        }
+
+        .add_group_btn span{
+         margin-top: 8px;
+        }
+        .add_group_btn, .clone_sub_task{
+          cursor: pointer;
+        }
+
+
+        .sub_task_append_area .custom_square{
+          cursor: move;
+        }
+
+        .del_btn_d{
+          display: inline-block;
+            position: absolute;
+            right: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+    </style>
+
+
+{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="content">
+    <div class="page-inner">
+
+        <div class="container-fluid ">
+
+            <div class="row my-4 justify-content-center">
+                <div class="card shadow">
+                    <div class="col-md-12 form_sec_outer_task border ">
+
+                        <form action="#" method="POST" id="add_form" class="form_items" >
+                            {% csrf_token %}
+
+                        <div class="card-header pb-0">
+                            <div class="row">
+                                <div class="col-md-12 bg-light p-2 mb-3">
+                                    <h4 class="card-title frm_section_n"><span class="fw-light fa-school">Fees</span>   Package</h4>
+                                    <!-- <div class="col col-sm-1 "> -->
+                                        <input name="opr_mode" value="{{package.mode}}" type="text" readonly class="mode no-bd "/>
+                                   <!-- </div> -->
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div id="output" class="col col-md-7 offset-1 message-notif-scroll text-md-center "></div>
+
+                                <div class="col-sm-4 font-weight-bold ">
+                                      Package For:
+                                      <div class="row">
+                                          <div class="col-md-12 form-group w_90 pl-3  p-0">
+                                              <select name="pkg_type" id="pkgfor_1" tabindex="0" class="form-control form-control-sm" type="select" autofocus required >
+                                                  <option  hidden>{{package.main.pkg_type}}</option>
+                                                  <option >New Students</option>
+                                                  <option >Returning Students</option>
+                                                  <option >Scholarship - New</option>
+                                                  <option >Scholarship - Returning</option>
+                                              </select>
+                                          </div>
+                                      </div>
+                                  </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-5 ">
+                                    <input name="school" id="sch_id"  type="text"  class="form-control form-control-sm" value="{{package.sch_id}}" hidden  >
+                                </div>
+                                <div class="col-md-5 ">
+                                    <input  name="timeline" id="timeline" value="{{package.timeline}}" type="text" class="form-control form-control-sm " hidden  >
+                                </div>
+                            </div>
+                            <div class="row ">
+
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-6 font-weight-bold">
+                                      Package Name:
+                                      <div class="row">
+                                          <div class="col-md-9">
+                                              <input  name="description" id="descx" value="{{package.main.description}}" tabindex="1" type="text" class="form-control form-control-sm w_90" placeholder="eg. New Admission 2021/2022 Fees" required >
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                <div class="col-md-3 font-weight-bold p-0 m-0" >
+                                      Status
+                                      <div class="row">
+                                          <div class="col-md-8 form-group w_90   p-0">
+                                              <select name="status" id="status_1" tabindex="2" class="form-control form-control-sm" type="select"  >
+                                                  <option>{{package.main.status}}</option>
+                                                  <option selected>Active</option>
+                                                  <option>In-active</option>
+                                              </select>
+                                          </div>
+                                      </div>
+                                  </div>
+
+                                <div class="col-md-3 font-weight-bold">
+                                    Total Fees
+                                    <div class="row">
+                                          <div class="col-md-10">
+                                              <input  name="total_fees" id="total_fees" value="{{package.main.total_fees}}"  default="0" type="text" readonly tabindex="-1" class="form-control form-control-sm w_90"  >
+                                          </div>
+                                      </div>
+                                </div>
+
+                            </div>
+                            <div class="font-italic mt-3">Details:</div>
+                            <hr class="b-0 m-0 mb-2 p-0">
+
+                            <div class="row">
+                                <div class="col-md-4 font-weight-bold">
+                                    Item Description
+                                </div>
+                                <div class="col-md-2 font-weight-bold">
+                                    Qty
+                                </div>
+                                <div class="col-md-2 font-weight-bold">
+                                    Item Value
+                                </div>
+
+                                <div class="col-md-2 font-weight-bold">
+                                     Amount
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 p-0 m-0 b-0 ">
+                                <div class="col-md-12 form_field_outer  p-0 m-0 b-0">
+                                    {% if package.mode == 'NEW' %}
+                                        <div class="row form_field_outer_row">
+                                            <div class="form-group col-md-4">
+                                                <input  name="item_descx" id="item_descx_1" value="{{pkgdet.item_descx}}"  type="text" placeholder="eg:- Tuition Fee" required class="form-control form-control-sm mb-0 w_90 itemdescx "  />
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <input  name="qty" id="qty_1" value="{{pkgdet.qty}}" type="number"   min="0" max="100" class="itemqty form-control form-control-sm w_90 itemqty" />
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <input name="unit_value" id="itemvalue_1" value="{{pkgdet.unit_value}}" type="number" change="setTwoNumberDecimal" min="0" max="1000000000" step="0.25" value="0.00" class="form-control form-control-sm w_90 itemvalue" />
+                                            </div>
+
+                                            <div class="form-group col-md-2">
+                                                <input name="amount" id="amount_1" value="{{pkgdet.amount}}" type="number" tabindex="-1" onchange="setTwoNumberDecimal" min="0" max="1000000000000" step="0.25" value="0.00" class="form-control form-control-sm amount w_90" />
+                                          </div>
+                                            <div class="form-group form-control-sm col-md-2 add_del_btn_outer">
+                                                <button class="btn_round add_node_btn_frm_field" title="Copy or clone this row">
+                                                  <i class="fas fa-copy"></i>
+                                                </button>
+
+                                                <button class="btn_round form-control-sm remove_node_btn_frm_field" disabled>
+                                                  <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                          </div>
+                                        </div>
+                                    {% else %}
+                                        {% for pkgdet in package.main.fee_details.all %}
+                                        <div class="row form_field_outer_row {% if not forloop.first %}append_item {% endif %}">
+                                            <div class="form-group col-md-4">
+                                                <input  name="item_descx" id="item_descx_{{forloop.counter}}" value="{{pkgdet.item_descx}}"  type="text" placeholder="eg:- Tuition Fee" required class="form-control form-control-sm mb-0 w_90 itemdescx"  />
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <input  name="qty" id="qty_{{forloop.counter}}" value="{{pkgdet.qty}}" type="number"   min="0" max="100" class="itemqty form-control form-control-sm w_90 itemqty" />
+                                            </div>
+                                            <div class="form-group col-md-2">
+                                                <input name="unit_value" id="itemvalue_{{forloop.counter}}" value="{{pkgdet.unit_value}}" type="number"  min="0" max="1000000000" step="0.25" value="0.00" class="form-control form-control-sm w_90 itemvalue" />
+                                            </div>
+
+                                            <div class="form-group col-md-2">
+                                                <input name="amount" id="amount_{{forloop.counter}}" value="{{pkgdet.amount}}" type="number" tabindex="-1"  min="0" max="1000000000000" step="0.25" value="0.00" class="form-control form-control-sm amount w_90" />
+                                          </div>
+                                            <div class="form-group form-control-sm col-md-2 add_del_btn_outer">
+                                                <button class="btn_round add_node_btn_frm_field" title="Add More">
+                                                  <i class="fas fa-copy"></i>
+                                                </button>
+
+                                                <button class="btn_round form-control-sm remove_node_btn_frm_field" {% if forloop.first %} disabled {% endif %}>
+                                                  <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                          </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer ">
+                            <div class="row m-0 bg-light   py-1">
+                                <div class="col-md-12 text-center">
+                                    {% if package.mode == 'NEW' %}
+                                    <button type="submit" class="btn btn-outline-lite btn_arc py-0 w-25" id="add_btn">SAVE</button>
+                                    {% else %}
+                                    <input type="submit" formaction="{{package.main.id}}" value="UPDATE" class="btn-outline-lite btn_arc  py-0" id="update_btn" />
+                                    {% endif %}
+                                    <input type="button" class="float-md-right text-small " value="Finish" id="finish">
+
+                                </div>
+                            </div>
+                        </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <script class="">
+                toastr.options.timeOut=105000
+                toastr.options["body-output-type"]="trustedHtml"
+            </script>
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project!
+	<script src="/static/assets/js/setting-demo2.js"></script> -->
+	<script >
+        function sum_amount() {
+            // Sum Amount column and send result to total_fee id
+            let sum = 0;
+
+            $('.amount').each(function() {
+                sum += Number($(this).val());
+            });
+            //alert( "The Total Amount is: " +  sum.toString() );
+            $("#total_fees").val(sum)
+        }
+
+
+        ///======Clone method
+        $(document).ready(function(){
+            $("body").on("click", ".add_node_btn_frm_field", function (e) {
+              var index = $(e.target).closest(".form_field_outer").find(".form_field_outer_row").length + 1;
+              var cloned_el = $(e.target).closest(".form_field_outer_row").clone(true);
+
+              $(e.target).closest(".form_field_outer").last().append(cloned_el).find(".remove_node_btn_frm_field:not(:first)").prop("disabled", false);
+              $(e.target).closest(".form_field_outer").find(".remove_node_btn_frm_field").first().prop("disabled", true);
+
+              //change id of Input fields by appending incremental numbers
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find("input[type='text']").attr("id", "item_descx_"+index);
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find("input[type='text']").attr("id", "qty_"+index);
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find("input[type='text']").attr("id", "item_value_"+index);
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find("input[type='text']").attr("id", "amount_"+index);
+
+                //Add another Class attr to this div
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().attr("class", "row form_field_outer_row append_item");
+
+                // Re-Set the values of the Cloned rows
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find('[class*="itemdescx"]').val(null);
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find('[class*="itemqty"]').val(1);
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find('[class*="itemvalue"]').val(0.00);
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find('[class*="amount"]').val(0.00);
+
+                $(e.target).closest(".form_field_outer").find(".form_field_outer_row").last().find('[class*="itemdescx"]').focus();
+
+                console.log(cloned_el);
+                //count++;
+            });
+         });
+
+
+        $(document).ready(function(){
+            //===== delete the form field row
+            $("body").on("click", ".remove_node_btn_frm_field", function () {
+              $(this).closest(".form_field_outer_row").remove();
+
+               sum_amount();
+              console.log("success");
+            });
+        });
+
+        $(document).ready(function(){
+            // Item-Qty change event handler
+            $(".itemqty").on({change: function() {
+                let item_value = $(this).closest(".form_field_outer_row").find('[class*="itemvalue"]').val();
+                let item_qty = $(this).val();
+
+                if (item_value > 0){
+                    amount = item_qty * item_value;
+                   $(this).closest(".form_field_outer_row").find('[class*="amount"]').val(amount);
+
+                   sum_amount();
+                }
+            }
+            });
+
+
+            // Item-Value change event handler
+            $(".itemvalue").on({change: function() {
+                //Calculate row Amount
+
+                //$(".mylink").closest(".box").find('[class*="something"]').first().attr("id")
+                let item_qty = $(this).closest(".form_field_outer_row").find('[class*="itemqty"]').val()
+                let amount = item_qty * $(this).val();
+                $(this).closest(".form_field_outer_row").find('[class*="amount"]').val(amount);
+
+                sum_amount();
+            }
+            });
+        });
+
+        $(document).ready(function() {
+
+            document.getElementById("qty_1").defaultValue = "1";
+
+            // ajax request to insert all form data when the SAVE button is click
+            $("#add_form").submit(function(e) {
+
+                let mode = $('.mode').val();
+                xrl = "{{package.main.id}}";
+                if (mode == 'NEW'){
+                    xrl = "new-package";
+                }
+                e.preventDefault();
+
+                $("#add_btn").val('Saving . . .')
+                /*
+                let actx = 1;
+                let xrl = "update-package";
+
+                if (actx == 1) {
+                    xrl = "new-package";
+                }
+                */
+
+                //formData = $('#add_form').serializeArray();
+                formData = $(this).serializeArray();
+
+                $.ajax({
+                    url: xrl,
+                    type: "POST",
+                    async: "True",
+                    dataType: "json",
+                    //data: $(this).serializeArray(),
+                    data: formData,
+                    success: function (data) {
+                        //console.log(data);
+                        $('#output').html(data.msg); /* response message */
+                        $("#add_btn").val('SAVE');
+
+                        let oprx = data.oprx
+                        if (oprx == 'pass' && mode == 'NEW') {
+                            $("#add_form")[0].reset();
+                            $(".append_item").remove()
+                        }
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert('Error: ' + errorMessage);
+
+                    }
+                });
+
+            });
+
+
+             // Finish button event event handler to redirect to Package List
+            $("#finish").on({click: function() {
+               location.href ='/financials/package-list';
+            }
+            });
+
+        });
+
+	</script>
+
+{% endblock javascripts %}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

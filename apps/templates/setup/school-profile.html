@@ -1,0 +1,200 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} School Profile {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% load static %}
+
+{% block content %}
+	<div class="content">
+        <div class="page-inner">
+	 		<form action="" class="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row">
+
+                    <div class="col col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">School Profile</div>
+								</div>
+
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col col-md-8 border border-danger" >
+                                        <!-- Column Rows Left Justification  -->
+                                        <div class="row d-flex justify-content-center text-left">
+                                            <div class="form-group col-sm-2" >
+                                                <!-- <label for="reg_id">Schoo  ID</label> -->
+                                                 {{ form.sch_id.label }}
+                                                <!-- <input type="text" class="form-control form-control-sm" id="reg_id" name="reg_id" value="{{form.sch_id}}"> -->
+                                                {{ form.sch_id }}
+                                            </div>
+
+                                            <div class=" col-sm-6 form-group ">
+                                                <!-- <label for="sch_name">Name of School</label>
+                                                <input id="sch_name" type="text" value="{{form.sch_name}}" class="form-control form-control-sm " name="sch_name" > -->
+                                                {{form.sch_name.label}}
+                                                {{form.sch_name}}
+
+                                            </div>
+
+
+                                            <div class="form-group col-md-2" >
+                                                <!--<label for="reg_id">Abbreviation</label>
+                                                 <input type="text" class="form-control form-control-sm" id="abrv" name="abrv" value="{{form.name_abr}}"> -->
+                                                {{form.name_abr.label}}
+                                                {{form.name_abr}}
+                                            </div>
+
+                                        </div>
+                                        <div class="row d-flex justify-content-center text-left">
+                                            <div class=" col-md-8 form-group ">
+                                                <!-- <label for="sch_addr" class="placeholder">Address</label>
+                                                <input id="sch_addr" type="text" value="{{form.sch_addr}}" class="form-control form-control-md " name="sch_addr" > -->
+                                                {{form.sch_addr.label}}
+                                                {{form.sch_addr}}
+                                            </div>
+
+                                        </div>
+                                        <div class="row d-flex justify-content-center text-left">
+
+                                            <div class="col-4">
+                                                <div class="form-group ">
+                                                    <!--<label for="phone" class="placeholder">Mobile No:</label>
+                                                    <input type="tel" id="phone" value="{{form.phone_no}}" class="form-control form-control-sm " name="phoneno"  pattern="[0-9]{11}" > -->
+                                                    {{form.phone_no.label}}
+                                                    {{form.phone_no}}
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="col-5 ">
+                                                <div class="form-group ">
+                                                    <!-- <label for="email" class="placeholder">Email</label>
+                                                    <input id="email" value="{{form.email}}" name="email" type="text" class="form-control form-control-sm " > -->
+                                                    {{form.email.label}}
+                                                    {{form.email}}
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row d-flex justify-content-center text-left">
+                                            <div class=" col-md-8 form-group ">
+                                                <!-- <label for="motor" class="placeholder">Motor</label>
+                                                <input id="motor" type="text" value="{{form.sch_motor}}" class="form-control form-control-md " name="motor" > -->
+                                                {{form.sch_motor.label}}
+                                                {{form.sch_motor}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col col-md-4 border border-dark">
+                                        <div class="row d-flex justify-content-left text-left">
+
+                                            <div class="form-group col-md-4" >
+                                                {{ form.rc_no.label }}
+                                                {{ form.rc_no }}
+                                            </div>
+
+                                            <div class="col-md-7">
+                                                 <div class="form-group ">
+                                                     {{form.start_date.label}}
+                                                     {{form.start_date}}
+
+                                                 </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row d-flex justify-content-left text-left">
+                                            <div class=" col-md-11 form-group ">
+                                                {{form.prop_name.label}}
+                                                {{form.prop_name}}
+
+                                            </div>
+                                        </div>
+                                         <div class="row d-flex justify-content-left text-left">
+                                             <div class=" col-md-5 form-group ">
+                                                {{form.no_classrooms.label}}
+                                                {{form.no_classrooms}}
+                                            </div>
+                                         </div>
+                                        <div class="row d-flex justify-content-center text-center">
+
+                                            {{form.sch_logo.label}}
+                                            <img id="preview" class="h-35 w-25 img-fluid rounded-circle img-thumbnail " src="{{sch_logo.url}}" alt="Upload Logo">
+                                            </div>
+
+
+                                        <div class="row d-flex justify-content-left text-center">
+                                            <div class=" col-md-5 form-group ">
+                                                {{form.sch_logo}}
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="card-action">
+                                 <div class="row d-flex justify-content-center text-center">
+                                      <div class="col-4 ">
+                                         <button class="btn btn-success" type="submit" id="save_action" name="save_action" value="{{action}}" formaction="" >{% if action == 'do_update' %} UPDATE {% else %} SAVE {% endif %}</button>
+                                      </div>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </form>
+
+		</div>
+	</div>
+
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+     {% if messages %}
+
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script class="">
+                    toastr.options.closeButton=true
+                    toastr.options.positionClass="toast-top-center"
+                    toastr.options.timeOut = 0;
+                    toastr.options.extendedTimeOut = 0;
+                </script>
+
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+
+
+        {% endfor %}
+    {% endif %}
+
+     <script type="text/javascript"  >
+
+		$(document).ready(function() {
+            $('#inputDate').datepicker({
+            });
+
+		});
+
+	</script>
+
+{% endblock javascripts %}

@@ -1,0 +1,77 @@
+# -*- encoding: utf-8 -*-
+"""
+Copyright (c) 2019 - present AppSeed.us
+"""
+
+# Create your views here.
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+from .forms import LoginForm, SignUpForm
+from ..settings.models import SchoolProfiles
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    else:
+        form = LoginForm(request.POST or None)
+
+        msg = None
+        prof = {"sch_name": "School Managment Software", "sch_logo": ""}
+
+        if request.method == "POST":
+
+            if form.is_valid():
+                username = form.cleaned_data.get("username")
+                password = form.cleaned_data.get("password")
+                user = authenticate(username=username, password=password)
+                if user is not None:
+                    login(request, user)
+                    sch_id = form.cleaned_data.get("sch_id")
+                    request.session['school_id'] = sch_id
+                    request.session['user_name'] = username
+
+                    return redirect("/")
+                else:
+                    msg = 'Invalid credentials'
+            else:
+                msg = 'Error validating the form'
+
+        else:
+            username = 'admin'
+            sch_id = 1
+            #username = request.session['user_name']
+            try:
+                prof = SchoolProfiles.objects.get(sch_id=sch_id)
+
+            except:
+               pass
+
+            form = LoginForm(initial={'username': username, 'sch_id':sch_id})
+
+        return render(request, "accounts/login.html", {"form": form, "msg": msg, "prof": prof})
+
+
+def register_user(request):
+    msg = None
+    success = False
+
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get("username")
+            raw_password = form.cleaned_data.get("password1")
+            user = authenticate(username=username, password=raw_password)
+
+            msg = 'User created - please <a href="/login">login</a>.'
+            success = True
+
+            # return redirect("/login/")
+
+        else:
+            msg = 'Form is not valid'
+    else:
+        form = SignUpForm()
+
+    return render(request, "accounts/register.html", {"form": form, "msg": msg, "success": success})

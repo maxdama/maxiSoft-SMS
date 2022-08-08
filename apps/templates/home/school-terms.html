@@ -1,0 +1,173 @@
+
+{% extends "layouts/base.html" %}
+
+{% block title %} Student Enrollment {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% load static %}
+
+{% block content %}
+<div class="content">
+    <div class="page-inner">
+
+        <form action="" class="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="container d-flex justify-content-center">
+                <div class="col col-md-9 ">
+                    <div class="card">
+
+                        <div class="card-header">
+                            <div class="card-title font-italic">Terms Setup</div>
+                            {{sch_name}}
+                            <div class="row">
+                                <div class="col-md-2 form-floating-label " style="width:auto">
+                                    <input id="sch_id" type="text" value="" class="form-control input-border-bottom" name="sch_id" required>
+                                    <label for="sch_id" class="placeholder">School ID No:</label>
+                                </div>
+
+                            </div>
+
+                            <div class="">
+
+                                <div class="row d-flex justify-content-center ">
+
+                                    <div class="col-md-2 ">
+                                        <div class="form-floating-label">
+
+                                            <select class="form-control input-border-bottom" id="term_id" name="term_id" style="font-weight:bold;" required >
+                                                <option value=""></option>
+                                                <option value=1>1</option>
+                                                <option value=2>2</option>
+                                                <option value=3>3</option>
+                                            </select>
+                                            <label for="term_id" class="placeholder">Term-ID</label>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-3 form-floating-label " style="width:auto">
+                                        <input id="descx" type="text" value="{{school.id}}" class="form-control input-border-bottom" name="descx" required>
+                                        <label for="descx" class="placeholder">Term Description</label>
+                                    </div>
+
+
+                                    <div class="col-md-2 form-floating-label">
+                                        <select class="form-control input-border-bottom"  id="status" name="status" style="font-weight:bold;" required >
+                                            <option value="" hidden></option>
+                                            <option selected>Active</option>
+                                            <option>In-Active</option>
+                                        </select>
+                                        <label for="status" class="placeholder">Status</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row d-flex justify-content-end ">
+                                  <div class="col-md-2 ">
+                                      <button class="btn btn-outline-dark btn-round"  type="submit" name="save" value="save" formaction="school-terms" >Save</button>
+                                  </div>
+                             </div>
+
+
+                        </div>
+
+                        <div class="card-body  ">
+                            <div class="container d-flex justify-content-center">
+                                <div class="card col-md-8">
+                                    <table id="table" class="table table-hover table-head-bg-info">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Term-ID</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td >Larry the Bird</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+ {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+     <script type="text/javascript"  >
+
+		$(document).ready(function() {
+
+		    $("#table tr").click(function(){
+               $(this).addClass('selected').siblings().removeClass('selected');
+               var term_id=$(this).find('td:first').html();
+               var descx=$(this).find('td:nth-child(2)').html();
+               var status=$(this).find('td:last ').html();
+
+               $('#term_id' ).val(term_id);
+               $('#descx' ).val(descx);
+               $('#status').val(status);
+               $("#status").selectmenu('refresh');
+
+               alert(term_id + ' and ' + status );
+            });
+
+			$('.gen-id').click(function(e){
+
+                var regno = $("#reg_no").val()
+
+                $( '#reg_no' ).val(new_reg);
+
+
+            });
+
+		});
+
+	</script>
+
+{% endblock javascripts %}

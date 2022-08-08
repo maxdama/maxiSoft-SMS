@@ -1,0 +1,452 @@
+
+{% extends "layouts/base.html" %}
+{% load custom_template_tag %}
+
+{% block title %} UI Alerts {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+    <!-- <link rel="stylesheet" href="../../static/assets/tabs/bootstrap.min.css"> -->
+
+    <style class="">
+        span {
+            margin: 0px;
+            display: inline-block;
+        }
+        hr {width: 95%;margin: 0px; padding: 0px}
+
+    </style>
+
+<!--
+    <link rel="stylesheet" href="../../static/assets/tabs/tabs-custom-classes.css">
+    <link rel="stylesheet" href="../../static/assets/tabs/font-awesome.min.css">
+   -->
+{% endblock stylesheets %}
+
+
+{% block content %}
+
+<div class="content">
+  <div class="page-inner">
+    <div class="row d-flex justify-content-center">
+
+        <div class="col-md-9">
+            <div class="card">
+                <form action="/settings/academic-calender" class="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                        <div class="card-header" style="margin: 0px; padding-bottom:0px";>
+                            <div class="d-flex align-items-center">
+                                <h4 class="card-title"><span class="fw-light fa-school">Academic</span>   Calender</h4>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+							  <div class="form">
+                                <!--  Timeline Section  ----  -->
+                                <div class="row d-flex justify-content-center">
+                                    <div class="row" style="padding:0px" >
+                                          <div class="col-12">
+                                              <!-- <div class="form-group"> -->
+                                              <span class="float-md-left">
+                                                  <input name="sch_id" id="sch_id"  type="text"  class="form-control form-control-sm" value="{{timeline.sch_id}}" hidden >
+                                                  <input name="school" id="school_id"  type="text"  class="form-control form-control-sm" value="{{timeline.sch_id}}" hidden >
+                                                  <input  name="tl_id" id="tl_id" value="{{timeline.id}}" type="text" class="form-control form-control-sm "  hidden readonly>
+                                              </span>
+                                              <!--</div> -->
+                                          </div>
+                                    </div>
+                                    <div class="row"  >
+                                        <div class="col-sm-4">
+                                            <div class="form-group" >
+                                                <label for="acada_yr">Session Time Line</label>
+                                                <input  name="acada_yr" id="acada_yr" value="{{timeline.descx}}" type="text" class="form-control form-control-sm " placeholder="eg. 2021/2022" required readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label for="start_dt">Starts</label>
+                                                <input  name="start_dt" id="start_dt" value="{{timeline.st_dt|date:'Y-m-d'}}" type="date" class="form-control form-control-sm" readonly >
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label for="end_dt">Ends</label>
+                                                <input  name="end_dt" id="end_dt" value="{{timeline.ed_dt|date:'Y-m-d'}}" type="date" class="form-control form-control-sm" readonly >
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <hr class="">
+                                </div>
+
+                                  <!--  Tabs Header -->
+                                  <ul id="myTab" role="tablist" class="nav nav-pills nav-success  nav-info nav-sm " style="padding:0px; margin:0px">
+                                      {% for s in sessx %}
+
+                                          <li class="nav-item  ">
+                                            <a id="tab-{{s.term_id}}" data-toggle="pill" href="#tab-addr-{{s.term_id}}" role="tab"
+                                               aria-controls="session-{{s.term_id}}" aria-selected="{% cycle 'true' 'false' 'false' 'false' 'false' %}"
+                                               class="{% cycle 'nav-link  active' 'nav-link' 'nav-link' 'nav-link' 'nav-link' %}" >
+                                                    <span class=" font-italic" style="font-size:15px">Sesssion -  </span>
+                                                    <span style="font-size:17px" class="font-weight-bold">  {% cycle ' One' ' Two' ' Three' ' Four' ' Five' %} </span>
+                                            </a>
+                                          </li>
+                                      {% endfor %}
+
+                                    </ul>
+
+                                   <!-- Tab Content Section  ------------ -->
+                                  <div id="myTabContent" class="tab-content">
+                                      {% for s in sessx %}
+                                      <!-- Initialize variables to None  -->
+                                        {% setvar None as date_cssd %}
+                                        {% setvar None as date_csed %}
+                                        {% setvar None as date_mbsd %}
+                                        {% setvar None as date_mbed %}
+                                        {% setvar None as date_hssd %}
+                                        {% setvar None as date_hsed %}
+
+
+                                        {% if s.term_id == 1 %}
+                                            <!-- Set first Term date variables -->
+                                            {% setvar cal1.cs_start_dt as date_cssd %}
+                                            {% setvar cal1.cs_end_dt as date_csed %}
+                                            {% setvar cal1.mb_start_dt as date_mbsd %}
+                                            {% setvar cal1.mb_end_dt as date_mbed %}
+                                            {% setvar cal1.hs_start_dt as date_hssd %}
+                                            {% setvar cal1.hs_end_dt as date_hsed %}
+
+                                        {% elif s.term_id == 2 %}
+                                            <!-- Set second Term date variables -->
+                                            {% setvar cal2.cs_start_dt as date_cssd %}
+                                            {% setvar cal2.cs_end_dt as date_csed %}
+                                            {% setvar cal2.mb_start_dt as date_mbsd %}
+                                            {% setvar cal2.mb_end_dt as date_mbed %}
+                                            {% setvar cal2.hs_start_dt as date_hssd %}
+                                            {% setvar cal2.hs_end_dt as date_hsed %}
+
+                                        {% elif s.term_id == 3 %}
+                                             <!-- Set Third Term date variables -->
+                                            {% setvar cal3.cs_start_dt as date_cssd %}
+                                            {% setvar cal3.cs_end_dt as date_csed %}
+                                            {% setvar cal3.mb_start_dt as date_mbsd %}
+                                            {% setvar cal3.mb_end_dt as date_mbed %}
+                                            {% setvar cal3.hs_start_dt as date_hssd %}
+                                            {% setvar cal3.hs_end_dt as date_hsed %}
+
+                                        {% endif %}
+
+                                        <div id="tab-addr-{{s.term_id}}" role="tabpanel" aria-labelledby="session-{{s.term_id}}"
+                                           {% if s.term_id == 1 %}
+                                              class="tab-pane fade px-4 py-5 show active"
+                                           {% else %}
+                                              class="tab-pane fade px-4 py-5 show"
+                                           {% endif %}  style="padding: 0px; margin:0px ">
+                                            <!-- Row Start and End Headers -->
+                                            <div class="row">
+                                                <!-- Blank Column   -->
+                                                <div class="col-sm-4">
+                                                </div>
+                                                <!--  Start Column -->
+                                                <div class="col-sm-4" style="text-indent:14px">
+                                                  <b>Starts</b>
+                                                </div>
+                                                 <!--  End Column -->
+                                                <div class="col-sm-4" style="text-indent:14px">
+                                                  <b>Ends</b>
+                                                </div>
+
+                                            </div>
+                                            <!-- Row Session Start and End Dates -->
+                                            <div class="row">
+
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <span class="fw-bold float-md-right">{{s.descx}}</span>
+                                                        <input name="term_id_{{s.term_id}}"  id="term_id_{{s.term_id}}" value="{{s.term_id}}"  type="text" class="form-control form-control-sm" hidden  required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <input name="st_dt_tm_{{s.term_id}}" id="st_dt_tm_{{s.term_id}}"   value="{{date_cssd|date:'Y-m-d'}}"  type="date" class="form-control form-control-sm" >
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <input name="ed_dt_tm_{{s.term_id}}" id="ed_dt_tm_{{s.term_id}}" value="{{date_csed|date:'Y-m-d'}}" type="date" class="form-control form-control-sm"  >
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <!-- Row Mid Term Start and End Dates -->
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <span class="fw-bold float-md-right">Mid-Term Break</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <input  name="st_dt_mb_{{s.term_id}}" id="st_dt_mb_{{s.term_id}}" value="{{date_mbsd|date:'Y-m-d'}}" type="date" class="form-control form-control-sm" >
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <input  name="ed_dt_mb_{{s.term_id}}" id="ed_dt_mb_{{s.term_id}}" value="{{date_mbed|date:'Y-m-d'}}" type="date" class="form-control form-control-sm" >
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Row Holiday Start and End Dates -->
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <span class="fw-bold float-md-right">Holidays ({{s.descx}})</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <input name="st_dt_hd_{{s.term_id}}" id="st_dt_hd_{{s.term_id}}" value="{{date_hssd|date:'Y-m-d'}}" type="date" class="form-control form-control-sm">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <input name="ed_dt_hd_{{s.term_id}}" id="ed_dt_hd_{{s.term_id}}" value="{{date_hsed|date:'Y-m-d'}}" type="date" class="form-control form-control-sm" >
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                      {% endfor %}
+
+                                  </div>
+
+                              </div>
+                          </div>
+                        <!-- Save and Close Section  --- -->
+                        <div class="card-footer card-action" style="margin: 0px; padding-top: 10px; padding-bottom: 10px;">
+                             <div class="row d-flex justify-content-center text-center">
+                                 <!-- Close Button  --- -->
+                                 <div class="col-4 ">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                 </div>
+                                  <!-- Save Button  --- -->
+                                 <div class="col-4 ">
+                                    <button type="submit" id="addRowButton" class="btn btn-success">Save</button>
+                                </div>
+                             </div>
+                        </div>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <script class="">
+                toastr.options.timeOut=105000
+                toastr.options["body-output-type"]="trustedHtml"
+            </script>
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project!
+	<script src="/static/assets/js/setting-demo2.js"></script> -->
+	<script >
+		$(document).ready(function() {
+			'{% if sess %}'; // If condition: Works perfectly well
+				// alert('The Value for Term Stat Date: {{sess.st_dt_tm_1}}')
+				// Session One Data Call back
+				$( '#st_dt_tm_1' ).val('{{sess.st_dt_tm_1}}');
+				$( '#ed_dt_tm_1' ).val('{{sess.ed_dt_tm_1}}');
+				$( '#st_dt_mb_1' ).val('{{sess.st_dt_mb_1}}');
+				$( '#ed_dt_mb_1' ).val('{{sess.ed_dt_mb_1}}');
+				$( '#st_dt_hd_1' ).val('{{sess.st_dt_hd_1}}');
+				$( '#ed_dt_hd_1' ).val('{{sess.ed_dt_hd_1}}');
+
+				// Session Two Data Call back
+				$( '#st_dt_tm_2' ).val('{{sess.st_dt_tm_2}}');
+				$( '#ed_dt_tm_2' ).val('{{sess.ed_dt_tm_2}}');
+				$( '#st_dt_mb_2' ).val('{{sess.st_dt_mb_2}}');
+				$( '#ed_dt_mb_2' ).val('{{sess.ed_dt_mb_2}}');
+				$( '#st_dt_hd_2' ).val('{{sess.st_dt_hd_2}}');
+				$( '#ed_dt_hd_2' ).val('{{sess.ed_dt_hd_2}}');
+
+				// Session Three Data Call back
+				$( '#st_dt_tm_3' ).val('{{sess.st_dt_tm_3}}');
+				$( '#ed_dt_tm_3' ).val('{{sess.ed_dt_tm_3}}');
+				$( '#st_dt_mb_3' ).val('{{sess.st_dt_mb_3}}');
+				$( '#ed_dt_mb_3' ).val('{{sess.ed_dt_mb_3}}');
+				$( '#st_dt_hd_3' ).val('{{sess.st_dt_hd_3}}');
+				$( '#ed_dt_hd_3' ).val('{{sess.ed_dt_hd_3}}');
+
+			'{% else %}'
+				// This section is for GET Operation')
+				//For copy and paste I would recommend the following:
+
+				//$('#st_dt_tm_1').on('input',function(e){
+				 //// Code here
+				//	var c_name = e.target.name
+				//	var str = $("#myInput").val();
+				//	alert("Your input value has been changed: " + xval);
+				//});
+
+				$('input').on('change', function() {
+					var name = this.name;
+
+					let lc = name.slice(-1); // return the last character of string value
+					var lstchar4 = name.slice(-4); // return the last 4 characters name value
+					var f2char = name.slice(0,2);  // return the first two character of string value
+					var f5char = name.slice(0,5);  // return the first two character of string value
+					let m39c = name.slice(2,9); // return the 3rd to 9th characters of name
+
+					var acyr = $('#start_dt').val();
+
+					if(lstchar4 == 'tm_1' && f2char == 'st'){
+						//if Term 1 start date is updated
+						// automatically populate Academic Calender Start and End date
+						$('#start_dt').val(this.value);
+
+						var dt = new Date($("#start_dt").val());
+
+						var yy = dt.getFullYear() + 1;
+						var mn = dt.getMonth() + 1;
+						var dd = dt.getDate();
+
+						if(dd < 10) dd = "0" + Number(dd);
+						if(mn < 10) mn = "0" + Number(mn);
+
+						var newdate = yy + '-'+ mn + '-'+ dd;
+						$('#end_dt').val(newdate); //value format: yyyy-mm-dd
+
+						//alert('Start Date: ' + newdate);
+					};
+
+					if(f5char == 'ed_dt') {
+
+						if ( $('#start_dt').val() == "" || $('#end_dt').val() == "" ) {
+							alert('Please start from session One First-Term');
+							$('#st_dt_tm_1').focus(); // set focus to the session one start date
+							$('#' + this.name).val(""); // set the current input to null or empty
+
+						} else if ($('#st' + m39c + lc).val() == ""){
+							alert("Please you have to enter the start date first.");
+							$('#' + this.name).val(""); //set the value to empty
+							$('#st' + m39c + lc).focus(); //Set focus to start date
+
+						} else if($('#st' + m39c + lc).val() > this.value) {
+							alert('The End Date must be greater than the Begin Date');
+							$('#' + this.name).val(""); //set the value to empty
+
+						} else if ( this.value > $('#end_dt').val() ){
+							alert('The Date entered is not within the Academic Calender');
+							$('#' + this.name).val(""); //set value of the active controll to null
+
+						//if the current control is mid term (start or end) and no value in term start date
+						} else if (this.name == 'st_dt_mb_' + lc || this.name == 'ed_dt_mb_' + lc ){
+							if ($('#st_dt_tm_' + lc).val() == "" ||  $('#ed_dt_tm_' + lc).val() == "" ){
+								alert('You have to enter the Terms Start and End Dates first');
+								$('#' + this.name).val(""); // set the current control to empty
+								$('#st_dt_tm_' + lc).focus(); //Set focus to start date
+
+							// if the current control value is greater than start term value or less than end term value
+							} else if (this.value < $('#st_dt_tm_' + lc).val() || this.value > $('#ed_dt_tm_' + lc).val() ){
+								alert('Dates for Mid-Term Break should be within the Terms dates');
+								$('#' + this.name).val("") // set the current control value to null
+							};
+
+						//if the current control is Holidays (start or end)
+						} else if (this.name == 'st_dt_hd_' + lc || this.name == 'ed_dt_hd_' + lc ){
+							// if no value in term start or End date
+							if ($('#st_dt_tm_' + lc).val() == "" ||  $('#ed_dt_tm_' + lc).val() == "" ){
+								alert('You have to enter the Terms Start and End Dates first');
+								$('#' + this.name).val(""); // set the current control to empty
+								$('#st_dt_tm_' + lc).focus(); //Set focus to start date of the term
+
+							// if the current control value is greater than start term value or less than end term value
+							} else if ( this.value <= $('#ed_dt_tm_' + lc).val() ){
+								alert('Dates for Holidays should be after the end of the term');
+								$('#' + this.name).val("") // set the current control value to null
+							};
+						};
+						// # TODO: SET font colour to green if validation is OK. Create an else block here
+					};
+
+					// if Start Date controls is entered except for Start Date for Term 1
+					if(lstchar4 != 'tm_1' && f2char == 'st'){
+						if ( $('#st_dt_tm_1').val() == "" || $('#ed_dt_tm_1').val() == "" ) {
+							alert('Please start from session One First-Term');
+							$('#' + this.name).val(""); // set the current input to null or empty
+							$('#st_dt_tm_1').focus(); // set focus to the session one start date
+
+						// if the start or end dates are not within the Academic Session
+						} else if (this.value < $('#start_dt').val() || this.value > $('#end_dt').val() ){
+							alert('The Date entered is not within the Academic Calender dates');
+							$('#' + this.name).val(""); // set the current input to null or empty
+							// set focus to the session one start date
+
+						//if the current control is mid term (start or end) and no value in term start date
+						} else if (this.name == 'st_dt_mb_' + lc || this.name == 'ed_dt_mb_' + lc ){
+							if ($('#st_dt_tm_' + lc).val() == "" ||  $('#ed_dt_tm_' + lc).val() == "" ){
+								alert('You have to enter the Terms Start and End Dates first');
+								$('#' + this.name).val(""); // set the current control to empty
+								$('#st_dt_tm_' + lc).focus(); //Set focus to start date
+
+							// if the current control value is greater than start term value or less than end term value
+							} else if (this.value < $('#st_dt_tm_' + lc).val() || this.value > $('#ed_dt_tm_' + lc).val() ){
+								alert('Dates for Mid-Term Break should be within the Terms dates');
+								$('#' + this.name).val("") // set the current control value to null
+							};
+
+						//if the current control is Holidays (start or end)
+						} else if (this.name == 'st_dt_hd_' + lc || this.name == 'ed_dt_hd_' + lc ){
+							// if no value in term start or End date
+							if ($('#st_dt_tm_' + lc).val() == "" ||  $('#ed_dt_tm_' + lc).val() == "" ){
+								alert('You have to enter the Terms Start and End Dates first');
+								$('#' + this.name).val(""); // set the current control to empty
+								$('#st_dt_tm_' + lc).focus(); //Set focus to start date
+
+							// if the current control value is greater than start term value or less than end term value
+							} else if ( this.value <= $('#ed_dt_tm_' + lc).val() ){
+								alert('Dates for Holidays should be after the end of the term');
+								$('#' + this.name).val("") // set the current control value to null
+							};
+						} else if ( this.value <= $('#ed_dt_hd_' + (lc-1)).val() ){
+							alert('The Start date for this Term is suppose to be after the last Holiday')
+							$('#'.this.name).val("")  // set the current control value to null
+						};
+						// # TODO: SET font colour to green if validation is OK. Create an else block here
+					};
+
+					//alert('Control Name = ' + this.name + '  Last Char = ' + lc + '    TERM Start Date = ' + $('#st_dt_tm_' + lc).val() )
+				  	// alert('This Input: ' + this.name + ' was Change. New Value is: ' + this.value + ' Last Char: ' +  lc + ' First Two Characters: ' + f2char + '  Last 4 Characters: ' + lstchar4 + '  Academic Year St Date: ' + acyr );
+				});
+
+			'{% endif %}';
+		});
+	</script>
+
+{% endblock javascripts %}

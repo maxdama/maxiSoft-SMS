@@ -1,0 +1,96 @@
+
+{% extends "layouts/base.html" %}
+
+{% block title %} Login {% endblock title %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+
+
+
+</style>
+
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="page-header">
+        <h4 class="page-title">Login</h4>
+
+    </div>
+
+
+    <div class="col col-md-4 container " style="padding-top: 50px;">
+        <div class="card ">
+            <div class="card-header align-items-center  text-center ">
+                <!-- <img id="preview" class="h-25 w-25 img-fluid rounded-circle img-thumbnail" src="/media/images/static/ngscrest.jpg" alt="Upload Picture"> -->
+                {% if prof.sch_logo %}
+                    <img id="preview" class="h-25 w-25 img-fluid rounded-circle img-thumbnail" src="{{prof.sch_logo.url}}" alt="Setup Logo">
+                {% endif %}
+                <div class="card-title">
+                    {% if msg %}
+                        <span class="text-danger">{{ msg | safe }}</span>
+                    {% else %}
+                        <span>
+                            <h3 class="fw-extrabold">{{prof.sch_name}}</h3>
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <form method="post" action="">
+                 {% csrf_token %}
+
+                <div class="card-body">
+                    <div class="row d-flex justify-content-sm-center text-xl-center">
+                        <div class="col- container">
+                            <h4 class="text-left">Ask for your Username and Password from your School Administrator</h4>
+                            <p class="text-left">Fill your details here and Login</p>
+
+                            <!--
+                            <input name="sch_id" id="sch_id" value="1" type="text" class="input-fixed form-control-sm"  placeholder="e.g:  dd/mm/yyyy" hidden>
+                            -->
+                            {{ form.sch_id }}
+
+                            <div class="form-group">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="icon-user"></i>
+                                        </span>
+                                    </div>
+
+                                    {{ form.username }}
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="icon-lock"></i>
+                                        </span>
+                                    </div>
+                                    {{ form.password }}
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card-action" style="padding:5px; margin:5px">
+                     <div class="row d-flex justify-content-center text-center">
+                        <button type="submit" class="btn btn-success">Login</button>
+                     </div>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}{% endblock javascripts %}

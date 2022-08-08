@@ -1,0 +1,175 @@
+
+{% extends "layouts/base.html" %}
+
+{% block title %} Academic Timeline {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style class="">
+
+    td:first-child {text-align:center;}
+    td:nth-child(3) {text-align:center;}
+    td:nth-child(4) {text-align:center;}
+    td:nth-child(5) {text-align:left;}
+    td:last-child {text-align:center;}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+        <div class="page-inner">
+
+
+            <div class="row justify-content-center">
+                <div class="col-md-10 ">
+                    <div class="card">
+                        <div class="card-header">
+							<div class="d-flex align-items-center">
+								<h4 class="card-title">Academic Timeline List</h4>
+							</div>
+						</div>
+
+                        <div class="card-body" style="margin-top:0px; padding-top:10px">
+
+                            <table id="example" class="table  table-bordered table-hover " cellspacing="0" width="100%" style="padding-top:0px; margin-top:0px">
+                                <thead >
+                                    <tr class="">
+                                        <th style="width:1%">Order</th>
+                                        <th style="width:30%">Description</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Status</th>
+                                        <th class="icon-book-open" style="text-align:center;"></th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tl in timelines %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{tl.descx}}</td>
+                                            <td>{{tl.st_dt|date:'d-m-Y'}}</td>
+                                            <td>{{tl.ed_dt|date:'d-m-Y'}}</td>
+                                            <td>{{tl.status}}</td>
+                                            <td>
+                                            {% if tl.status == "active" %}
+                                                <a class="icon-pencil edit" href="{% url 'academic-timeline' %}"></a>
+                                            {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+
+                            <!-- Modal -->
+                            <div id="myModal" class="modal fade" role="dialog">
+                              <div class="modal-dialog">
+
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Row information</h4>
+                                  </div>
+                                  <div class="modal-body">
+
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+	{% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+	<script src="/static/assets/js/setting-demo2.js"></script>
+	<script>
+		$(document).ready(function() {
+
+
+            $('.edit').click(function(e){
+			    var self = $(this);
+			    console.log(self.data('title'));
+			    e.preventDefault();
+
+                swal({
+                    title: 'Edit Academic Timeline?',
+                    text: "Do you want to go ahead",
+                    type: 'information',
+                    buttons:{
+                        confirm: {
+                            text : 'Yes, Continue!',
+                            className : 'btn btn-success'
+                        },
+                        cancel: {
+                            text : 'No, Cancel!',
+                            visible: true,
+                            className: 'btn btn-danger'
+                        }
+                    }
+                }).then((Edit) => {
+                    if (Edit) {
+                        location.href = self.attr('href');
+                    }
+                });
+
+            });
+
+
+
+             //Only needed for the filename of export files.
+            //Normally set in the title tag of your page.
+            // document.title='Simple DataTable';
+            // DataTable initialisation
+            $('#example').DataTable(
+                {
+                    "dom": '<"dt-buttons"Bf><"clear">lirtp',
+                    "paging": false,
+                    "autoWidth": true,
+                    "columnDefs": [
+                        { "orderable": false, "targets": 5 }
+                    ],
+                    "buttons": [
+                        'colvis',
+                        'copyHtml5',
+                        'csvHtml5',
+                        'excelHtml5',
+                        'pdfHtml5',
+                        'print'
+                    ]
+                }
+            );
+
+        });
+	</script>
+
+{% endblock javascripts %}

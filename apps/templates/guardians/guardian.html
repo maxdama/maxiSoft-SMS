@@ -1,0 +1,22 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Guardian Forms {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% load static %}
+
+{% block content %}
+
+    <h2>New Guardian</h2>
+    <form method="POST" class="post-form">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Save</button>
+    </form>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
