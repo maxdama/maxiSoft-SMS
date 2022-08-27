@@ -371,7 +371,7 @@ def setup_academic_calender_1(request):
         terms = AcademicSessions.objects.filter(status='Active', sch_id=sch_id).order_by('term_id')
         if not terms:
             messages.info(request, 'You have been redirect: Your School Academic Session must be entered, followed by '
-                                   'Academic Timeline or Period, befor your School Academic Calender.')
+                                   'Academic Timeline or Period, before your School Academic Calender.')
             return redirect('school-terms')
         time_line = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)  # Return the first row from the queryset
         # Acad_cal = AcademicCalender.objects.filter(AcademicTimeLine__sch_id=sch_id, AcademicTimeLine__status='active')

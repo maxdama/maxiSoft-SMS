@@ -16,7 +16,6 @@ from apps.guardians import views as g, models as gm
 from ..financials.forms import FinancialTransactionsForm, InvoiceForm
 from ..settings.models import AcademicTimeLine, ClassRooms, AcademicSessions, AcademicCalender
 from django.db import transaction
-
 from ..utils import get_school_id, default_image_restore
 
 
@@ -36,14 +35,21 @@ def increment_reg_no():
 # Create your views here.
 @login_required
 def student_list(request):
-    title = 'Register'
+    sch_id = get_school_id(request)
+
+    title = 'Registration'
     default_image_restore(request)
     # Request all the Student.
     student = Students.objects.all().order_by('-id')
+    #enrl = Enrollments.objects.all().select_related('student')
+    #print(enrl[0].student.first_name)
+    acada_yr = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
+
     # Put the data into the context
     context = {
         'title': title,
         'students': student,
+        'acada_yr': acada_yr.descx
     }
     return render(request, 'student/students-list.html', context)
 
@@ -189,42 +195,62 @@ def returned_student_register(request):
 
 
 def continue_registration(request,  reg_id, reg_step):
-
     sch_id = get_school_id(request)
+    try:
+        student = Students.objects.get(id=reg_id, reg_steps=reg_step)
+        # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active', sch_id=sch_id)
+        timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
+        classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
+        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
+        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
+        # print(timeline.term['id'], timeline.term['descx'])
 
-    student = Students.objects.get(id=reg_id, reg_steps=reg_step)
-    # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active', sch_id=sch_id)
-    timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
-    classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
-    fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
-    sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
-    # print(timeline.term['id'], timeline.term['descx'])
+        context = {
+            'student': student, 'timeline': timeline, 'classes': classes, 'fees': fees, 'sessions': sessions
+        }
 
-    context = {
-        'student': student, 'timeline': timeline, 'classes': classes, 'fees': fees, 'sessions': sessions
-    }
+        if reg_step == 1:
+            try:
+                guardian = gm.Guardians.objects.get(id=student.g_id_id or None)
+                if guardian:
+                    context = {
+                        'guardian': guardian, 'student': student, 'timeline': timeline
+                    }
 
-    if reg_step == 1:
-        try:
-            guardian = gm.Guardians.objects.get(id=student.g_id_id or None)
-            if guardian:
-                context = {
-                    'guardian': guardian, 'student': student, 'timeline': timeline
-                }
+                return render(request, "financial/student-enrollment.html", context)
 
-            return render(request, "financial/reg-enrollment.html", context)
+            except gm.Guardians.DoesNotExist:
+                messages.error(request, "The Student has not been Assigned to Guardian", "Add New")
+                return render(request, "guardians/reg-guardians-biodata.html", context)
+            except Exception as e:
+                raise e
+                return redirect(student_list)
+                # raise Http404
 
-        except gm.Guardians.DoesNotExist:
-            messages.error(request, "The Student has not been Assigned to Guardian", "Add New")
-            return render(request, "guardians/reg-guardians-biodata.html", context)
-        except Exception as e:
-            raise e
-            return redirect(student_list)
-            # raise Http404
+        elif reg_step == 2:
+            return render(request, "financial/student-enrollment.html", context)
 
-    elif reg_step == 2:
-        # return render(request, "student/reg-enrollment.html", context)
-        return render(request, "financial/reg-enrollment.html", context)
+        elif reg_step == 3:
+            context = {
+                'student': student, 'timeline': timeline
+            }
+            return render(request, "financial/student-enrollment.html", context)
+
+    except Students.DoesNotExist:
+        return HttpResponse('Student Record Does not exists')
+    except AcademicTimeLine.DoesNotExist:
+        messages.info(request, "The Acadamic Timeline might have expired or has not been setup. "
+                                    "You can not do Student Enrollment now until the Timeline issue is resolved. "
+                                    "Please contact your systems admin")
+        return redirect(student_list)
+
+    except AcademicTimeLine.MultipleObjectsReturned:
+        messages.warning(request, "The Acadamic Timeline was not Setup correctly. There is more than one Active session in the timeline. "
+                               "You can not do Student Enrollment now until the Timeline issue is resolved. "
+                               "Please contact your systems admin")
+
+        return redirect(student_list)
+
 
 
 def list_students_enrolled(request):
@@ -314,6 +340,4 @@ def invoice_amount(request, pkg_id):
     reg_no = generate_reg_no(request, jsonx=False)
 
     return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})
-
-
 

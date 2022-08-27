@@ -38,7 +38,7 @@
 			<div class="row ">
 				<div class="col-md-12">
 					<div class="card">
-						<div class="card-header">
+						<div class="card-header pb-0">
 							<div class="d-flex align-items-center">
 								<h4 class="card-title">{{title}}</h4>
 
@@ -47,6 +47,7 @@
 									 New Student
 								</button>
 							</div>
+							<h6>{{acada_yr}} Acadamic Year</h6>
 						</div>
 
 
@@ -90,6 +91,11 @@
 												  <div class="dropdown-menu">
 													  {% if student.reg_status == 'pending' %}
 														  <a class="dropdown-item" href="{% url 'continue' reg_id=student.pk reg_step=student.reg_steps %}">Continue-> Registration</a>
+
+														  <div class="dropdown-divider"></div>
+													  {% endif %}
+													  {% if  student.reg_status == 'returned' %}
+														  <a class="dropdown-item" href="{% url 're-enrollment' stud_id=student.pk %}">Student Re-Enrollment</a>
 
 														  <div class="dropdown-divider"></div>
 													  {% endif %}

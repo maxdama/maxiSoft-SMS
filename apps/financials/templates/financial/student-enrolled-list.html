@@ -33,7 +33,7 @@
                             <i class="flaticon-right-arrow"></i>
                         </li>
                         <li class="nav-item">
-                            <a href="/students/list">Registered List</a>
+                            <a href="/students/list">Registeration List</a>
                         </li>
                     </ul>
                 </div>
@@ -60,41 +60,52 @@
 									<thead>
 										<tr class="text-small text-secondary ">
 											<th>S/N</th>
-											<th>Reg. Number</th>
+											<!--<th>Acada Yr</th> -->
 											<th>Student Names</th>
 											<th class="text-right">Sex</th>
-											<th>Batch</th>
+											<th>Class</th>
+											<th>Trm</th>
 											<th>Due Date</th>
-                                            <th class="text-center">Due Amt</th>
+											<th>Dt Lst Pmt</th>
+											<th>Cum Inv</th>
+											<th>Cum Paid</th>
+											<th>Term Inv</th>
+											<th>Term Pmt</th>
+											<th class="text-center">Tot Due</th>
 											<th class="text-center">Status</th>
 											<th  class="icon-book-open "> Action</th>
 										</tr>
 									</thead>
 
 									<tbody>
-										{% for invoice in enrollments %}
+										{% for enrolled in enrollments %}
 										<tr height="25px" class="text-small">
 											<td class="text-center">{{ forloop.counter }}</td>
-											<td>{{invoice.enrolled.reg_no}}</td>
-											<td>{{invoice.student.surname}} {{invoice.student.first_name}} {{invoice.student.middle_name}}</td>
-											<td class="text-center pr-3">{{invoice.student.gender|first}}</td>
-                                            <td>{{invoice.enrolled.classroom.class_abr}}{{invoice.enrolled.classroom.arm}}</td>
-											<td class="text-left">{{invoice.enrolled.due.date|date:'d-m-Y'}}</td>
-											<td  class="text-right pr-2">{{invoice.enrolled.amount.due|floatformat:2|intcomma}} </td>
-											<td class="text-left">{{invoice.enrolled.status}}</td>
-
+											<!--<td>{{enrolled.timeline.descx}}</td> -->
+											<td>{{enrolled.student.surname}} {{enrolled.student.first_name}} {{enrolled.student.middle_name}}</td>
+											<td class="text-center pr-3">{{enrolled.student.gender|first}}</td>
+											<td>{{enrolled.classroom.class_abr}}{{enrolled.classroom.arm}}</td>
+                                            <td>{{enrolled.session.term_id}}</td>
+											<td class="text-left">{{enrolled.due.date|date:'d-m-Y'}}</td>
+											<td class="text-left">{{enrolled.last_paymt.date|date:'d-m-Y'}}</td>
+											<td  class="text-right pr-2"> {{enrolled.inv.amt|floatformat:2|intcomma}} </td>
+											<td  class="text-right pr-2">{{enrolled.paid.amt|floatformat:2|intcomma}} </td>
+											<td  class="text-right pr-2">{{enrolled.last_inv.amt|floatformat:2|intcomma}} </td>
+											<td  class="text-right pr-2">{{enrolled.term_pmt.amt|floatformat:2|intcomma}} </td>
+											<td  class="text-right pr-2">{{enrolled.tot_amt.due|floatformat:2|intcomma}} </td>
+											<td class="text-left">{{enrolled.status}}</td>
 											<td class="">
 												<div class="btn-group form-button-action">
 												  <button class="btn btn-secondary btn-xs  dropdown-toggle btn-border btn-round" type="button" data-toggle="dropdown" >
 													<b class="icon-pencil"></b>
 												  </button>
 												  <div class="dropdown-menu">
-													  <input type="text" class="trans_date"  value="{{invoice.trans_date}}" hidden>
-													  <a class="dropdown-item" href="">Payment</a>
-													  {% if invoice.enrolled.status|lower == 'enrolled' %}
+													  <input type="text" class="trans_date"  value="{{enrolled.trans_date}}" hidden>
+													  <a class="dropdown-item" href="{% url 'payment-entry' enrolled.student_id %}">Payment</a>
+													  {% if enrolled.status|lower == 'enrolled' %}
 													  	<div class="dropdown-divider"></div>
-													  	<a class="dropdown-item" href="{% url 'update-enrollment' invoice.enrolled_id invoice.invoice_no %}">Update Enrollment</a>
-													  	<a class="dropdown-item  cancel"  href="{% url 'cancel-enrollment' invoice.enrolled_id invoice.invoice_no %}">Cancel Enrolled</a>
+													  	<a class="dropdown-item" href="{% url 'update-enrollment' enrolled.id enrolled.first_inv_no %}">Update Enrollment</a>
+													  	<a class="dropdown-item  cancel"  href="{% url 'cancel-enrollment' enrolled.id enrolled.first_inv_no  %}">Cancel Enrolled</a>
 													  {% endif %}
 												  </div>
 												</div>

@@ -30,7 +30,11 @@ def login_view(request):
                     sch_id = form.cleaned_data.get("sch_id")
                     request.session['school_id'] = sch_id
                     request.session['user_name'] = username
-
+                    """
+                    if first_login_today:
+                        if end_of_term:
+                            ap_do_end_of_term
+                    """
                     return redirect("/")
                 else:
                     msg = 'Invalid credentials'
@@ -38,7 +42,7 @@ def login_view(request):
                 msg = 'Error validating the form'
 
         else:
-            username = 'admin'
+            username = 'dama'
             sch_id = 1
             #username = request.session['user_name']
             try:

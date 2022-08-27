@@ -14,9 +14,8 @@ class RegistrationForm(forms.ModelForm):
 class EnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollments
-        fields = [
-            "student", "school", "timeline", "session", "reg_no", "classroom", "trans_date", "status", "fee_pkg"
-        ]
-        exclude = ['status']
+        # fields = [ "student", "school", "timeline", "session", "reg_no", "classroom", "trans_date", "status", "fee_pkg"]
+        fields = '__all__'
+        exclude = ['status', 'first_inv_no']
 
 

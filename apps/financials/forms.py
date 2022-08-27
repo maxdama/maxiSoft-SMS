@@ -29,4 +29,11 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = '__all__'
-        exclude = ['package', 'due_date', 'status']
+        exclude = ['package', 'due_date', 'balance', 'status']
+
+
+class PaymentForm(forms.ModelForm):
+    class Meta:
+        model = Payments
+        fields = '__all__'
+        exclude = ['receipt_no', 'invoice_no', 'amt_paid', 'pmt_descx', 'status']
