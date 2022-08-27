@@ -1,0 +1,342 @@
+
+{% extends "layouts/base.html" %}
+
+{% block title %} Student Payment {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="content">
+    <div class="page-inner">
+
+        <div class="page-header">
+            <h3 class=" font-weight-bold ">{{header}}</h3>
+            <ul class="breadcrumbs">
+                <li class="nav-home">
+                    <a href="#">
+                        <i class="flaticon-home"></i>
+                    </a>
+                </li>
+                <li class="separator">
+                    <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="list">Students</a>
+                </li>
+                <li class="separator">
+                    <i class="flaticon-right-arrow"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="/financials/enrollment-list">Students Enrolled:-List and Make Payment</a>
+                </li>
+            </ul>
+        </div>
+
+        <form action="" class="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="container d-flex justify-content-center">
+                <div class="col col-md-10 ">
+                    <div class="card">
+
+                        <div class="card-header">
+
+                            <div class="row float-sm-right " >
+                                <div class="col-sm-4 form-group" >
+                                    <input type="text" class="form-control no-bd" id="reg_id" name="student" value="{{enrolled.student.pk}}" hidden required>
+                                </div>
+                                <input type="text" class="no-bd" id="enrolled_id" name="enrolled" value="{{enrolled.id}}" hidden required>
+                                <input type="text" class="no-bd" id="sch_id" name="school" value="{{timeline.sch_id}}" hidden required>
+
+                            </div>
+
+                            <h5 class=""><strong>Student Payment Entry: </strong><br> Session: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
+
+                            <hr>
+
+                            <div class="row">
+                                <div class="avatar avatar-lg">
+                                    {% if enrolled.student.stud_pic %}
+                                        <img src="{{enrolled.student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
+                                    {% else %}
+                                        <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                    {% endif %}
+                                </div>
+
+                                <div class="no-bd col-md-5 form-floating-label ">
+                                    <input id="studnames" type="text" name="studentnames" value="{{enrolled.student.surname}} {{enrolled.student.first_name}} {{enrolled.student.middle_name}}" class="form-control no-bd" style="font-weight:bold; font-size: 18px;"  required>
+                                    <label for="studnames" class="placeholder pl-3">Student Making Payment</label>
+                                </div>
+
+                                <div class="col-md-3  " style="width:auto">
+                                    <!-- <button type="button" class="btn btn-outline-dark  btn-xs gen-id">Reg-No (Auto Gen)</button> -->
+                                    <span class="gen-id ">Registration No:</span>
+                                    <div class="row">
+                                        <div class="col-md-12 form-group w_90 pl-3  p-0 m-0">
+                                            <input id="reg_no" name="reg_no" value="{{enrolled.reg_no}}" readonly="" type="text" class="no-bd form-control form-control-sm pt-0 mt-0"  required>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3 ">
+                                    <div class="form-floating-label">
+
+                                        <select class="no-bd form-control input-border-bottom" id="class_id" name="classroom" style="font-weight:bold;" required >
+                                            <option selected hidden value="{{enrolled.classroom.id}}">{{enrolled.classroom.class_abr}} - {{enrolled.classroom.arm}}</option>
+                                            {% for cls in classes %}
+                                                <option value={{cls.id}}>{{cls.class_abr}} - {{cls.arm}}  ({{timeline.descx}})</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="class_id" class="placeholder pl-1">Batch Placement:</label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+
+                        <div class="">
+
+                            <div class="row d-flex justify-content-center "  >
+
+                                <div class="col-md-3 font-weight-bold text-left">
+                                    <span class="pl-2 ">Due Amount</span>
+                                      <div class="row">
+                                          <div class="col-md-12 pl-4">
+                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due}}" tabindex="10" type="number" readonly class="form-control form-control-sm no-bd " placeholder=""  >
+                                          </div>
+                                      </div>
+                                </div>
+
+
+                                <div class="col-md-3 font-weight-bold text-left ">
+                                    <div class="form-floating-label">
+
+                                        <select class="no-bd form-control input-border-bottom" id="pay_method" name="pay_method" style="font-weight:bold;" required >
+                                            <option></option>
+                                            {% for pm in paymethods %}
+                                                <option value="{{pm.id}}">{{pm.pay_method}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="pay_method" class="placeholder pl-0">* Payment Method:</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 font-weight-bold text-left">
+                                    <span class="pl-2 ">Doc No</span>
+                                      <div class="row">
+                                          <div class="col-md-12 pl-4">
+                                              <input  name="doc_no" id="doc_no" value="{{inv.amount}}" tabindex="10" type="text"  class="form-control form-control-sm  no-bd" placeholder=""  >
+                                          </div>
+                                      </div>
+                                </div>
+
+                                <div class="col-xs-4">
+                                 <!-- Date of Payment -->
+                                     <div class="form-group form-floating-label">
+                                         <input  type="date" id="trans_date" class="no-bd form-control" name="pmt_date"   required >
+                                         <label for="trans_date" class="placeholder pl-3">* Date</label>
+                                     </div>
+                                </div>
+
+
+                            </div>
+                            <hr class=" mb-2">
+                            <!--<span class="text-small fw-extrabold font-italic">Auto Invoice </span> <p> -->
+                            <div class="row ">
+
+                                <div class="col-md-6 font-weight-bold text-left">
+                                    <span class="label pl-2">Payment Description:</span>
+                                      <div class="row">
+                                          <div class="col-md-12 pl-4">
+                                              <input  name="pmt_descx" id="descx" value="{{descx}}" tabindex="10" type="text" class="form-control form-control-sm" placeholder="Payment - 1st Term 2022 Tuition Fee" required >
+                                          </div>
+                                      </div>
+                                </div>
+
+                                <div class="col-md-3 font-weight-bold text-left">
+                                    <span class="pl-1 ">* Amount Paying</span>
+                                      <div class="row">
+                                          <div class="col-md-12 pl-4 text-right ">
+                                              <input  name="amt_paid" id="amount" value="{{inv.amount}}" tabindex="10" type="number"  class="form-control form-control-sm  " placeholder="" required >
+                                          </div>
+                                      </div>
+                                </div>
+
+
+                                <div class="col-md-3 font-weight-bold text-left ">
+                                    <div class="form-floating-label">
+
+                                        <select class="no-bd form-control input-border-bottom" id="bank" name="bank" style="font-weight:bold;" required >
+                                            <option></option>
+                                            {% for pt in banks %}
+                                                <option value="{{pt.id}}">{{pt.bank_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="bank" class="placeholder pl-0">* Bank Entry:</label>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                        <div class="card-footer card-transparent">
+                            <div class="row d-flex justify-content-center text-center">
+                                 <div class="col-4 ">
+                                    <button class="btn btn-outline-dark btn-round btn-sm"  type="submit" name="save_and_add" value="save&add" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Save and Add Another</button>
+                                 </div>
+                                 <div class="col-4 ">
+                                     <button class="btn btn-outline-dark btn-round btn-sm" type="submit" name="save_and_list" value="save&list" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Finish and List Enrollment</button>
+                                 </div>
+                                  <div class="col-4 ">
+                                      <button class="btn btn-outline-dark btn-round btn-sm" id="save"  type="submit" name="save" value="paid" formaction="/financials/student-payment/{{enrolled.student_id}}" >Pay NOW</button>
+                                  </div>
+                             </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <script type="text/javascript"  >
+
+		$(document).ready(function() {
+
+            document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
+
+            $('#save').click(function(e){
+                e.preventDefault();
+
+                let form = $(this).closest('form');
+                //let url  = '/financials/student-payment/{{enrolled.pk}}';
+
+                // Get values from Inputs text-box and selected controls
+                let pmtd = $("#pay_method option:selected").text(); //Get the selected text from pay_method dropdown
+                let docno = $("#doc_no").val();  // Get the Document No from doc_no object text box
+                let studname = $("#studnames").val();  // Get the Student Name from studnames object text box
+                let classid = $("#class_id option:selected").text(); //Get the select class text from class_id dropdown
+                let amtpaid = $("#amount").val();  // Get the Amount Paid from amount object text box
+                let bank = $("#bank option:selected").text(); //Get the selected text from bank dropdown
+                let pmt_date = $("#trans_date").val();  // Get the Payment Date from trans_date object text box
+                let descx = $("#descx").val();  // Get the Payment Description from pmt_descx object text box
+
+
+                if(docno != ""){
+                    docno = ' ( ' + docno + " ) ";
+                };
+
+                let title = 'Payment Confirmation! . . ';
+                let msg = "Receiving: \n" + pmtd + " Payment " + docno +
+                    "\n For: \n    " + studname + " (" + classid + ") " + " \n Amount Paying: N" + amtpaid + " \n      Paid To:  " + bank;
+
+                if(pmtd == "" | amtpaid == "" | bank == "" | pmt_date == "" | descx == ""){
+                    required_alert(pmtd, amtpaid, bank, pmt_date, descx)
+                } else {
+                    payment_confirmation_alert(title, msg, form);
+                };
+            });
+
+
+			function payment_confirmation_alert(title, msg, form)
+			{
+				swal({
+				title: title,
+				text: msg,
+				type: 'warning',
+				buttons:{
+					confirm: {
+						text : 'YES, Confirmed!',
+						className : 'btn btn-success'
+					},
+					cancel: {
+						text: 'NO, Stop!',
+						visible: true,
+						className: 'btn btn-danger'
+					}
+
+				}
+				}).then((go) => {
+					if (go) {
+                        form.submit();
+
+					} else {
+					    /*
+						swal({
+							title: 'Operation Stopped!',
+							type: 'info',
+							buttons : {
+								confirm: {
+									className : 'btn btn-info',
+								}
+							}
+
+						});
+					     */
+						//location.href = url;
+						swal.close();
+					}
+				});
+			};
+
+			function required_alert(pay_method, amt_paid, bank, pmt_date, descx) {
+                let msg = "You have to enter the following required field(s):";
+                if(pay_method == ""){msg = msg + '\n >>   ---- Payment Method ----'};
+                if(pmt_date == ""){msg = msg + '\n >>   ---- Payment Date ----'};
+                if(descx == ""){msg = msg + '\n >>   ---- Payment Description ----'};
+                if(amt_paid == ""){msg = msg + '\n >>   ---- Amount Paying ----'};
+                if(bank == ""){msg = msg + '\n >>   ---- Bank Entry ----'};
+                if(msg != ""){msg = msg + '\n\n Please fill required fields and Continue.'};
+
+                swal({
+				title: 'WAIT oo !!',
+				text: msg,
+				type: 'warning',
+				buttons:{
+					confirm: {
+						text : 'OK, Understood!',
+						className : 'btn btn-success'
+					}
+
+				}
+				})
+            };
+
+		});
+	</script>
+
+
+
+{% endblock javascripts %}
