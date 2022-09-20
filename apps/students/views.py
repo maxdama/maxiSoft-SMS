@@ -192,23 +192,25 @@ def new_student_registration(request):
             stud_id = request.POST['reg_id']
             stud_data = Students.objects.get(id=stud_id)
             student = StudentsRegistrationNewForm(request.POST, instance=stud_data)
+            mode = 'edit'
             print('----- Student Record for Update Retrieved ')
         else:
             student = StudentsRegistrationNewForm(request.POST, request.FILES)
+            mode = 'new'
 
         if student.is_valid():
             print('----- Form is Valid')
             stud = student.save(commit=False)
             stud.reg_steps = 1
-            stud_assign_others(request, stud)
+            stud_assign_others(request, stud, mode)
             print('----- Saving Student Record. ')
             stud_saved = stud.save()
-            opr = 'new'
             print('----- Student Record is SAVED')
 
             if request.POST.get("save_pause"):
-                if stud_saved:
-                    if opr == 'new':
+                print(stud)
+                if stud:
+                    if mode == 'new':
                         messages.success(request, 'The registration is not Complete yet, it is pending  ')
                         messages.success(request, 'Student registration Saved. ')
                     else:
@@ -226,7 +228,7 @@ def new_student_registration(request):
         return render(request, "student/reg-student-biodata.html", context)
 
 
-def stud_assign_others(request, stud):
+def stud_assign_others(request, stud, mode="new"):
     stud.middle_name = request.POST['middle_name']
     stud.religion = request.POST['religion']
     stud.email = request.POST['email']
@@ -235,6 +237,12 @@ def stud_assign_others(request, stud):
     stud.lga_origin = request.POST['lga']
     stud.state_origin = request.POST['state']
     stud.nationality = request.POST['nationality']
+
+    if request.FILES:
+        if len(stud.stud_pic) > 0 and mode == "edit":
+            os.remove(stud.stud_pic.path)
+
+        stud.stud_pic = request.FILES['stud_pic']
 
     if stud.reg_steps == 1:
         stud.reg_status = 'pending'
