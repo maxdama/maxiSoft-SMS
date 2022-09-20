@@ -85,7 +85,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title">Personal Biodata <div class="text-small float-md-right ">(Registration Form-1)</div></div>
-                                <input type="text" class="no-bd" id="sch_id" name="school" value="{{sch_id}}" placeholder="School ID" hidden required>
+                                <input type="text" class="no-bd" id="sch_id" name="school" value="{{sch_id}}" placeholder="School ID" hidden  required>
                             </div>
 
                             <div class="card-body">
@@ -226,20 +226,20 @@
                                          <button class="btn btn-outline-warning btn-xs"  type="reset" >Clear or Reset</button>
                                      </div>
                                      <div class="col-4 ">
-                                        <button class="btn btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new" >
+                                        <button class="btn btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new_registration" >
                                             {% if student.reg_status|lower == 'enrolled' %}
                                                 UPDATE
                                             {% else %}
-                                                SAVE for later
+                                                SAVE
                                             {% endif %}
                                         </button>
                                      </div>
                                       <div class="col-4 ">
-                                         <button class="btn btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new" >
+                                         <button class="btn btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new_registration" >
                                              {% if student.reg_status|lower == 'enrolled' %}
-                                                UPDATE & Next -->
+                                                UPDATE & Continue . . .
                                              {% else %}
-                                                Next -->
+                                                Save & Continue . . .
                                              {% endif %}
                                          </button>
                                       </div>

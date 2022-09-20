@@ -13,13 +13,14 @@ from ..students.models import Enrollments
 def term_is_used(term_id):
     sx_used = False
 
-    sx = AcademicSessions.objects.values('id').get(term_id=term_id, status='Active')
-    xin_enrolled = Enrollments.objects.filter(session_id=sx['id']).exists()
-    # xin_cal = AcademicSessions.objects.distinct().filter(enrollments__session=15, status='Active')
-    # print(sx['id'])
-
-    if xin_enrolled:
-        sx_used = True
+    # sx = AcademicSessions.objects.values('id').get(term_id=term_id, status='Active')
+    sx = AcademicSessions.objects.values('id').filter(term_id=term_id, status='Active').first()
+    print(f'Academic Session: {sx}')
+    if sx:
+        print(sx)
+        xin_enrolled = Enrollments.objects.filter(session_id=sx['id']).exists()
+        if xin_enrolled:
+            sx_used = True
 
     return sx_used
 
@@ -152,10 +153,11 @@ def setup_school_terms(request):
                 else:
                     # Delete the Term
                     term = AcademicSessions.objects.filter(term_id=term_id, status='Active').delete()
-                    if term:
-                        messages.info(request, 'Unused Term Record is Deactivated')
+                    # Access Tuple and checking if delete was successful
+                    if term[0] != 0:
+                        messages.info(request, 'The previous Term Entry was Deleted')
 
-                # create and save object
+                # create and save new Academic Session ( object )
                 school_term = AcademicSessions(term_id=term_id, descx=descx, status=status, sch_id=sch_id)
                 school_term.save()
                 messages.success(request, 'New-Terms record Activated')

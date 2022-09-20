@@ -84,8 +84,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'schoolsdb',
-        'USER': 'postgres',
+        'NAME': 'schools',
+        'USER': 'admin',
         'PASSWORD': '20phc04sys',
         'HOST': '127.0.0.1',
         'PORT': '5432',
@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'WAT'
+TIME_ZONE = 'Africa/Lagos'
 
 USE_I18N = True
 

@@ -8,6 +8,9 @@ from apps.settings.models import AcademicSessions, AcademicCalender
 
 
 def get_school_id(request):
+    """ Gets the school ID from the login session. If the session has expired, the
+        function Logs out the User and redirect the user to the Login Page.
+    """
     sch_id = 0
     if request.session.has_key('school_id'):
         sch_id = request.session['school_id']

@@ -6,7 +6,7 @@ from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect
 from . models import Students, Enrollments
 from apps.financials.models import FeesPackage, Invoice
-from .forms import RegistrationForm, EnrollmentForm
+from .forms import RegistrationForm, StudentsRegistrationNewForm, EnrollmentForm
 from django.http import HttpResponse, JsonResponse
 import datetime
 import os
@@ -40,16 +40,19 @@ def student_list(request):
     title = 'Registration'
     default_image_restore(request)
     # Request all the Student.
-    student = Students.objects.all().order_by('-id')
+    qrycrit = (~Q(reg_status='graduated'))
+    student = Students.objects.filter(qrycrit).order_by('-id')
     #enrl = Enrollments.objects.all().select_related('student')
     #print(enrl[0].student.first_name)
-    acada_yr = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
+    try:
+        acada_yr = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
+    except AcademicTimeLine.DoesNotExist:
+        messages.info(request, 'Student Registration List can not be viewed now:  The school Academic Year have not been set. Please consult with your Software Administrator to set it up.')
+        return render(request, 'student/students-list.html', {'title': title})
 
     # Put the data into the context
     context = {
-        'title': title,
-        'students': student,
-        'acada_yr': acada_yr.descx
+        'title': title, 'students': student, 'acada_yr': acada_yr.descx
     }
     return render(request, 'student/students-list.html', context)
 
@@ -84,24 +87,6 @@ def update_student_register(reg_id, request):
     return stud
 
 
-def view_student(request, reg_id):
-    if reg_id is None:
-        reg_id = request.GET.get('id', '')
-    student = Students.objects.get(id=reg_id)
-
-    sch_id = student.school_id
-    if sch_id == None: sch_id = 0
-
-    context = {
-        'reg_no': reg_id,
-        'name': student.surname,
-        'date': student.dob,
-        'student': student,
-        'sch_id': sch_id
-    }
-    return render(request, "student/reg-student-biodata.html", context)
-
-
 def delete_student(request, reg_id):
     #try:
     student = Students.objects.get(pk=reg_id)
@@ -126,16 +111,20 @@ def delete_student(request, reg_id):
 
 @login_required
 def form_register(request):
+    print('Runing: form_register')
     gad_id = 0
     sch_id = request.session['school_id']
-
+    print(f'----- School ID Number:  {sch_id}')
     if request.method == 'POST':
+        print('----- Checking if Form is Valid')
         form = RegistrationForm(request.POST or None,  request.FILES or None)
 
         if form.is_valid():
+            print('----- Form is Valid')
             if request.POST['reg_id']:
                 stud_obj = update_student_register(request.POST['reg_id'], request)
                 opr = 'update'
+                print('   Update Student Registration . . . ')
 
                 gad_id = stud_obj.g_id_id
                 if gad_id is None:
@@ -155,6 +144,7 @@ def form_register(request):
                 form.instance.reg_status = 'pending'
                 stud_obj = form.save()
                 opr = 'new'
+                print('   New Student Registration . . . ')
 
             if request.POST.get("save_pause"):
                 if stud_obj:
@@ -177,9 +167,10 @@ def form_register(request):
 
                 return redirect('guardian', gad_id=gad_id, reg_id=stud_obj.pk)
         else:
-            messages.warning(request, 'The Student register was NOT Saved or Updated.')
-            messages.warning(request, 'Something was not right !!! ')
-            # return render(request, "student/reg-student-biodata.html")
+            print('----- The Form is NOT Valid')
+            messages.warning(request, 'The Student registration was NOT Saved or Updated.')
+            messages.warning(request, 'The Form is NOT Valid !!! ')
+            return render(request, "student/reg-student-biodata.html", {'sch_id': sch_id, 'form':form})
             return redirect(student_list)
     else:
         default_image_restore(request)
@@ -187,11 +178,82 @@ def form_register(request):
         return render(request, "student/reg-student-biodata.html", context)
 
 
+def new_student_registration(request):
+    print('Runing: New_Student_Registration')
+
+    gad_id = 0
+    sch_id = request.session['school_id']
+    print(f'----- School ID Number:  {sch_id}')
+
+    if request.method == "POST":
+        print('----- Post Request method')
+        if request.POST['reg_id']:
+            print('----- Get Student Record for Update ')
+            stud_id = request.POST['reg_id']
+            stud_data = Students.objects.get(id=stud_id)
+            student = StudentsRegistrationNewForm(request.POST, instance=stud_data)
+            print('----- Student Record for Update Retrieved ')
+        else:
+            student = StudentsRegistrationNewForm(request.POST, request.FILES)
+
+        if student.is_valid():
+            print('----- Form is Valid')
+            stud = student.save(commit=False)
+            stud.reg_steps = 1
+            stud_assign_others(request, stud)
+            print('----- Saving Student Record. ')
+            stud_saved = stud.save()
+            opr = 'new'
+            print('----- Student Record is SAVED')
+
+            if request.POST.get("save_pause"):
+                if stud_saved:
+                    if opr == 'new':
+                        messages.success(request, 'The registration is not Complete yet, it is pending  ')
+                        messages.success(request, 'Student registration Saved. ')
+                    else:
+                        messages.success(request, 'Student register Updated ')
+                else:
+                    messages.warning(request, 'Save operation failed')
+
+                return redirect(student_list)
+        else:
+            return render(request, "student/reg-student-biodata.html", request.POST)
+    else:
+        print('----- Get Request method')
+        default_image_restore(request)
+        context = {'sch_id': sch_id}
+        return render(request, "student/reg-student-biodata.html", context)
 
 
-def returned_student_register(request):
-    msg = None
-    success = False
+def stud_assign_others(request, stud):
+    stud.middle_name = request.POST['middle_name']
+    stud.religion = request.POST['religion']
+    stud.email = request.POST['email']
+    stud.bloodgroup = request.POST['bloodgroup']
+    stud.phone_no = request.POST['phoneno']
+    stud.lga_origin = request.POST['lga']
+    stud.state_origin = request.POST['state']
+    stud.nationality = request.POST['nationality']
+
+    if stud.reg_steps == 1:
+        stud.reg_status = 'pending'
+
+    return None
+
+
+def view_student_for_update(request, reg_id):
+    if reg_id is None:
+        reg_id = request.GET.get('id', '')
+    student = Students.objects.get(id=reg_id)
+
+    sch_id = student.school_id
+    if sch_id == None: sch_id = 0
+
+    context = {
+        'reg_no': reg_id, 'name': student.surname, 'date': student.dob, 'student': student, 'sch_id': sch_id
+    }
+    return render(request, "student/reg-student-biodata.html", context)
 
 
 def continue_registration(request,  reg_id, reg_step):

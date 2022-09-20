@@ -170,6 +170,6 @@ class Enrollments(models.Model):
         ordering = ['school_id', 'reg_no']
         # unique_together = ('school_id', 'session', 'reg_no', 'classroom')
         constraints = [
-            models.UniqueConstraint(fields=['school_id', 'timeline', 'session', 'reg_no'], name="regno_class_unx"),
-            models.UniqueConstraint(fields=['school_id', 'timeline', 'session', 'student'], name="stud_class_unx"),
+            models.UniqueConstraint(fields=['school_id', 'timeline', 'session', 'reg_no'], name="unq_regno_class"),
+            models.UniqueConstraint(fields=['school_id', 'timeline', 'session', 'student'], name="unq_stud_class"),
         ]
