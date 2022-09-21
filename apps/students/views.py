@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Q, F
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect
-from . models import Students, Enrollments
+from .models import Students, Enrollments
 from apps.financials.models import FeesPackage, Invoice
 from .forms import RegistrationForm, StudentsRegistrationNewForm, EnrollmentForm
 from django.http import HttpResponse, JsonResponse
@@ -27,7 +27,8 @@ def increment_reg_no():
     reg_id_str = last_reg_no.reg_no
     reg_no_int = int(reg_id_str[9:12])
     new_reg_no = reg_no_int + 1
-    reg_id = 'NGS' + str(str(datetime.date.today().year)) + str(datetime.date.today().month).zfill(2) + str(new_reg_no).zfill(3)
+    reg_id = 'NGS' + str(str(datetime.date.today().year)) + str(datetime.date.today().month).zfill(2) + str(
+        new_reg_no).zfill(3)
 
     return reg_id
 
@@ -45,12 +46,13 @@ def student_list(request):
     # Request all the Student.
     qrycrit = (~Q(reg_status='graduated'))
     student = Students.objects.filter(qrycrit).order_by('-id')
-    #enrl = Enrollments.objects.all().select_related('student')
-    #print(enrl[0].student.first_name)
+    # enrl = Enrollments.objects.all().select_related('student')
+    # print(enrl[0].student.first_name)
     try:
         acada_yr = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
     except AcademicTimeLine.DoesNotExist:
-        messages.info(request, 'Student Registration List can not be viewed now:  The school Academic Year have not been set. Please consult with your Software Administrator to set it up.')
+        messages.info(request,
+                      'Student Registration List can not be viewed now:  The school Academic Year have not been set. Please consult with your Software Administrator to set it up.')
         return render(request, 'student/students-list.html', {'title': title})
 
     # Put the data into the context
@@ -93,7 +95,7 @@ def update_student_register(reg_id, request):
 
 
 def delete_student(request, reg_id):
-    #try:
+    # try:
     student = Students.objects.get(pk=reg_id)
     if student.reg_status == 'pending':
         try:
@@ -106,9 +108,9 @@ def delete_student(request, reg_id):
         messages.success(request, 'Student Record deleted')
     else:
         messages.info(request, 'Student Record can not be deleted')
-    #except FileNotFoundError:
+    # except FileNotFoundError:
     #    messages.warning(request, 'Delete Operation Failed.  The record is retained.')
-    #except:
+    # except:
     #    messages.error(request, 'Delete operation Failed.')
 
     return redirect(student_list)
@@ -126,7 +128,7 @@ def form_register(request):
     print(f'----- School ID Number:  {sch_id}')
     if request.method == 'POST':
         print('----- Checking if Form is Valid')
-        form = RegistrationForm(request.POST or None,  request.FILES or None)
+        form = RegistrationForm(request.POST or None, request.FILES or None)
 
         if form.is_valid():
             print('----- Form is Valid')
@@ -179,7 +181,7 @@ def form_register(request):
             print('----- The Form is NOT Valid')
             messages.warning(request, 'The Student registration was NOT Saved or Updated.')
             messages.warning(request, 'The Form is NOT Valid !!! ')
-            return render(request, "student/reg-student-biodata.html", {'sch_id': sch_id, 'form':form})
+            return render(request, "student/reg-student-biodata.html", {'sch_id': sch_id, 'form': form})
             return redirect(student_list)
     else:
         default_image_restore(request)
@@ -198,7 +200,7 @@ def new_student_registration(request):
 
     if not school['profile_exists']:
         messages.warning(request, 'THE SCHOOL PROFILE HAS NOT BEEN CREATED.  You can not proceed with this  '
-                         'operation until your Software Admin  creates it.')
+                                  'operation until your Software Admin  creates it.')
         return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
 
     print(f'----- School ID Number:  {sch_id}')
@@ -212,7 +214,7 @@ def new_student_registration(request):
             student = StudentsRegistrationNewForm(request.POST, instance=stud_data)
             mode = 'edit'
             print('----- Student Record for Update Retrieved ')
-            gad_id = stud_data.g_id_id
+            gad_id = stud_data.guardian_id
             print(f'----- Guardian ID Retrieved: {gad_id} ')
             if gad_id is None:
                 gad_id = 0
@@ -234,7 +236,7 @@ def new_student_registration(request):
                 print(f'----- Integrity Error Occurred:  {e}')
                 msg = 'INTEGRITY ERROR:  insert or update on table "apps_Students" may have violates foreign key ' \
                       'constraint.  The current School ID may not be present in table "apps_SchoolProfiles'
-                messages.error(request,  msg)
+                messages.error(request, msg)
                 return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
 
             print('----- Student Record is SAVED')
@@ -305,15 +307,21 @@ def view_student_for_update(request, reg_id):
     return render(request, "student/reg-student-biodata.html", context)
 
 
-def continue_registration(request,  reg_id, reg_step):
-    sch_id = schools(request)
+def continue_registration(request, reg_id, reg_step):
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
     try:
         student = Students.objects.get(id=reg_id, reg_steps=reg_step)
         # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active', sch_id=sch_id)
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
-        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
-        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
+        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id,
+                                                                                    pkg_type__icontains='new')
+        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id,
+                                                                                    status='Active').order_by('term_id')
         # print(timeline.term['id'], timeline.term['descx'])
 
         context = {
@@ -322,7 +330,7 @@ def continue_registration(request,  reg_id, reg_step):
 
         if reg_step == 1:
             try:
-                guardian = gm.Guardians.objects.get(id=student.g_id_id or None)
+                guardian = gm.Guardians.objects.get(id=student.guardian_id or None)
                 if guardian:
                     context = {
                         'guardian': guardian, 'student': student, 'timeline': timeline
@@ -351,32 +359,31 @@ def continue_registration(request,  reg_id, reg_step):
         return HttpResponse('Student Record Does not exists')
     except AcademicTimeLine.DoesNotExist:
         messages.info(request, "The Acadamic Timeline might have expired or has not been setup. "
-                                    "You can not do Student Enrollment now until the Timeline issue is resolved. "
-                                    "Please contact your systems admin")
+                               "You can not do Student Enrollment now until the Timeline issue is resolved. "
+                               "Please contact your systems admin")
         return redirect(student_list)
 
     except AcademicTimeLine.MultipleObjectsReturned:
-        messages.warning(request, "The Acadamic Timeline was not Setup correctly. There is more than one Active session in the timeline. "
-                               "You can not do Student Enrollment now until the Timeline issue is resolved. "
-                               "Please contact your systems admin")
+        messages.warning(request, "The Academic Timeline was not Setup correctly. There is more than one Active session"
+                         " in the timeline. You can not do Student Enrollment now until the Timeline issue is resolved."
+                         " Please contact your Software Admin")
 
         return redirect(student_list)
 
 
-
 def list_students_enrolled(request):
-
     sch_id = schools(request)
 
     # print("==============  List Student Enrolled  =================================")
     context = {}
 
     # enrolled_students = Enrollments.objects.filter(status='Enrolled', school=sch_id).select_related('student', 'session', 'classroom')
-    enrolled_students = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
+    enrolled_students = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student',
+                                                                                                          'enrolled')
 
-    #due_amt = Enrollments.objects.filter(reg_no='NGS202204000', school_id=1).aggregate(amt_due=Sum('invoice__amount'))
-    #print(due_amt)
-    #students = Enrollments.objects.values('reg_no',).annotate(total=Sum('invoice__amount'),).order_by()
+    # due_amt = Enrollments.objects.filter(reg_no='NGS202204000', school_id=1).aggregate(amt_due=Sum('invoice__amount'))
+    # print(due_amt)
+    # students = Enrollments.objects.values('reg_no',).annotate(total=Sum('invoice__amount'),).order_by()
     # enrolled_students = Enrollments.objects.filter(school=sch_id, status='Enrolled', ).annotate(total=Sum('invoice__amount', filter=Q(invoice__status='np')), ).order_by('reg_no', 'total',)
     # print(enrolled_students)
     # MyModel.objects.values(renamed_value=F('cryptic_value_name'))  # F example
@@ -395,7 +402,6 @@ def list_students_enrolled(request):
 
 
 def generate_reg_no(request, jsonx=True):
-
     if request.method == 'GET':
 
         try:
@@ -409,7 +415,8 @@ def generate_reg_no(request, jsonx=True):
         if reg_id_str:
             reg_no_int = int(reg_id_str[9:12])
             new_reg_no = reg_no_int + 1
-            reg_id = 'NGS' + str(str(datetime.date.today().year)) + str(datetime.date.today().month).zfill(2) + str(new_reg_no).zfill(3)
+            reg_id = 'NGS' + str(str(datetime.date.today().year)) + str(datetime.date.today().month).zfill(2) + str(
+                new_reg_no).zfill(3)
 
         if jsonx:
             return JsonResponse({"new_reg_no": reg_id})
@@ -451,4 +458,3 @@ def invoice_amount(request, pkg_id):
     reg_no = generate_reg_no(request, jsonx=False)
 
     return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})
-
