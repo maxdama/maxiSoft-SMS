@@ -42,7 +42,7 @@
 							<div class="d-flex align-items-center">
 								<h4 class="card-title">{{title}}</h4>
 
-								<button class="btn btn-success btn-round ml-auto new" data-toggle="modal">
+								<button class="btn btn-outline-success btn-round ml-auto new" data-toggle="modal">
 									<i class="fa fa-plus"></i>
 									 New Student
 								</button>
@@ -81,7 +81,7 @@
 											<td>{{student.dob|date:'d-m-Y'}}</td>
 											<td><img src="{{student.stud_pic.url}}" width="35" height="35"/></td>
 											<td>{{student.age}}</td>
-											<td>{{student.reg_status}}</td>
+											<td>{{student.reg_status|capfirst}}</td>
 
 											<td class="">
 												<div class="btn-group form-button-action">
@@ -147,7 +147,7 @@
 
 
 		$('.new').click(function(e){
-			location.href ='/students/new';
+			location.href ='/students/new_registration';
 		});
 
 		$('.delete').click(function(e){

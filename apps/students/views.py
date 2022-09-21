@@ -194,6 +194,11 @@ def new_student_registration(request):
             student = StudentsRegistrationNewForm(request.POST, instance=stud_data)
             mode = 'edit'
             print('----- Student Record for Update Retrieved ')
+            gad_id = stud_data.g_id_id
+            print(f'----- Guardian ID Retrieved: {gad_id} ')
+            if gad_id is None:
+                gad_id = 0
+                print(f'----- Guardian ID NOT Retrieved: {gad_id}')
         else:
             student = StudentsRegistrationNewForm(request.POST, request.FILES)
             mode = 'new'
@@ -204,11 +209,10 @@ def new_student_registration(request):
             stud.reg_steps = 1
             stud_assign_others(request, stud, mode)
             print('----- Saving Student Record. ')
-            stud_saved = stud.save()
+            stud.save()
             print('----- Student Record is SAVED')
 
             if request.POST.get("save_pause"):
-                print(stud)
                 if stud:
                     if mode == 'new':
                         messages.success(request, 'The registration is not Complete yet, it is pending  ')
@@ -219,6 +223,15 @@ def new_student_registration(request):
                     messages.warning(request, 'Save operation failed')
 
                 return redirect(student_list)
+
+            elif request.POST.get("save_continue"):
+                if mode == 'new':
+                    messages.info(request, 'Please assign a Guardian to the Student')
+                    messages.success(request, 'Student registration Saved. ')
+                else:
+                    messages.success(request, 'Student register Updated ')
+
+                return redirect('guardian', gad_id=gad_id, reg_id=stud.pk)
         else:
             return render(request, "student/reg-student-biodata.html", request.POST)
     else:
@@ -244,7 +257,8 @@ def stud_assign_others(request, stud, mode="new"):
 
         stud.stud_pic = request.FILES['stud_pic']
 
-    if stud.reg_steps == 1:
+    if stud.reg_steps == 1 and request.POST['reg_status'] == '':
+        print('Req_Status Value = "" ')
         stud.reg_status = 'pending'
 
     return None

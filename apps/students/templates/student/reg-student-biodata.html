@@ -84,8 +84,11 @@
                     <div class="col col-md-9">
                         <div class="card">
                             <div class="card-header">
-                                <div class="card-title">Personal Biodata <div class="text-small float-md-right ">(Registration Form-1)</div></div>
+                                <div class="card-title">Personal Biodata <div class="text-small float-md-right ">
+                                    ({% if student.reg_status == None %} New {% else %} {{student.reg_status|capfirst}} {% endif %}  Registration: Form-1 )</div>
+                                </div>
                                 <input type="text" class="no-bd" id="sch_id" name="school" value="{{sch_id}}" placeholder="School ID" hidden  required>
+                                <input type="text" class="float-xl-right" id="reg_status" name="reg_status" value="{{student.reg_status}}"  >
                             </div>
 
                             <div class="card-body">
@@ -223,8 +226,11 @@
                             <div class="card-action">
                                  <div class="row d-flex justify-content-center text-center">
                                      <div class="col-4 ">
-                                         <button class="btn btn-outline-warning btn-xs"  type="reset" >Clear or Reset</button>
+                                         {% if student.reg_status == None %}
+                                         <button class="btn btn-outline-warning btn-xs btn-rounded"  type="reset" >Clear or Reset</button>
+                                         {% endif %}
                                      </div>
+
                                      <div class="col-4 ">
                                         <button class="btn btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new_registration" >
                                             {% if student.reg_status|lower == 'enrolled' %}
@@ -235,13 +241,11 @@
                                         </button>
                                      </div>
                                       <div class="col-4 ">
+                                          {% if student.reg_status|lower == 'pending' or student.reg_status is None %}
                                          <button class="btn btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new_registration" >
-                                             {% if student.reg_status|lower == 'enrolled' %}
-                                                UPDATE & Continue . . .
-                                             {% else %}
-                                                Save & Continue . . .
-                                             {% endif %}
+                                                SAVE & CONTINUE . . .
                                          </button>
+                                          {% endif %}
                                       </div>
                                  </div>
                             </div>
