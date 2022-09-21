@@ -6,8 +6,9 @@ from django.shortcuts import render, redirect
 from .models import SchoolProfiles, AcademicSessions, AcademicTimeLine, AcademicCalender, ClassRooms
 from .forms import SchoolProfilesForm, AcademicTimelineForm, AcademicCalenderForm, ClassRoomsForm
 from ..students.models import Enrollments
-
+from ..utils import schools
 # Create your views here.
+
 
 
 def term_is_used(term_id):
@@ -64,8 +65,11 @@ def academic_timeline(request):
     # If POST opoeration, form data is saved and redirected to Academic List
 
     context = {}
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
-    sch_id = request.session['school_id']
     if not SchoolProfiles.objects.filter(sch_id=sch_id).exists():
         messages.info(request, 'Your School Profile must be entered first. Then after you can enter Academic Timeline.')
         return redirect('profile')
@@ -125,9 +129,10 @@ def academic_timeline(request):
 
 
 def setup_school_terms(request):
-    sch_id = 0
-    if request.session.has_key('school_id'):
-        sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     if not SchoolProfiles.objects.filter(sch_id=sch_id).exists():
         messages.info(request, 'Your School Profile must be entered first. Then after you can set the Session names.')
@@ -186,7 +191,11 @@ def setup_school_terms(request):
 
 
 def list_academic_sessions(request):
-    sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
     action = 'Add New'
     context = {}
     rows1 = {}
@@ -194,18 +203,7 @@ def list_academic_sessions(request):
     timeline = AcademicTimeLine.objects.filter(sch_id=sch_id).order_by('-id')
     if AcademicTimeLine.objects.filter(sch_id=sch_id, status='active').exists():
         action = 'Update'
-    """
-    rows1 = AcademicCalender.objects.raw('SELECT tl.id, tl.sch_id, tl.descx, tl.status, ac.term_id, ac.cs_start_dt, '
-                                        'ac.cs_end_dt, ac.mb_start_dt, ac.mb_end_dt, ac.hs_start_dt, ac.hs_end_dt, '
-                                        'ac.status FROM "apps_AcademicTimeLine" tl JOIN "apps_AcademicCalender" ac ON '
-                                        'tl.id = ac.tl_id_id WHERE tl.sch_id = 1  ORDER BY tl.sch_id ASC, tl.id DESC')
 
-
-    
-    cursor = connection.cursor()
-    cursor.execute('SELECT tl.id, tl.sch_id, tl.descx, tl.status, ac.term_id, ac.cs_start_dt, ac.cs_end_dt, ac.mb_start_dt, ac.mb_end_dt, ac.hs_start_dt, ac.hs_end_dt, ac.status FROM "apps_AcademicTimeLine" tl JOIN "apps_AcademicCalender" ac ON tl.id = ac.tl_id_id ORDER BY tl.sch_id ASC, tl.id DESC')
-    solution = cursor.fetchall()
-    """
     tl = {'timeline': timeline}
     actx = {'action': action}
 
@@ -256,7 +254,10 @@ def map_form_fields(request, term_id, data):
 
 
 def setup_academic_calender(request):
-    sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     try:
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id) # Return the first row from the queryset
@@ -367,7 +368,10 @@ def setup_academic_calender(request):
 
 def setup_academic_calender_1(request):
     saved = False
-    sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     try:
         terms = AcademicSessions.objects.filter(status='Active', sch_id=sch_id).order_by('term_id')
@@ -441,8 +445,10 @@ def setup_academic_calender_1(request):
 
 
 def list_academic_timeline(request, sch_id):
-    if sch_id != request.session['school_id']:
-        sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     timeline = AcademicTimeLine.objects.filter(sch_id=sch_id).order_by('-id')
 
@@ -515,14 +521,14 @@ def setup_class_rooms(request):
     sch_id = 0
     prf_id = 0
 
-    if request.session.has_key('school_id'):
-        sch_id = request.session['school_id']
-        try:
-            prf_id = SchoolProfiles.objects.get(sch_id=sch_id)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
-        except SchoolProfiles.DoesNotExist:
-            messages.info(request, 'Your School Profile must be entered first. Then after you can setup the Class Rooms.')
-            return redirect('profile')
+    if not school['profile_exists']:
+        messages.info(request, 'Your School Profile must be entered first, then after you can setup the Class Rooms.')
+        return redirect('profile')
 
     context = {}
     if request.method == 'POST':

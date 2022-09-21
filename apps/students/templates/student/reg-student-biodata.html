@@ -88,7 +88,7 @@
                                     ({% if student.reg_status == None %} New {% else %} {{student.reg_status|capfirst}} {% endif %}  Registration: Form-1 )</div>
                                 </div>
                                 <input type="text" class="no-bd" id="sch_id" name="school" value="{{sch_id}}" placeholder="School ID" hidden  required>
-                                <input type="text" class="float-xl-right" id="reg_status" name="reg_status" value="{{student.reg_status}}"  >
+                                <input type="text" class="float-xl-right" id="reg_status" name="reg_status" value="{{student.reg_status}}" hidden >
                             </div>
 
                             <div class="card-body">
@@ -264,6 +264,20 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 
 	<!-- Atlantis DEMO methods, don't include it in your project! -->
 	<script src="/static/assets/js/setting-demo2.js"></script>  <!-- Script that controlls the settings by the right side -->

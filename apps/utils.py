@@ -1,23 +1,29 @@
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 import shutil
 import os.path
 from os import path
 import datetime
-from apps.settings.models import AcademicSessions, AcademicCalender
+from apps.settings.models import AcademicSessions, AcademicCalender, SchoolProfiles
 
 
-def get_school_id(request):
+def schools(request):
     """ Gets the school ID from the login session. If the session has expired, the
         function Logs out the User and redirect the user to the Login Page.
+        Also, Check if the School Profile has been entered and returns True,
+        otherwise return False
     """
     sch_id = 0
+    sch_prof_exists = False
+
     if request.session.has_key('school_id'):
         sch_id = request.session['school_id']
-        return sch_id
+        sch_prof_exists = SchoolProfiles.objects.filter(sch_id=sch_id).exists()
     else:
         logout(request)
-        return redirect("logout")
+        # return redirect("logout")
+    return {'sch_id': sch_id, 'profile_exists': sch_prof_exists}
 
 
 def default_image_restore(request):

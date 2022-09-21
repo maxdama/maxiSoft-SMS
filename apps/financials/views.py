@@ -13,14 +13,17 @@ from django.http import HttpResponse, JsonResponse
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
 from apps.students.forms import EnrollmentForm
 from apps.students.models import Enrollments, Students
-from apps.utils import get_school_id, get_cur_session
+from apps.utils import schools, get_cur_session
 from django.db.models import Sum, Q, F
 
 
 # Create your views here.
 def financial_package_list(request, *args, **kwargs):
     context = {}
-    sch_id = get_school_id(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     packages = FeesPackage.objects.filter(status='Active', school__sch_id=sch_id)
     # print(str(packages.query)) # print the SQL query to terminal
@@ -58,7 +61,10 @@ def fee_package_details(request, pkg, mode):
 
 def new_package(request, *args, **kwargs):
     # Save new package and return json data
-    sch_id = get_school_id(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     if request.method == 'POST':
         is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -94,7 +100,11 @@ def new_package(request, *args, **kwargs):
 
 
 def delete_package(request, pkg_id):
-    sch_id = get_school_id(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
     try:
         package = FeesPackage.objects.get(id=pkg_id, school__sch_id=sch_id)
         if package:
@@ -111,8 +121,10 @@ def delete_package(request, pkg_id):
 
 
 def edit_package(request, pkg_id):
-
-    sch_id = get_school_id(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     if request.method == 'POST':
         pkg = FeesPackage.objects.get(id=pkg_id)
@@ -143,12 +155,14 @@ def edit_package(request, pkg_id):
 @transaction.atomic()
 def new_student_enrollment(request, reg_id):
     context = {}
-
-    sch_id = get_school_id(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     if request.method == 'POST':
 
-        status = 'Enrolled'
+        status = 'enrolled'
         inv_no = request.POST['invoice_no']
 
         enrollment = EnrollmentForm(request.POST or None)
@@ -195,7 +209,7 @@ def new_student_enrollment(request, reg_id):
 
 @transaction.atomic
 def cancel_enrollment(request, enr_id, inv_no):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
     # print(f'==== = Sch_ID: {sch_id} Cancelling Enrollment ID: {enr_id} and Invoice No: {inv_no} =  =====') , inv_no
 
     inv = Invoice.objects.filter(school=sch_id, enrolled=enr_id, invoice_no=inv_no).first()
@@ -230,7 +244,7 @@ def cancel_enrollment(request, enr_id, inv_no):
 
 @transaction.atomic
 def student_enrolled_update(request, enr_id, inv_no):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
 
     if request.method == 'POST':
         enrolled = Enrollments.objects.get(school=sch_id, id=enr_id)
@@ -277,7 +291,7 @@ def student_enrolled_update(request, enr_id, inv_no):
 
 
 def student_re_enrollment(request, stud_id):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
 
     if request.method == 'POST':
 
@@ -324,7 +338,7 @@ def student_re_enrollment(request, stud_id):
         # return HttpResponse(f'Student Re-Enrollment: ID-No:- {stud_id}')
 
 def financial_transactions(request, action, enr_id, inv_no):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
 
     # with transaction.set_autocommit():
     # -- Save / Update Financial Transactions
@@ -384,7 +398,7 @@ def ap_due_date(request):
 
 
 def list_enrollments(request):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
     context = {}
 
     # students_enrolled = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
@@ -398,7 +412,7 @@ def list_enrollments(request):
 
 @transaction.atomic
 def student_payment(request, stud_id):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
     enrolled = Enrollments.objects.filter(school=sch_id, student_id=stud_id).order_by('id').last()
     # enrolled = Enrollments.objects.filter(school=sch_id, id=enr_id).first()
     # stud_id = enrolled.student_id

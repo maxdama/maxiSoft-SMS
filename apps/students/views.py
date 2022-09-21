@@ -14,9 +14,9 @@ import os
 from django.contrib import messages
 from apps.guardians import views as g, models as gm
 from ..financials.forms import FinancialTransactionsForm, InvoiceForm
-from ..settings.models import AcademicTimeLine, ClassRooms, AcademicSessions, AcademicCalender
-from django.db import transaction
-from ..utils import get_school_id, default_image_restore
+from ..settings.models import AcademicTimeLine, ClassRooms, AcademicSessions, SchoolProfiles
+from django.db import transaction, IntegrityError
+from ..utils import schools, default_image_restore
 
 
 def increment_reg_no():
@@ -35,7 +35,10 @@ def increment_reg_no():
 # Create your views here.
 @login_required
 def student_list(request):
-    sch_id = get_school_id(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     title = 'Registration'
     default_image_restore(request)
@@ -59,6 +62,8 @@ def student_list(request):
 
 def update_student_register(reg_id, request):
     stud = Students.objects.get(id=reg_id)
+    school = schools(request)
+    sch_id = school['sch_id']
 
     # stud.reg_no = reg_no
     stud.surname = request.POST['surname']
@@ -113,7 +118,11 @@ def delete_student(request, reg_id):
 def form_register(request):
     print('Runing: form_register')
     gad_id = 0
-    sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
     print(f'----- School ID Number:  {sch_id}')
     if request.method == 'POST':
         print('----- Checking if Form is Valid')
@@ -182,7 +191,16 @@ def new_student_registration(request):
     print('Runing: New_Student_Registration')
 
     gad_id = 0
-    sch_id = request.session['school_id']
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
+    if not school['profile_exists']:
+        messages.warning(request, 'THE SCHOOL PROFILE HAS NOT BEEN CREATED.  You can not proceed with this  '
+                         'operation until your Software Admin  creates it.')
+        return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
+
     print(f'----- School ID Number:  {sch_id}')
 
     if request.method == "POST":
@@ -207,9 +225,18 @@ def new_student_registration(request):
             print('----- Form is Valid')
             stud = student.save(commit=False)
             stud.reg_steps = 1
+            stud.school_id = request.POST['school']
             stud_assign_others(request, stud, mode)
-            print('----- Saving Student Record. ')
-            stud.save()
+            try:
+                print('----- Saving Student Record. ')
+                stud.save()
+            except IntegrityError as e:
+                print(f'----- Integrity Error Occurred:  {e}')
+                msg = 'INTEGRITY ERROR:  insert or update on table "apps_Students" may have violates foreign key ' \
+                      'constraint.  The current School ID may not be present in table "apps_SchoolProfiles'
+                messages.error(request,  msg)
+                return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
+
             print('----- Student Record is SAVED')
 
             if request.POST.get("save_pause"):
@@ -233,7 +260,7 @@ def new_student_registration(request):
 
                 return redirect('guardian', gad_id=gad_id, reg_id=stud.pk)
         else:
-            return render(request, "student/reg-student-biodata.html", request.POST)
+            return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
     else:
         print('----- Get Request method')
         default_image_restore(request)
@@ -279,7 +306,7 @@ def view_student_for_update(request, reg_id):
 
 
 def continue_registration(request,  reg_id, reg_step):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
     try:
         student = Students.objects.get(id=reg_id, reg_steps=reg_step)
         # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active', sch_id=sch_id)
@@ -339,7 +366,7 @@ def continue_registration(request,  reg_id, reg_step):
 
 def list_students_enrolled(request):
 
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
 
     # print("==============  List Student Enrolled  =================================")
     context = {}
@@ -417,7 +444,7 @@ def ap_invoice_no(sch_id):
 
 
 def invoice_amount(request, pkg_id):
-    sch_id = get_school_id(request)
+    sch_id = schools(request)
 
     inv_amt = ap_package_amount(pkg_id, sch_id)
     inv_no = ap_invoice_no(sch_id)
