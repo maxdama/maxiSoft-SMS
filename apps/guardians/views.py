@@ -41,7 +41,7 @@ def new_guardian(request):
 
     if request.method == 'POST':
         reg_id = request.POST['reg_id']
-        stud_obj = sm.Students.objects.get(pk=reg_id)
+        student = sm.Students.objects.get(pk=reg_id)
 
         form = GuardianForm(request.POST)
         if form.is_valid():
@@ -49,12 +49,7 @@ def new_guardian(request):
 
             if request.POST['gad_id']:    # Check if Guardian ID exists from POSTED form.
                 guardian = update_guardian(request)  # Update Guardian model
-                context = {
-                    'reg_id': reg_id,
-                    'gad_id': request.POST['gad_id'],
-                    'student': stud_obj,
-                    'guardian': guardian
-                }
+                context = {'reg_id': reg_id, 'gad_id': request.POST['gad_id'], 'student': student, 'guardian': guardian}
                 messages.success(request, "Update successfully.")
                 # return render(request, 'student/reg-enrollment.html', context)
             else:
@@ -74,19 +69,16 @@ def new_guardian(request):
                 messages.success(request, "Saved successfully.")
 
             # Update Student Bio Data
-            stud_obj.reg_steps = 2
-            stud_obj.g_id_id = guardian.pk
-            stud_obj.save()
+            student.reg_steps = 2
+            student.guardian_id = guardian.pk
+            student.save()
 
             if request.POST.get("save_continue"):
                 return redirect('new-enrollment', reg_id=reg_id) # Route through guardian-url to view_enrollment function below
             else:
                 return redirect('guardians') # route through guardian-url to guardian_list below
         else:
-            context = {
-                'student': stud_obj,
-                'guardian': form
-            }
+            context = {'student': student, 'guardian': form }
             return render(request, 'guardians/reg-guardians-biodata.html', context)
     else:
         return render(request, 'guardians/reg-guardians-biodata.html')
@@ -113,21 +105,18 @@ def view_guardian(request, gad_id, reg_id):
 
     guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
     if reg_id > 0:
-        stud_obj = sm.Students.objects.get(pk=reg_id)
+        student = sm.Students.objects.get(pk=reg_id)
     elif reg_id == 0 and gad_id > 0:
         # Use guardian ID to get the ID of student assigned.
-        stud_obj = sm.Students.objects.filter(g_id_id=gad_id, reg_status='pending').order_by('-id')[0]
-    context = {'student': stud_obj, 'gad_list': guardians}
+        student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
+        print(student)
+    context = {'student': student, 'gad_list': guardians}
 
-    # if view_gad == 1 and stud_obj:
-    if gad_id > 0 and stud_obj:
+    # if view_gad == `1 and stud_obj:`
+    if gad_id > 0 and student:
         try:
-            guardian = gm.Guardians.objects.get(pk=stud_obj.g_id_id)
-            context = {
-                'student': stud_obj,
-                'guardian': guardian,
-                'gad_list': guardians
-            }
+            guardian = gm.Guardians.objects.get(pk=student.guardian_id)
+            context = { 'student': student, 'guardian': guardian, 'gad_list': guardians }
         except gm.Guardians.DoesNotExist:
             gad_id = 0
 

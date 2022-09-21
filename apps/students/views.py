@@ -318,10 +318,8 @@ def continue_registration(request, reg_id, reg_step):
         # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active', sch_id=sch_id)
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
-        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id,
-                                                                                    pkg_type__icontains='new')
-        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id,
-                                                                                    status='Active').order_by('term_id')
+        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
+        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
         # print(timeline.term['id'], timeline.term['descx'])
 
         context = {
