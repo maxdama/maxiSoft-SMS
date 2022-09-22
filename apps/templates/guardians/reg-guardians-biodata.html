@@ -43,39 +43,46 @@
 
                                         {% endfor %}
                                     </select>
-
                                 </div>
                             </div>
+
                             <div class="float-left">
-                            <h5 class=""><strong>Assign Guardian to this Student:</strong></h5>
+                                <h5 class=""><strong>Assign Guardian to this Student:</strong></h5>
+                                <div class="row">
+                                    <div class="avatar avatar-lg">
+                                        {% if student.stud_pic %}
+                                            <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
+                                        {% else %}
+                                            <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                        {% endif %}
+                                    </div>
 
-                            <div class="row">
-                                <div class="avatar avatar-lg">
-                                    {% if student.stud_pic %}
-                                        <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
-                                    {% else %}
-									    <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                    <div class="col-md-7 form-floating-label">
+                                        <input id="studnames" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}" class="form-control input-border-bottom" name="studentnames" required>
+                                        <label for="studnames" class="placeholder">Student Names</label>
+                                    </div>
+
+                                    <div class="col-md-2 form-floating-label" >
+                                        <input type="text" class="form-control input-border-bottom" id="reg_id" name="reg_id" value="{{student.pk}}" required>
+                                        <label for="reg_id" class="placeholder">Reg ID</label>
+                                    </div>
+                                    {% if student.reg_no %}
+                                    <div class="col-md-3 form-floating-label">
+                                        <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
+                                        <label for="regno" class="placeholder">Registration No:</label>
+                                    </div>
                                     {% endif %}
-								</div>
-
-                                <div class="col-md-7 form-floating-label">
-                                    <input id="studnames" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}" class="form-control input-border-bottom" name="studentnames" required>
-                                    <label for="studnames" class="placeholder">Student Names</label>
                                 </div>
 
-                                <div class="col-md-2 form-floating-label" >
-                                    <input type="text" class="form-control input-border-bottom" id="reg_id" name="reg_id" value="{{student.pk}}" required>
-                                    <label for="reg_id" class="placeholder">Reg ID</label>
+                                <div class="form-check pt-0 pl-lg-5 pb-0">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="">
+                                        <span class="form-check-sign">Student is not staying with Guardian</span>
+                                    </label>
                                 </div>
-                                {% if student.reg_no %}
-                                <div class="col-md-3 form-floating-label">
-                                    <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
-                                    <label for="regno" class="placeholder">Registration No:</label>
-                                </div>
-                                {% endif %}
 
                             </div>
-                            </div>
+
                         </div>
                     </div>
 
@@ -214,19 +221,23 @@
                                          {% endif %}
                                      </div>
                                      <div class="col-4 ">
-                                        <button class="btn btn-outline-success btn-rounded"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new" >
+                                        <button class="btn btn-outline-success btn-rounded btn-sm"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new" >
                                             {% if student.reg_status|lower == 'enrolled' %}
-                                                UPDATE
+                                                U P D A T E
                                             {% else %}
-                                                SAVE
+                                                S A V E
                                             {% endif %}
                                         </button>
                                      </div>
-                                     {% if student.reg_status|lower != 'enrolled' %}
+
                                       <div class="col-4 ">
-                                         <button class="btn btn-outline-success btn-rounded" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new" >SAVE & CONTINUE - - - ></button>
+                                          {% if student.reg_status|lower != 'enrolled' %}
+                                            <button class="btn btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new" >
+                                                S A V E  &  Continue
+                                            </button>
+                                          {% endif %}
                                       </div>
-                                     {% endif %}
+
                                  </div>
                             </div>
                         </div>

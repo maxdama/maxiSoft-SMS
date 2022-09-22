@@ -398,7 +398,11 @@ def ap_due_date(request):
 
 
 def list_enrollments(request):
-    sch_id = schools(request)
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
     context = {}
 
     # students_enrolled = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
