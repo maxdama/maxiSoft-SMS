@@ -7,6 +7,7 @@ from . forms import GuardianForm
 from django.contrib import messages
 
 
+# Create your views here.
 def update_guardian(request):
     gad_id = request.POST['gad_id']
     guardian = {'gad_id': gad_id}
@@ -36,7 +37,36 @@ def update_guardian(request):
         return guardian
 
 
-# Create your views here.
+def student_update(request, student, guardian):
+
+    print('Not Together CheckBox value: ')
+    not_together = False
+    chk_values = request.POST.getlist('not_with_guard')  # Get the list of Checkbox with the name enclosed
+    for value in chk_values: # Loop through checkbox. In this case it's only one check box
+        not_together = value
+
+    print(not_together)
+    student.reg_steps = 2
+    student.guardian_id = guardian.pk
+    student.not_live_with_guard = not_together
+
+    if not_together:  # Student is NOT living with Guardian or Parent
+        #  Update Student Residential Address
+        student.res_addr_l1 = request.POST['res_addr_l1']
+        student.res_addr_l2 = request.POST['res_addr_l2']
+        student.res_city = request.POST['stud_res_city']
+    else:  # Student is living with Guardian or Parent
+        #  Set Student Residence address to None
+        student.res_addr_l1 = None
+        student.res_addr_l2 = None
+        student.res_city = None
+
+    student.save()
+
+    return None
+
+
+
 def new_guardian(request):
 
     if request.method == 'POST':
@@ -69,18 +99,7 @@ def new_guardian(request):
                 messages.success(request, "Saved successfully.")
 
             # Update Student Bio Data
-            print('Not Together CheckBox value: ')
-            not_together = False
-            chk_values = request.POST.getlist('not_with_guard')
-            for value in chk_values:
-                not_together = value
-
-            # not_together = chk_box
-            print(not_together)
-
-            student.reg_steps = 2
-            student.guardian_id = guardian.pk
-            student.save()
+            student_update(request, student, guardian)
 
             if request.POST.get("save_continue"):
                 return redirect('new-enrollment', reg_id=reg_id) # Route through guardian-url to view_enrollment function below
@@ -116,7 +135,7 @@ def view_guardian(request, gad_id, reg_id):
     if reg_id > 0:
         student = sm.Students.objects.get(pk=reg_id)
     elif reg_id == 0 and gad_id > 0:
-        # Use guardian ID to get the ID of student assigned.
+        # Use guardian ID to get the ID of the last student assigned.
         student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
         print(student)
     context = {'student': student, 'gad_list': guardians}
