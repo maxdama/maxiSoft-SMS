@@ -69,6 +69,11 @@ def new_guardian(request):
                 messages.success(request, "Saved successfully.")
 
             # Update Student Bio Data
+            print('Not Together CheckBox value: ')
+            chk_box = request.POST.getlist('not_with_guard')
+            # not_together = chk_box
+            print(chk_box)
+
             student.reg_steps = 2
             student.guardian_id = guardian.pk
             student.save()

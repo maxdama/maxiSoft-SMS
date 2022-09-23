@@ -76,23 +76,23 @@
 
                                 <div class="form-check pt-0 pl-lg-5 pb-0">
                                     <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="">
+                                        <input class="form-check-input" type="checkbox" value="True" id="not-together" name="not_with_guard">
                                         <span class="form-check-sign">Student is not living with Guardian</span>
                                     </label>
                                 </div>
 
-                                <div class="row student-address ml-lg-3 pl-lg-3 "  >
+                                <div class="row student-address ml-lg-5 pl-lg-5 "  >
                                     <!-- Student Residential Address  -->
                                     <div class="col-4">
                                         <div class="form-group form-floating-label pt-1 mt-1">
-                                            <input id="stud_addr" type="text" value="{{guardian.res_addr}}" name="res_addr" class="form-control input-border-bottom pb-1">
-                                            <label for="res_addr" class="placeholder pb-0 mb-0">Residential Addr:</label>
+                                            <input id="res_addr_l1" type="text" value="{{guardian.res_addr}}" name="res_addr_l1" class="form-control input-border-bottom pb-2">
+                                            <label for="res_addr" class="placeholder pb-0 mb-0">Student Residential Addr:</label>
                                         </div>
                                     </div>
                                     <!-- Student Residentials Area -->
                                     <div class="col-3">
                                         <div class="form-group form-floating-label pt-1 mt-1">
-                                            <input id="stud_res_area" type="text" value="{{guardian.res_area}}" name="res_area" class="form-control input-border-bottom pb-1">
+                                            <input id="res_addr_l2" type="text" value="{{guardian.res_area}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
                                             <label for="res_area" class="placeholder pb-0 mb-0">Residential Area:</label>
                                         </div>
                                     </div>
@@ -141,7 +141,9 @@
                             <div class="card">
 
                                 <div class="card-header">
-                                    <div class="card-title">{% if student.reg_status|lower != 'enrolled' %} New {% endif %}Guardian Info <div class="text-small float-md-right ">Registration Form-2</div></div>
+                                    <div class="card-title"><h3>Guardian Details </h3>
+                                        <div class="text-small float-md-right ">{% if student.reg_status|lower != 'enrolled' %} NEW {% endif %} Registration Form-2</div>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <!-- Column Rows Left Justification  -->
@@ -325,12 +327,33 @@
 	<script src="/static/assets/js/setting-demo2.js"></script>  <!-- Script that controlls the settings by the right side -->
 
     <script>
-    $(document).on("click", ".browse", function()
-        {var file = $(this).parents().find(".file");
+
+     $(document).ready(function(){
+         if (!$('#not-together').is(':checked')) {  //If the CheckBox is NOT Checked
+             $(".student-address").hide()
+         }
+
+         $('#not-together').click(function(e) {         // When the Check box is Click
+             if ($('#not-together').is(':checked')) {   //If the CheckBox is Checked
+                 $(".student-address").show()  //  Show inputs for Student Address
+                 // alert('Student is NOT living with Guardian?')
+                 $('#res_addr_l1').focus()
+
+             } else {
+                 $(".student-address").hide()   //  Hide inputes for Student Address
+                 // alert('Student is living with Guardian?')
+             }
+		});
+     });
+
+
+    $(document).on("click", ".browse", function() {
+        var file = $(this).parents().find(".file");
         file.trigger("click");
     });
-    $('input[type="file"]').change(function(e)
-        {var fileName = e.target.files[0].name;
+
+    $('input[type="file"]').change(function(e) {
+        var fileName = e.target.files[0].name;
         $("#file").val(fileName);
         var reader = new FileReader();
         reader.onload = function(e) {
