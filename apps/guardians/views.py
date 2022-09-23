@@ -70,9 +70,13 @@ def new_guardian(request):
 
             # Update Student Bio Data
             print('Not Together CheckBox value: ')
-            chk_box = request.POST.getlist('not_with_guard')
+            not_together = False
+            chk_values = request.POST.getlist('not_with_guard')
+            for value in chk_values:
+                not_together = value
+
             # not_together = chk_box
-            print(chk_box)
+            print(not_together)
 
             student.reg_steps = 2
             student.guardian_id = guardian.pk
