@@ -32,115 +32,122 @@
                 <div class="container" >
                     <div class="card" >
                         <div class="card-body">
-                            <div class="float-right">
-                                <h5 class="">Assign an Existing Guardian from Here:</h5>
-                                <div class="">
-                                    <!-- <label for="guardians" class="">Guardian Here:</label> -->
-                                    <select class="form-control input-border-bottom" id="guardians" name="guardians" style="font-weight:bold;" >
-                                        <option value=""></option>
-                                        {% for gad in gad_list %}
-                                            <option value="{{gad.id}}">{{gad.surname}} {{gad.other_names}}</option>
-                                        {% endfor %}
-                                    </select>
+                            <div class="row ">
+                                <!-- Column for Student Name and Address Controls  -->
+                                <div class="col col-sm-7">
+                                    <!--
+                                    <h5 class="">Assign an Existing Guardian from Here:</h5>
+                                    <div class="">
+                                        <label for="guardians" class="">Guardian Here:</label>
+                                        <select class="form-control input-border-bottom" id="guardians" name="guardians" style="font-weight:bold;" >
+                                            <option value=""></option>
+                                            {% for gad in gad_list %}
+                                                <option value="{{gad.id}}">{{gad.surname}} {{gad.other_names}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
+    -->
+                                <div class="float-left">
+                                    <h4 class=""><strong>Student Parent / Guardian</strong></h4><p>
+                                    <div class="row">
+                                        <div class="avatar avatar-lg ml-4">
+                                            {% if student.stud_pic %}
+                                                <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
+                                            {% else %}
+                                                <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                            {% endif %}
+                                        </div>
 
-                            <div class="float-left">
-                                <h5 class=""><strong>Assign Guardian to this Student:</strong></h5>
-                                <div class="row">
-                                    <div class="avatar avatar-lg ml-3">
-                                        {% if student.stud_pic %}
-                                            <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
-                                        {% else %}
-                                            <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                        <div class="col-md-7 form-floating-label">
+                                            <input id="stud_names" type="text" style="font-weight:bold; font-size: 17px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}"
+                                                   class="form-control input-border-bottom pb-0" name="studentnames" required>
+                                            <label for="stud_names" class="placeholder">Student Names</label>
+                                        </div>
+
+                                        <div class="col-md-2 form-floating-label" hidden >
+                                            <input type="text" class="form-control input-border-bottom pb-1" id="reg_id" name="reg_id" value="{{student.pk}}"  required>
+                                            <label for="reg_id" class="placeholder">Stud ID</label>
+                                        </div>
+                                        {% if student.reg_no %}
+                                        <div class="col-md-3 form-floating-label">
+                                            <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
+                                            <label for="regno" class="placeholder">Registration No:</label>
+                                        </div>
                                         {% endif %}
                                     </div>
 
-                                    <div class="col-md-7 form-floating-label">
-                                        <input id="stud_names" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}" class="form-control input-border-bottom" name="studentnames" required>
-                                        <label for="stud_names" class="placeholder">Student Names</label>
+                                    <div class="form-check pt-0 pl-lg-5 ml-4 pb-0">
+                                        <label class="form-check-label">
+                                            <input class="form-check-input" type="checkbox" value="True" id="not-together" name="not_with_guard">
+                                            <span class="form-check-sign">Student is not living with Guardian</span>
+                                        </label>
                                     </div>
 
-                                    <div class="col-md-2 form-floating-label" >
-                                        <input type="text" class="form-control input-border-bottom" id="reg_id" name="reg_id" value="{{student.pk}}" required>
-                                        <label for="reg_id" class="placeholder">Reg ID</label>
-                                    </div>
-                                    {% if student.reg_no %}
-                                    <div class="col-md-3 form-floating-label">
-                                        <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
-                                        <label for="regno" class="placeholder">Registration No:</label>
-                                    </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="form-check pt-0 pl-lg-5 pb-0">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="True" id="not-together" name="not_with_guard">
-                                        <span class="form-check-sign">Student is not living with Guardian</span>
-                                    </label>
-                                </div>
-
-                                <div class="row student-address ml-lg-5 pl-lg-5 "  >
-                                    <!-- Student Residential Address  -->
-                                    <div class="col-4">
-                                        <div class="form-group form-floating-label pt-1 mt-1">
-                                            <input id="res_addr_l1" type="text" value="{{student.res_addr_l1|default_if_none:''}}" name="res_addr_l1" class="form-control input-border-bottom pb-2" >
-                                            <label for="res_addr" class="placeholder pb-0 mb-0">Student Residential Addr:</label>
+                                    <div class="row student-address ml-lg-5 pl-lg-5 "  >
+                                        <!-- Student Residential Address  -->
+                                        <div class="col-4">
+                                            <div class="form-group form-floating-label pt-1 mt-1">
+                                                <input id="res_addr_l1" type="text" value="{{student.res_addr_l1|default_if_none:''}}" name="res_addr_l1" class="form-control input-border-bottom pb-2" >
+                                                <label for="res_addr" class="placeholder pb-0 mb-0">Student Residential Addr:</label>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <!-- Student Residentials Area -->
-                                    <div class="col-3">
-                                        <div class="form-group form-floating-label pt-1 mt-1">
-                                            <input id="res_addr_l2" type="text" value="{{student.res_addr_l2|default_if_none:''}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
-                                            <label for="res_area" class="placeholder pb-0 mb-0">Residential Area:</label>
+                                        <!-- Student Residentials Area -->
+                                        <div class="col-3">
+                                            <div class="form-group form-floating-label pt-1 mt-1">
+                                                <input id="res_addr_l2" type="text" value="{{student.res_addr_l2|default_if_none:''}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
+                                                <label for="res_area" class="placeholder pb-0 mb-0">Residential Area:</label>
+                                            </div>
                                         </div>
-                                    </div>
 
 
-                                    <!-- student Residenc City -->
-                                    <div class="col-3 ">
-                                        <div class="form-group form-floating-label pb-0 mb-0">
-                                            <select class="form-control input-border-bottom pb-1" id="res_city" name="stud_res_city" >
-                                                <option value="{{student.res_city|default_if_none:''}}" hidden>{{student.res_city|default_if_none:''}}</option>
-                                                <option>Port Harcourt</option>
-                                                <option>Ahoada</option>
-                                                <option>Emoha</option>
-										    </select>
-										    <label for="city" class="placeholder pb-0 mb-0">City Residence:</label>
+                                        <!-- student Residence City -->
+                                        <div class="col-3 ">
+                                            <div class="form-group form-floating-label pb-0 mb-0">
+                                                <select class="form-control input-border-bottom pb-1" id="res_city" name="stud_res_city" >
+                                                    <option value="{{student.res_city|default_if_none:''}}" hidden>{{student.res_city|default_if_none:''}}</option>
+                                                    <option>Port Harcourt</option>
+                                                    <option>Ahoada</option>
+                                                    <option>Emoha</option>
+                                                </select>
+                                                <label for="city" class="placeholder pb-0 mb-0">City Residence:</label>
+                                            </div>
                                         </div>
+
                                     </div>
 
-                                     <!-- student Residence State
-                                    <div class="col-sm-2 ">
-                                        <div class="form-group form-floating-label">
-                                            <select class="form-control input-border-bottom pb-1" id="res_state"  name="res_state">
-											<option value="{{guardian.res_state}}" hidden>{{guardian.res_state}}</option>
-											<option>Rivers</option>
-											<option>Bayelsa</option>
-                                            <option>Kwara</option>
-											<option>Niger</option>
-											<option>Adamawa</option>
-                                            <option>Yola</option>
-											<option>Kogi</option>
-                                            <option>Plateau</option>
-										    </select>
-										    <label for="state" class="placeholder pb-0 mb-0">State Residence</label>
-                                        </div>
-                                    </div>
--->
                                 </div>
 
                             </div>
-
-                        </div>
+                                <!-- Column to Select Guardian for Student control -->
+                                <div class="col col-sm-5 ">
+                                    <!-- student Guardian Selection -->
+                                     <br>
+                                    <span class="font-italic">
+                                    For new Guardian fill the Guardian Details. <br>
+                                    Select existing Guardian from the Drop-Down. <p>
+                                    </span>
+                                    <div class="col-10 ">
+                                        <div class="form-group form-floating-label pb-0 mb-0">
+                                            <select class="form-control input-border-bottom pb-1" id="stud_guardian" name="stud_guardian" >
+                                                <option value=""></option>
+                                                {% for gad in gad_list %}
+                                                    <option value="{{gad.id}}">{{gad.surname}} {{gad.other_names}}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <label for="stud_guardian" class="placeholder pb-0 mb-0">Select Parent / Guardian:</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                     </div>
 
                     <div class="row d-flex justify-content-center">
                         <div class="col col-md-10">
                             <div class="card">
 
-                                <div class="card-header">
-                                    <div class="card-title"><h3>Guardian Details </h3>
+                                <div class="card-header pt-1 pb-1 ">
+                                    <div class="card-title card-success "><h4>Guardian Details </h4>
                                         <div class="text-small float-md-right ">{% if student.reg_status|lower != 'enrolled' %} NEW {% endif %} Registration Form-2</div>
                                     </div>
                                 </div>
@@ -265,7 +272,7 @@
                                     </div>
 
                                 </div>
-                                <div class="card-action">
+                                <div class="card-action pt-3 pb-2">
                                      <div class="row d-flex justify-content-center text-center">
                                          <div class="col-4 ">
                                              {% if student.reg_status|lower == 'pending' %}
