@@ -59,13 +59,13 @@
 										<tr>
 											<th>S/N</th>
 											<th>Reg. Date</th>
-											<th>Names</th>
+											<th>Guardian Names</th>
 											<th>Gender</th>
 											<th>Mobile No</th>
 											<th>Active Wards</th>
 											<th>Tot Wards</th>
-											<th>Tot Bal.</th>
-											<th>Reg_iD.</th>
+											<th>Tot Dues.</th>
+											<!-- <th>Reg_iD.</th> -->
 											<th style="width: 10%" class="border-gray-200">Action</th>
 										</tr>
 									</thead>
@@ -79,9 +79,9 @@
 												<td>{{guardian.gender}}</td>
 												<td>{{guardian.mobile_no1}} {{guardian.mobile_no2}}</td>
 												<td>{{guardian.active_wards}}</td>
-												<td>3</td>
+												<td>{{guardian.tot_wards}}</td>
 												<td>N12,000.00</td>
-												<td>{{guardian.student.id_no}}</td>
+												<!--<td>{{guardian.student.id_no}}</td> -->
 
 												<td class="">
 													<div class="btn-group form-button-action">

@@ -5,10 +5,12 @@ from apps.students import models as sm
 from . import models as gm
 from . forms import GuardianForm
 from django.contrib import messages
-
+from ..utils import schools
 
 # Create your views here.
-def update_guardian(request):
+
+
+def update_guardian(request, sch_id):
     gad_id = request.POST['gad_id']
     guardian = {'gad_id': gad_id}
 
@@ -16,6 +18,7 @@ def update_guardian(request):
         # Get objects from Guardians models and store in guardian
         guardian = gm.Guardians.objects.get(pk=gad_id)
 
+        guardian.school_id = sch_id
         guardian.title = request.POST['title']
         guardian.surname = request.POST['surname']
         guardian.other_names = request.POST['other_names']
@@ -67,7 +70,12 @@ def student_update(request, student, guardian):
 
 
 
+@login_required
 def new_guardian(request):
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
 
     if request.method == 'POST':
         reg_id = request.POST['reg_id']
@@ -78,7 +86,7 @@ def new_guardian(request):
             g_id = request.POST['gad_id']
 
             if request.POST['gad_id']:    # Check if Guardian ID exists from POSTED form.
-                guardian = update_guardian(request)  # Update Guardian model
+                guardian = update_guardian(request, sch_id)  # Update Guardian model
                 context = {'reg_id': reg_id, 'gad_id': request.POST['gad_id'], 'student': student, 'guardian': guardian}
                 messages.success(request, "Guardian Updated successfully.")
                 # return render(request, 'student/reg-enrollment.html', context)
@@ -93,7 +101,7 @@ def new_guardian(request):
                 form.instance.res_state = request.POST['res_state']
                 form.instance.mobile_no2 = request.POST['mobile_no2']
                 form.instance.email = request.POST['email']
-                # form.instance.stays_together = request.POST['stays_together']
+                form.instance.school_id = sch_id
 
                 guardian = form.save()
                 messages.success(request, "Guardian Saved successfully.")
@@ -112,6 +120,7 @@ def new_guardian(request):
         return render(request, 'guardians/reg-guardians-biodata.html')
 
 
+@login_required
 def delete_guardian(request, gad_id):
     guardian = gm.Guardians.objects.get(pk=gad_id)
     if guardian:

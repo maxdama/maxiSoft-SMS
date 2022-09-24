@@ -19,6 +19,7 @@ from django.db import transaction, IntegrityError
 from ..utils import schools, default_image_restore
 
 
+# Create your views here.
 def increment_reg_no():
     last_reg_no = Students.objects.all().order_by('id').last()
     if not last_reg_no:
@@ -33,7 +34,6 @@ def increment_reg_no():
     return reg_id
 
 
-# Create your views here.
 @login_required
 def student_list(request):
     school = schools(request)
@@ -189,6 +189,7 @@ def form_register(request):
         return render(request, "student/reg-student-biodata.html", context)
 
 
+@login_required
 def new_student_registration(request):
     print('Runing: New_Student_Registration')
 
@@ -307,6 +308,7 @@ def view_student_for_update(request, reg_id):
     return render(request, "student/reg-student-biodata.html", context)
 
 
+@login_required
 def continue_registration(request, reg_id, reg_step):
     school = schools(request)
     sch_id = school['sch_id']
@@ -369,6 +371,7 @@ def continue_registration(request, reg_id, reg_step):
         return redirect(student_list)
 
 
+@login_required
 def list_students_enrolled(request):
     sch_id = schools(request)
 
