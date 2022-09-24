@@ -39,8 +39,7 @@
                                     <select class="form-control input-border-bottom" id="guardians" name="guardians" style="font-weight:bold;" >
                                         <option value=""></option>
                                         {% for gad in gad_list %}
-                                        <option value="{{gad.id}}">{{gad.surname}} {{gad.other_names}}</option>
-
+                                            <option value="{{gad.id}}">{{gad.surname}} {{gad.other_names}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -49,7 +48,7 @@
                             <div class="float-left">
                                 <h5 class=""><strong>Assign Guardian to this Student:</strong></h5>
                                 <div class="row">
-                                    <div class="avatar avatar-lg">
+                                    <div class="avatar avatar-lg ml-3">
                                         {% if student.stud_pic %}
                                             <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
                                         {% else %}
@@ -58,8 +57,8 @@
                                     </div>
 
                                     <div class="col-md-7 form-floating-label">
-                                        <input id="studnames" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}" class="form-control input-border-bottom" name="studentnames" required>
-                                        <label for="studnames" class="placeholder">Student Names</label>
+                                        <input id="stud_names" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}" class="form-control input-border-bottom" name="studentnames" required>
+                                        <label for="stud_names" class="placeholder">Student Names</label>
                                     </div>
 
                                     <div class="col-md-2 form-floating-label" >
@@ -85,14 +84,14 @@
                                     <!-- Student Residential Address  -->
                                     <div class="col-4">
                                         <div class="form-group form-floating-label pt-1 mt-1">
-                                            <input id="res_addr_l1" type="text" value="{{guardian.res_addr}}" name="res_addr_l1" class="form-control input-border-bottom pb-2">
+                                            <input id="res_addr_l1" type="text" value="{{student.res_addr_l1|default_if_none:''}}" name="res_addr_l1" class="form-control input-border-bottom pb-2" >
                                             <label for="res_addr" class="placeholder pb-0 mb-0">Student Residential Addr:</label>
                                         </div>
                                     </div>
                                     <!-- Student Residentials Area -->
                                     <div class="col-3">
                                         <div class="form-group form-floating-label pt-1 mt-1">
-                                            <input id="res_addr_l2" type="text" value="{{guardian.res_area}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
+                                            <input id="res_addr_l2" type="text" value="{{student.res_addr_l2|default_if_none:''}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
                                             <label for="res_area" class="placeholder pb-0 mb-0">Residential Area:</label>
                                         </div>
                                     </div>
@@ -102,7 +101,7 @@
                                     <div class="col-3 ">
                                         <div class="form-group form-floating-label pb-0 mb-0">
                                             <select class="form-control input-border-bottom pb-1" id="res_city" name="stud_res_city" >
-                                                <option value="{{guardian.res_city}}" hidden>{{guardian.res_city}}</option>
+                                                <option value="{{student.res_city|default_if_none:''}}" hidden>{{student.res_city|default_if_none:''}}</option>
                                                 <option>Port Harcourt</option>
                                                 <option>Ahoada</option>
                                                 <option>Emoha</option>
@@ -170,8 +169,8 @@
 
                                         <div class="col-5">
                                             <div class="form-group form-floating-label">
-                                                <input id="othernames" type="text" value="{{guardian.other_names}}" name="other_names" class="form-control input-border-bottom" required>
-                                                <label for="othernames" class="placeholder">* Other Names</label>
+                                                <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" class="form-control input-border-bottom" required>
+                                                <label for="other_names" class="placeholder">* Other Names</label>
                                             </div>
                                         </div>
 
@@ -334,14 +333,20 @@
              $(".student-address").hide()
          }
 
+         if ($('#res_addr_l1').val() != ''){  // check if the first Student Address has value
+             $('#not-together').prop('checked', true);  // Check the CheckBox
+             $(".student-address").show()  //  Show inputs for Student Address
+         }
+
          $('#not-together').click(function(e) {         // When the Check box is Click
              if ($('#not-together').is(':checked')) {   //If the CheckBox is Checked
                  $(".student-address").show()  //  Show inputs for Student Address
-                 // alert('Student is NOT living with Guardian?')
+                 $('#res_addr_l1').attr('required', true);
                  $('#res_addr_l1').focus()
 
              } else {
                  $(".student-address").hide()   //  Hide inputes for Student Address
+                 $('#res_addr_l1').attr('required', false);
                  // alert('Student is living with Guardian?')
              }
 		});

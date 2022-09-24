@@ -80,7 +80,7 @@ def new_guardian(request):
             if request.POST['gad_id']:    # Check if Guardian ID exists from POSTED form.
                 guardian = update_guardian(request)  # Update Guardian model
                 context = {'reg_id': reg_id, 'gad_id': request.POST['gad_id'], 'student': student, 'guardian': guardian}
-                messages.success(request, "Update successfully.")
+                messages.success(request, "Guardian Updated successfully.")
                 # return render(request, 'student/reg-enrollment.html', context)
             else:
                 # Get guardian model object–
@@ -96,7 +96,7 @@ def new_guardian(request):
                 # form.instance.stays_together = request.POST['stays_together']
 
                 guardian = form.save()
-                messages.success(request, "Saved successfully.")
+                messages.success(request, "Guardian Saved successfully.")
 
             # Update Student Bio Data
             student_update(request, student, guardian)
@@ -128,24 +128,24 @@ def delete_guardian(request, gad_id):
 
 
 @login_required
-def view_guardian(request, gad_id, reg_id):
+def view_guardian_for_update(request, gad_id, reg_id):
     context = {}
 
     guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
     if reg_id > 0:
         student = sm.Students.objects.get(pk=reg_id)
     elif reg_id == 0 and gad_id > 0:
-        # Use guardian ID to get the ID of the last student assigned.
+        # Use guardian ID to get the ID of the last student assigned and pending.
         student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
         print(student)
     context = {'student': student, 'gad_list': guardians}
 
-    # if view_gad == `1 and stud_obj:`
     if gad_id > 0 and student:
         try:
             guardian = gm.Guardians.objects.get(pk=student.guardian_id)
             context = { 'student': student, 'guardian': guardian, 'gad_list': guardians }
         except gm.Guardians.DoesNotExist:
+            messages.warning(request, 'Guardian was not found for Update')
             gad_id = 0
 
     return render(request, 'guardians/reg-guardians-biodata.html', context)
@@ -154,14 +154,10 @@ def view_guardian(request, gad_id, reg_id):
 @login_required
 def guardian_list(request):
     title = 'Guardians'
-    # Request all the Student.
-    #if status == 'all':
-    guardians = gm.Guardians.objects.all().order_by('-id')
-    # Put the data into the context
-    context = {
-        'title':title,
-        'guardians': guardians,
-    }
+
+    guardians = gm.Guardians.objects.all().order_by('-id')  # Request all the Guardians.
+    context = {'title':title, 'guardians': guardians, }
+
     return render(request, 'guardians/guardians-list.html', context)
 
 

@@ -31,8 +31,10 @@ class Guardians(models.Model):
 
     @property
     def student(self):  # Get the ID Number of the last Student assigned to the Guardian of the specified row
-        stud_id_no = sm.Students.objects.filter(guardian_id=self.id).values(id_no=F('id')).last()
-        if stud_id_no['id_no'] is None:
+        qry_crit = Q(guardian_id=self.id) & Q(reg_status='pending')
+        stud_id_no = sm.Students.objects.filter(qry_crit).values(id_no=F('id')).last()
+        #if stud_id_no['id_no'] is None:
+        if stud_id_no is None:
             stud_id_no = {'id_no': 0}
         return stud_id_no
 
