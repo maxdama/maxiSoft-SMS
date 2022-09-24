@@ -311,13 +311,13 @@
      {% if messages %}
         {% for message in messages %}
             {% if message.tags == 'success'%}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+                <script type=text/javascript>toastr["success"]('{{ message }}', 'Very Good . . . ')</script>
             {% elif message.tags == 'info' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+                <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
             {% elif message.tags == 'warning' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}', 'Error . . . ')</script>
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -352,23 +352,6 @@
 		});
      });
 
-
-    $(document).on("click", ".browse", function() {
-        var file = $(this).parents().find(".file");
-        file.trigger("click");
-    });
-
-    $('input[type="file"]').change(function(e) {
-        var fileName = e.target.files[0].name;
-        $("#file").val(fileName);
-        var reader = new FileReader();
-        reader.onload = function(e) {
-        // get loaded data and render thumbnail.
-        document.getElementById("preview").src = e.target.result;
-        };
-      // read the image file as a data URL.
-      reader.readAsDataURL(this.files[0]);
-    });
 
     </script>
 

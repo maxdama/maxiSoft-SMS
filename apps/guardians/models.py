@@ -31,13 +31,21 @@ class Guardians(models.Model):
 
     @property
     def student(self):  # Get the ID Number of the last Student assigned to the Guardian of the specified row
+        # Referred to: guardian.student.id_no
         qry_crit = Q(guardian_id=self.id) & Q(reg_status='pending')
         stud_id_no = sm.Students.objects.filter(qry_crit).values(id_no=F('id')).last()
-        #if stud_id_no['id_no'] is None:
         if stud_id_no is None:
             stud_id_no = {'id_no': 0}
         return stud_id_no
 
+    @property
+    def active_wards(self): # Return the count of active wards for the Guardians
+        # Referrenced as: guardian.active_wards
+        qry_crit = Q(guardian_id=self.id) & ~Q(reg_status='graduated')
+        stud_count = sm.Students.objects.filter(qry_crit).values('id').count()
+        print('Count Student:')
+        print(stud_count)
+        return stud_count
 
     """ 
     @property
