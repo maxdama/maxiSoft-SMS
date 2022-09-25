@@ -115,7 +115,7 @@ def delete_student(request, reg_id):
 
     return redirect(student_list)
 
-
+# TODO: This function form_register should be deleted. It has been replaced
 @login_required
 def form_register(request):
     print('Runing: form_register')
@@ -315,32 +315,36 @@ def continue_registration(request, reg_id, reg_step):
     if sch_id == 0:
         return redirect("logout")
 
+    print('Reg Step:')
+    print(reg_step)
+
     try:
         student = Students.objects.get(id=reg_id, reg_steps=reg_step)
-        # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active', sch_id=sch_id)
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
         fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
         sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
-        # print(timeline.term['id'], timeline.term['descx'])
 
-        context = {
-            'student': student, 'timeline': timeline, 'classes': classes, 'fees': fees, 'sessions': sessions
-        }
+        context = {'student': student, 'timeline': timeline, 'classes': classes, 'fees': fees, 'sessions': sessions}
 
         if reg_step == 1:
             try:
+                # Query Guardian with Student Guardian ID and if successful request financial Enrollment Form
+                # otherwise, an exception is thrown that request the Guardian form
                 guardian = gm.Guardians.objects.get(id=student.guardian_id or None)
                 if guardian:
-                    context = {
-                        'guardian': guardian, 'student': student, 'timeline': timeline
-                    }
+                    context = {'guardian': guardian, 'student': student, 'timeline': timeline}
 
                 return render(request, "financial/student-enrollment.html", context)
 
             except gm.Guardians.DoesNotExist:
-                messages.error(request, "The Student has not been Assigned to Guardian", "Add New")
+
+                guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
+                context2 = { 'gad_list': guardians}
+                context.update(context2)  # The update is use to update context2 to context ( Concatenate )
+                messages.info(request, "Please Enter or Select Parent / Guardian for the Student")
                 return render(request, "guardians/reg-guardians-biodata.html", context)
+
             except Exception as e:
                 raise e
                 return redirect(student_list)

@@ -152,9 +152,12 @@ def view_guardian_for_update(request, gad_id, reg_id):
     if gad_id > 0 and student:
         try:
             guardian = gm.Guardians.objects.get(pk=student.guardian_id)
-            context = { 'student': student, 'guardian': guardian, 'gad_list': guardians }
+            context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
+
         except gm.Guardians.DoesNotExist:
             messages.warning(request, 'Guardian was not found for Update')
+            guardian = gm.Guardians.objects.get(pk=gad_id)
+            context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
             gad_id = 0
 
     return render(request, 'guardians/reg-guardians-biodata.html', context)
