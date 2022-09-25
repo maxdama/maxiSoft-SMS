@@ -10,6 +10,22 @@
       position: absolute;
     }
     </style>
+
+
+    <style class="">
+        .btn-div{
+            color: #333;
+            background-color: #fff;
+            border-color: #ccc;
+        }
+
+        .btn-div:hover{
+            color: #333;
+            background-color: #e6e6e6;
+            border-color: #adadad;
+        }
+    </style>
+
 {% endblock stylesheets %}
 
 {% load static %}
@@ -298,7 +314,7 @@
                         <div class="row d-flex justify-content-center ml-4 ">
                             <!-- Start of Ward Column  -->
                             <div class="col col-md-3">
-                                <div class="card edit_class table-hover ">
+                                <div class="card edit-class btn-div">
                                     <div class="card-body">
                                         <span class="font-weight-bolder text-primary  "> Ward 1:</span>
                                         <div class="row">
@@ -314,7 +330,8 @@
                                             </div>
                                             <div class="col col-sm-8">
                                                 <!-- Names and Class Column -->
-                                                <span class="name-ward1"> Ajoku Christabel Chibuoso (JSS 1)</span>
+                                                <span class="name-ward1"> Ajoku Christabel Chibuoso </span>
+                                                <span class="ward-class-1">(JSS 1)</span>
                                                 <span class="id-ward1 text-hide">34</span>
                                             </div>
 
@@ -322,7 +339,6 @@
                                     </div>
                                 </div>
                             </div>
-
 
                         </div>
 
@@ -395,12 +411,45 @@
             }
         });
 
-        $(".edit_class").click(function(){
+        $(".edit-class").click(function(){
         /// your code for click event here ///
-            let id = $('.id-ward1').text()
+            let ward_id = $('.id-ward1').text()
             let ward_name = $('.name-ward1').text()
-            alert("The first Ward Card is Click. \n ID=" + id + '\nName: ' + ward_name )
+            // alert("The first Ward Card is Click. \n ID=" + id + '\nName: ' + ward_name )
+            wards_action(ward_name, ward_id)
+
         });
+
+        function wards_action(ward_name, ward_id){
+
+            swal({
+                title: ward_name,
+                text: "What would like to do with this Ward!",
+                type: 'warning',
+                buttons:{
+                    true: {
+                        text : 'Change Guardian!',
+                        className : 'btn btn-outline-success btn-rounded'
+                    },
+                    remove: {
+                        text : 'Remove Ward!',
+                        className : 'btn btn-outline-warning btn-rounded'
+                    },
+                    cancel: {
+                        visible: true,
+                        className: 'btn btn-outline-info btn-rounded'
+                    }
+                }
+            }).then((action) => {
+				if (action === 'true') {
+					//location.href = self.attr('href');
+                    alert('Change the Guardian for this Ward')
+                    //alert('Change Wards Guardian')
+				} else if (action === 'remove') {
+                    alert('Remove Ward from this Guardian')
+                }
+            })
+        }
 
      });
 
