@@ -290,15 +290,20 @@
                             </div>
                         </div>
 
-                        <!-- Guardian Wards Card -->
-                        <div class="row d-flex justify-content-left ml-4 ">
+                        <!-- Guardian Wards row -->
+                         <div class="row justify-content-center mb-1 ">
+                             <span class="ml-2  text-secondary fw-extrabold"> Guardian Wards</span>
+                         </div>
+
+                        <div class="row d-flex justify-content-center ml-4 ">
                             <!-- Start of Ward Column  -->
                             <div class="col col-md-3">
-                                <div class="card">
+                                <div class="card edit_class table-hover ">
                                     <div class="card-body">
-                                        <span class="font-weight-bolder text-success "> Ward 1:</span>
+                                        <span class="font-weight-bolder text-primary  "> Ward 1:</span>
                                         <div class="row">
                                             <div class="col col-sm-4">
+                                                <!-- Picture Column -->
                                                 <div class="avatar avatar-lg ">
                                                     {% if student.stud_pic %}
                                                         <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
@@ -308,7 +313,9 @@
                                                 </div>
                                             </div>
                                             <div class="col col-sm-8">
-                                                <span class=""> Ajoku Christabel Chibuoso (JSS 1)</span>
+                                                <!-- Names and Class Column -->
+                                                <span class="name-ward1"> Ajoku Christabel Chibuoso (JSS 1)</span>
+                                                <span class="id-ward1 text-hide">34</span>
                                             </div>
 
                                         </div>
@@ -316,23 +323,7 @@
                                 </div>
                             </div>
 
-                            <!-- 2nd of Ward Column  -->
-                            <div class="col col-md-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        Ward 1:
-                                        <div class="row">
-                                            <div class="col col-sm-4">
-                                                Student Picture
-                                            </div>
-                                            <div class="col col-sm-8">
-                                                The Name of the first Student Here
-                                            </div>
 
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                     </div>
@@ -373,7 +364,7 @@
              $(".student-address").hide()
          }
 
-         if ($('#res_addr_l1').val() != ''){  // check if the first Student Address has value
+         if ($('#res_addr_l1').val() != ''){  // check if the first control of Student Address has value
              $('#not-together').prop('checked', true);  // Check the CheckBox
              $(".student-address").show()  //  Show inputs for Student Address
          }
@@ -402,6 +393,13 @@
             }else{
                 alert('Guardian is NOT Selected')
             }
+        });
+
+        $(".edit_class").click(function(){
+        /// your code for click event here ///
+            let id = $('.id-ward1').text()
+            let ward_name = $('.name-ward1').text()
+            alert("The first Ward Card is Click. \n ID=" + id + '\nName: ' + ward_name )
         });
 
      });
