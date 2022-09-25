@@ -71,7 +71,7 @@ def student_update(request, student, guardian):
 
 
 @login_required
-def new_guardian(request):
+def new_guardian(request, edit=False):
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -137,9 +137,16 @@ def delete_guardian(request, gad_id):
 
 
 @login_required
-def view_guardian_for_update(request, gad_id, reg_id):
+def view_guardian_for_update(request, gad_id, reg_id, oprx_type='update'):
     context = {}
 
+    new_entry = False
+    if oprx_type == 'new-entry':
+        new_entry = True
+    print('New Entry?')
+    print(new_entry)
+
+    # list of Parents/Guardians for Selection
     guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
     if reg_id > 0:
         student = sm.Students.objects.get(pk=reg_id)
@@ -147,7 +154,7 @@ def view_guardian_for_update(request, gad_id, reg_id):
         # Use guardian ID to get the ID of the last student assigned and pending.
         student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
         print(student)
-    context = {'student': student, 'gad_list': guardians}
+    context = {'student': student, 'gad_list': guardians, 'new_entry': new_entry}
 
     if gad_id > 0 and student:
         try:
@@ -159,6 +166,9 @@ def view_guardian_for_update(request, gad_id, reg_id):
             guardian = gm.Guardians.objects.get(pk=gad_id)
             context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
             gad_id = 0
+
+        context1 = {'show_parent_child': True, 'new_entry': new_entry}
+        context.update(context1)
 
     return render(request, 'guardians/reg-guardians-biodata.html', context)
 

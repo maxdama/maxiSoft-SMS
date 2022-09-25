@@ -48,10 +48,13 @@
                         <!-- Card Body  Student to Assign  -->
                         <div class="card-body">
                             <div class="row ">
+
                                 <!-- Column for Student Name and Address Controls  -->
                                 <div class="col col-sm-7">
                                     <div class="float-left">
-                                    <h4 class=""><strong>Student Parent / Guardian</strong></h4><p>
+                                    <h3 class=""><strong>Parent / Guardian Entry</strong></h3><p>
+
+                                        {% if new_entry %}
                                     <div class="row">
                                         <div class="avatar avatar-lg ml-4">
                                             {% if student.stud_pic %}
@@ -61,10 +64,10 @@
                                             {% endif %}
                                         </div>
 
-                                        <div class="col-md-7 form-floating-label">
-                                            <input id="stud_names" type="text" style="font-weight:bold; font-size: 17px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}"
+                                        <div class="col-md-8 form-floating-label">
+                                            <input id="stud_names" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}"
                                                    class="form-control input-border-bottom pb-0" name="studentnames" required>
-                                            <label for="stud_names" class="placeholder">Student Names</label>
+                                            <label for="stud_names" class="placeholder">For: </label>
                                         </div>
 
                                         <div class="col-md-2 form-floating-label" hidden >
@@ -117,16 +120,17 @@
                                         </div>
 
                                     </div>
-
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                </div>
-                                <!-- Column to Select Guardian for Student control -->
+                                {% if new_entry %}
+                                <!-- Column to Select Student Guardian control -->
                                 <div class="col col-sm-5 ">
                                     <!-- student Guardian Selection -->
                                      <br>
                                     <span class="font-italic">
-                                    For new Guardian fill in the Guardian Details. <br>
-                                    For existing Guardian select from the Drop-Down. <p>
+                                    For new Parent/Guardian fill in the Details below. <br>
+                                    For existing Parent/Guardian select from the Drop-Down. <p>
                                     </span>
                                     <div class="col-10 ">
                                         <div class="form-group form-floating-label pb-0 mb-0">
@@ -140,6 +144,8 @@
                                         </div>
                                     </div>
                                 </div>
+                                {% endif %}
+
                             </div>
                         </div>
 
@@ -148,7 +154,7 @@
                                 <div class="card">
                                     <!-- Card Header Guardian Details-->
                                     <div class="card-header pt-1 pb-1 ">
-                                        <div class="card-title card-success "><h4>Guardian Details </h4>
+                                        <div class="card-title card-success "><h4>Details ( Parent/Guardian ) </h4>
                                             <div class="text-small float-md-right ">{% if student.reg_status|lower != 'enrolled' %} NEW {% endif %} Registration Form-2</div>
                                         </div>
                                     </div>
@@ -305,10 +311,10 @@
                                 </div>
                             </div>
                         </div>
-
+                        {% if show_parent_child %}
                         <!-- Guardian Wards row -->
                          <div class="row justify-content-center mb-1 ">
-                             <span class="ml-2  text-secondary fw-extrabold"> Guardian Wards</span>
+                             <span class="ml-2  text-secondary fw-extrabold"> Parent Child / Ward</span>
                          </div>
 
                         <div class="row d-flex justify-content-center ml-4 ">
@@ -341,6 +347,7 @@
                             </div>
 
                         </div>
+                        {% endif %}
 
                     </div>
                 </div>
@@ -424,15 +431,15 @@
 
             swal({
                 title: ward_name,
-                text: "What would like to do with this Ward!",
+                text: "What would like to do with this Student?",
                 type: 'warning',
                 buttons:{
-                    true: {
-                        text : 'Change Guardian!',
+                    change: {
+                        text : 'Change Guardian !',
                         className : 'btn btn-outline-success btn-rounded'
                     },
                     remove: {
-                        text : 'Remove Ward!',
+                        text : 'Remove !',
                         className : 'btn btn-outline-warning btn-rounded'
                     },
                     cancel: {
@@ -441,7 +448,7 @@
                     }
                 }
             }).then((action) => {
-				if (action === 'true') {
+				if (action === 'change') {
 					//location.href = self.attr('href');
                     alert('Change the Guardian for this Ward')
                     //alert('Change Wards Guardian')

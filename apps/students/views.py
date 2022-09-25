@@ -256,12 +256,12 @@ def new_student_registration(request):
 
             elif request.POST.get("save_continue"):
                 if mode == 'new':
-                    messages.info(request, 'Please assign a Guardian to the Student')
+                    messages.info(request, 'Please enter the Student Parent or Guardian')
                     messages.success(request, 'Student registration Saved. ')
                 else:
                     messages.success(request, 'Student register Updated ')
 
-                return redirect('guardian', gad_id=gad_id, reg_id=stud.pk)
+                return redirect('guardian', gad_id=gad_id, reg_id=stud.pk, oprx_type='new-entry')
         else:
             return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
     else:
@@ -330,7 +330,7 @@ def continue_registration(request, reg_id, reg_step):
         if reg_step == 1:
             try:
                 # Query Guardian with Student Guardian ID and if successful request financial Enrollment Form
-                # otherwise, an exception is thrown that request the Guardian form
+                # otherwise, if no guarding entry an exception is thrown that request the Guardian form
                 guardian = gm.Guardians.objects.get(id=student.guardian_id or None)
                 if guardian:
                     context = {'guardian': guardian, 'student': student, 'timeline': timeline}
@@ -338,9 +338,9 @@ def continue_registration(request, reg_id, reg_step):
                 return render(request, "financial/student-enrollment.html", context)
 
             except gm.Guardians.DoesNotExist:
-
                 guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
-                context2 = { 'gad_list': guardians}
+
+                context2 = { 'gad_list': guardians, 'show_parent_child': False, 'new_entry': True}
                 context.update(context2)  # The update is use to update context2 to context ( Concatenate )
                 messages.info(request, "Please Enter or Select Parent / Guardian for the Student")
                 return render(request, "guardians/reg-guardians-biodata.html", context)
