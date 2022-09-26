@@ -289,7 +289,7 @@
                                                  {% endif %}
                                              </div>
                                              <div class="col-4 ">
-                                                <button class="btn btn-outline-success btn-rounded btn-sm"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new" >
+                                                <button class="btn btn-outline-success btn-rounded btn-sm"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/True" >
                                                     {% if student.reg_status|lower == 'enrolled' %}
                                                         U P D A T E
                                                     {% else %}
@@ -300,7 +300,7 @@
 
                                               <div class="col-4 ">
                                                   {% if student.reg_status|lower != 'enrolled' %}
-                                                    <button class="btn btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new" >
+                                                    <button class="btn btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new/True" >
                                                         S A V E  &  Continue
                                                     </button>
                                                   {% endif %}
@@ -435,11 +435,11 @@
 
         });
 
-        function wards_action(ward_name, ward_id){
+        function wards_action(ward_name, stud_id){
 
             swal({
                 title: ward_name,
-                text: "What would like to do with this Student?",
+                text: "What would like to do with this Student \n relationship with the Parent or Guardian?",
                 type: 'warning',
                 buttons:{
                     change: {
@@ -461,10 +461,33 @@
                     alert('Change the Guardian for this Ward')
                     //alert('Change Wards Guardian')
 				} else if (action === 'remove') {
-                    alert('Remove Ward from this Guardian')
+                    let url = '/guardians/update_relationship'
+                    let data = {'stud_id': stud_id }
+                    update_relationship (url, data)
+
                 }
             })
-        }
+        };
+
+         function update_relationship(url, data)
+         {
+
+            $.ajax(url,
+                {
+                type: 'POST',  // http method
+                data: data,  // data to submit
+                success: function (data, status, xhr) {
+                    //$('p').append('status: ' + status + ', data: ' + data);
+                    alert(status)
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+                        //$('p').append('Error' + errorMessage);
+                        alert(errorMessage)
+                }
+            });
+
+         }
+
 
      });
 

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import RestrictedError
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from apps.students import models as sm
 from . import models as gm
@@ -71,7 +72,7 @@ def student_update(request, student, guardian):
 
 
 @login_required
-def new_guardian(request, edit=False):
+def new_guardian(request, not_edit=False):
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -80,7 +81,7 @@ def new_guardian(request, edit=False):
     reg_id = 0
     student = {}
     if request.method == 'POST':
-        if edit:
+        if not_edit:
             reg_id = request.POST['reg_id']
             student = sm.Students.objects.get(pk=reg_id)
 
@@ -109,7 +110,7 @@ def new_guardian(request, edit=False):
                 guardian = form.save()
                 messages.success(request, "Guardian Saved successfully.")
 
-            if edit:
+            if not_edit:
                 # Update Student Bio Data
                 student_update(request, student, guardian)
 
@@ -196,6 +197,10 @@ def guardian_list(request):
     context = {'title':title, 'guardians': guardians, }
 
     return render(request, 'guardians/guardians-list.html', context)
+
+
+def update_relationship(request):
+    return HttpResponse('Parent Student Relationship Updated . . . ')
 
 
 
