@@ -324,7 +324,7 @@
                                     {% with count=forloop.counter %}
 
                                 <div class="col col-md-3">
-                                    <div class="card child-edit div-btn">
+                                    <div class="card child-edit div-btn" value="{{count}}">
                                         <div class="card-body">
                                             <span class="font-weight-bolder text-primary  "> Ward {{count}}:</span>
                                             <div class="row">
@@ -426,9 +426,11 @@
 
         $(".child-edit").click(function(){
         /// your code for click event here ///
-            let ward_id = $('.id-ward1').text()
-            let ward_name = $('.name-ward1').text()
-            // alert("The first Ward Card is Click. \n ID=" + id + '\nName: ' + ward_name )
+            var x = $(this).attr('value');
+
+            let ward_id = $('.id-ward'+x).text()
+            let ward_name = $('.name-ward'+x).text()
+
             wards_action(ward_name, ward_id)
 
         });
