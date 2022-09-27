@@ -24,6 +24,33 @@
             background-color: #e6e6e6;
             border-color: #adadad;
         }
+
+        .swal-title {
+          margin: 0px;
+          font-size: 23px;
+          box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+          margin-bottom: 28px;
+            text-align: -moz-center;
+        }
+
+        .swal-text {
+          background-color: rgb(255, 255, 255);
+          padding: 17px;
+          border: 1px solid rgba(240, 225, 161, 0.94);
+          display: block;
+          margin: 22px;
+          text-align: center;
+          color: #61534e;
+          font-size: 17px;
+        }
+
+        .swal-footer {
+          background-color: rgb(245, 248, 250);
+          margin-top: 32px;
+          border-top: 4px solid #E9EEF1;
+          overflow: hidden;
+        }
+
     </style>
 
 {% endblock stylesheets %}
@@ -315,7 +342,7 @@
 
                             <!-- Guardian Wards row -->
                              <div class="row justify-content-center mb-1 ">
-                                 <span class="ml-2  text-secondary fw-extrabold"> Parent Child / Ward</span>
+                                 <div class="ml-2 col-sm-5  text-secondary fw-extrabold"> Children / Wards</div>
                              </div>
 
                             <div class="row d-flex justify-content-center ml-4 ">
@@ -323,8 +350,8 @@
                                 {% for child in children %}
                                     {% with count=forloop.counter %}
 
-                                <div class="col col-md-3">
-                                    <div class="card child-edit div-btn" value="{{count}}">
+                                    <div class="col col-md-3">
+                                    <div class="card child-edit div-btn" value="{{count}}" id="child-{{count}}">
                                         <div class="card-body">
                                             <span class="font-weight-bolder text-primary  "> Ward {{count}}:</span>
                                             <div class="row">
@@ -349,6 +376,7 @@
                                         </div>
                                     </div>
                                 </div>
+
                                     {% endwith %}
                                 {% endfor %}
                             </div>
@@ -426,67 +454,113 @@
 
         $(".child-edit").click(function(){
         /// your code for click event here ///
-            var x = $(this).attr('value');
+            var card_no = $(this).attr('value');
 
-            let ward_id = $('.id-ward'+x).text()
-            let ward_name = $('.name-ward'+x).text()
+            let stud_id = $('.id-ward'+ card_no).text()
+            let stud_name = $('.name-ward'+ card_no).text()
 
-            wards_action(ward_name, ward_id)
+            relationship(stud_id, stud_name, card_no)
 
         });
 
-        function wards_action(ward_name, stud_id){
+        function relationship(stud_id, stud_name, card_no){
 
             swal({
-                title: ward_name,
-                text: "What would like to do with this Student \n relationship with the Parent or Guardian?",
-                type: 'warning',
+                // title: stud_name,
+                // text: "What would you like to do with the Student\'s \n relationship with this Parent or Guardian?",
+                title: 'Relationship Update',
+                text: "{{guardian.surname}} {{guardian.other_names}} is Father to \n" + stud_name + '?',
+                // icon: 'info',
                 buttons:{
+                    yes: {
+                        text: 'YES, Correct !',
+                        value: 'yes',
+                        className : 'btn btn-outline-success btn-rounded '
+                    },
                     change: {
-                        text : 'Change Guardian !',
-                        className : 'btn btn-outline-success btn-rounded'
+                        text : 'NO, Change !',
+                        className : 'btn btn-outline-info btn-rounded '
                     },
                     remove: {
-                        text : 'Remove !',
+                        text : 'NO, Remove !',
                         className : 'btn btn-outline-warning btn-rounded'
-                    },
-                    cancel: {
-                        visible: true,
-                        className: 'btn btn-outline-info btn-rounded'
                     }
                 }
             }).then((action) => {
 				if (action === 'change') {
 					//location.href = self.attr('href');
                     alert('Change the Guardian for this Ward')
-                    //alert('Change Wards Guardian')
+                    //alert
+
 				} else if (action === 'remove') {
                     let url = '/guardians/update_relationship'
-                    let data = {'stud_id': stud_id }
-                    update_relationship (url, data)
+                    let data = {'stud_id': stud_id, 'card_id': card_no }
+
+                    update_relationship_ajax (url, data)
 
                 }
             })
         };
 
-         function update_relationship(url, data)
+         function update_relationship_ajax(url, stud_data, x)
          {
+             let csrftoken = getCookie('csrftoken'); // Get csrftoken from cookie ( function )
 
-            $.ajax(url,
+            $.ajax({
+                method: "POST",
+                url: url,
+                headers: {'X-CSRFToken': csrftoken},
+                async: "True",
+                dataType: "json",
+                data:stud_data,
+                success: function(data, status)
                 {
-                type: 'POST',  // http method
-                data: data,  // data to submit
-                success: function (data, status, xhr) {
-                    //$('p').append('status: ' + status + ', data: ' + data);
-                    alert(status)
+                    console.log(data);
+                    // var  new_reg = response.new_reg_no;
+                    // $( '#reg_no' ).val(new_reg);
+                    let x = data.card_id
+                    $("#child-" + x).remove();
+
+                    //ajaxAction('success', data)
                 },
-                error: function (jqXhr, textStatus, errorMessage) {
-                        //$('p').append('Error' + errorMessage);
-                        alert(errorMessage)
+                error: function(xhr, status, error){
+                    alert("An Error occured:" + "\n" + error);
+                    // let msg = 'An error ocurred:' + '\n' + error;
+                    // sweet_alert('Error: Registration No', msg, 'info')
+                    ajaxAction('failed', data)
                 }
+
             });
 
          }
+
+         function ajaxAction(status, data){
+             if (status == 'success'){
+                 alert(data.data)
+                 $("#card-1").remove();
+             }else{
+                 alert('Operation Failed')
+             }
+
+         }
+
+
+         function getCookie(name) {
+            // Get the value of the csrfToken from cookie
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
 
      });

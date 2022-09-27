@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import RestrictedError
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from apps.students import models as sm
 from . import models as gm
@@ -200,7 +200,11 @@ def guardian_list(request):
 
 
 def update_relationship(request):
-    return HttpResponse('Parent Student Relationship Updated . . . ')
+    stud_id = request.POST['stud_id']
+    card_id = request.POST['card_id']
 
+    print(f'Student ID: {stud_id}')
+    print('Testing Ajax URL GET Request . . .')
+    msg = f'Student being Processed: ID= {stud_id}'
 
-
+    return JsonResponse({'data': msg, 'card_id': card_id})
