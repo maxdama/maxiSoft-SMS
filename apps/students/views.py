@@ -338,10 +338,11 @@ def continue_registration(request, reg_id, reg_step):
                 return render(request, "financial/student-enrollment.html", context)
 
             except gm.Guardians.DoesNotExist:
+                oprx_type = 'new-entry'
                 guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
 
-                context2 = { 'gad_list': guardians, 'show_parent_child': False, 'new_entry': True}
-                context.update(context2)  # The update is use to update context2 to context ( Concatenate )
+                context2 = { 'gad_list': guardians, 'show_parent_child': False, 'oprx_type': oprx_type}
+                context.update(context2)  # The update is used to concatenate context2 to context ( Concatenate )
                 messages.info(request, "Please Enter or Select Parent / Guardian for the Student")
                 return render(request, "guardians/reg-guardians-biodata.html", context)
 

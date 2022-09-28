@@ -16,6 +16,7 @@ class Students(models.Model):
     first_name = models.CharField(max_length=40)
     middle_name = models.CharField(max_length=40, null=True)
     guardian = models.ForeignKey(gm.Guardians, on_delete=models.RESTRICT, null=True, blank=True, unique=False)
+    guardian_is = models.CharField(max_length=25, null=True, blank=True)
     stud_pic = models.ImageField(upload_to='images', default='images/static/default.png', null=True, blank=True)
     dob = models.DateField(default=None, null=True, blank=True, db_index=True)
     gender = models.CharField(max_length=8, db_index=True)
@@ -23,7 +24,7 @@ class Students(models.Model):
     phone_no = models.CharField(max_length=33, null=True, db_index=True)
     bloodgroup = models.CharField(max_length=5, null=True, blank=True)
     religion = models.CharField(max_length=15, null=True, blank=True)
-    not_live_with_guard = models.BooleanField(default=False)
+    not_with_guard = models.BooleanField(default=False)  # Field to hold boolean value indicating if student is living with guardian or not
     res_addr_l1 = models.CharField(max_length=255, null=True)
     res_addr_l2 = models.CharField(max_length=100, null=True)
     res_city = models.CharField(max_length=35, null=True)

@@ -52,7 +52,8 @@ def student_update(request, student, guardian):
     print(not_together)
     student.reg_steps = 2
     student.guardian_id = guardian.pk
-    student.not_live_with_guard = not_together
+    student.not_with_guard = not_together
+    student.guardian_is = request.POST['relationship']
 
     if not_together:  # Student is NOT living with Guardian or Parent
         #  Update Student Residential Address
@@ -72,7 +73,7 @@ def student_update(request, student, guardian):
 
 
 @login_required
-def new_guardian(request, not_edit=False):
+def new_guardian(request, oprx_type='edit-entry'):
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -81,7 +82,7 @@ def new_guardian(request, not_edit=False):
     reg_id = 0
     student = {}
     if request.method == 'POST':
-        if not_edit:
+        if oprx_type == 'new-entry':
             reg_id = request.POST['reg_id']
             student = sm.Students.objects.get(pk=reg_id)
 
@@ -110,7 +111,7 @@ def new_guardian(request, not_edit=False):
                 guardian = form.save()
                 messages.success(request, "Guardian Saved successfully.")
 
-            if not_edit:
+            if oprx_type == 'new-entry':
                 # Update Student Bio Data
                 student_update(request, student, guardian)
 
@@ -142,35 +143,33 @@ def delete_guardian(request, gad_id):
 
 
 @login_required
-def view_guardian_for_update(request, gad_id, reg_id, oprx_type='update'):
+def view_guardian_for_update(request, gad_id, reg_id, oprx_type='edit-entry'):
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
         return redirect("logout")
 
-    new_entry = False
-    if oprx_type == 'new-entry':
-        new_entry = True
-
-    print('New Entry?')
-    print(new_entry)
+    print(oprx_type)
 
     context = {}
     children = []
-    if oprx_type == 'update':
+    guardians = []
+
+    if oprx_type == 'edit-entry':
         print('----- Query Children of this Parent  ')
         children = sm.Students.objects.filter(school_id=sch_id, guardian_id=gad_id)
         print(children)
+    else:
+        # list of Parents/Guardians for Selection
+        guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
 
-    # list of Parents/Guardians for Selection
-    guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
     if reg_id > 0:
         student = sm.Students.objects.get(pk=reg_id)
     elif reg_id == 0 and gad_id > 0:
         # Use guardian ID to get the ID of the last student assigned and pending.
         student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
         print(student)
-    context = {'student': student, 'gad_list': guardians, 'new_entry': new_entry, 'children': children}
+    context = {'student': student, 'gad_list': guardians, 'children': children, 'oprx_type':  oprx_type}
 
     if gad_id > 0 and student:
         try:
@@ -183,7 +182,7 @@ def view_guardian_for_update(request, gad_id, reg_id, oprx_type='update'):
             context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
             gad_id = 0
 
-        context1 = {'show_parent_child': True, 'new_entry': new_entry, 'children': children}
+        context1 = {'show_parent_child': True, 'children': children, 'oprx_type':  oprx_type}
         context.update(context1)
 
     return render(request, 'guardians/reg-guardians-biodata.html', context)
@@ -200,11 +199,21 @@ def guardian_list(request):
 
 
 def update_relationship(request):
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
     stud_id = request.POST['stud_id']
     card_id = request.POST['card_id']
 
     print(f'Student ID: {stud_id}')
-    print('Testing Ajax URL GET Request . . .')
+    print('Testing Ajax URL POST Request . . .')
     msg = f'Student being Processed: ID= {stud_id}'
+
+    student = sm.Students.objects.filter(school_id=sch_id, id=stud_id).update(guardian_id=None)
+
+    if not student:
+        card_id = 0
 
     return JsonResponse({'data': msg, 'card_id': card_id})

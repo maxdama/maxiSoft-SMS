@@ -81,7 +81,7 @@
                                     <div class="float-left">
                                     <h3 class=""><strong>Parent / Guardian Entry</strong></h3><p>
 
-                                        {% if new_entry %}
+                                    {% if oprx_type == 'new-entry' %}
                                     <div class="row">
                                         <div class="avatar avatar-lg ml-4">
                                             {% if student.stud_pic %}
@@ -147,11 +147,11 @@
                                         </div>
 
                                     </div>
-                                        {% endif %}
+                                    {% endif %}
                                     </div>
                                 </div>
-                                {% if new_entry %}
-                                <!-- Column to Select Student Guardian control -->
+                                {% if oprx_type == 'new-entry' %}
+                                <!-- Column for Selection of existing Parent / Guardian control -->
                                 <div class="col col-sm-5 ">
                                     <!-- student Guardian Selection -->
                                      <br>
@@ -311,12 +311,14 @@
                                     <div class="card-action pt-3 pb-2">
                                          <div class="row d-flex justify-content-center text-center">
                                              <div class="col-4 ">
-                                                 {% if student.reg_status|lower == 'pending' %}
-                                                    <button class="btn btn-outline-warning btn-rounded btn-sm"  type="reset" >Clear or Reset</button>
+                                                 {% if oprx_type == 'new-entry' %}
+                                                     {% if student.reg_status|lower == 'pending' %}
+                                                        <button class="btn btn-outline-warning btn-rounded btn-sm"  type="reset" >Clear or Reset</button>
+                                                     {% endif %}
                                                  {% endif %}
                                              </div>
                                              <div class="col-4 ">
-                                                <button class="btn btn-outline-success btn-rounded btn-sm"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/True" >
+                                                <button class="btn btn-outline-success btn-rounded btn-sm"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/{{oprx_type}}" >
                                                     {% if student.reg_status|lower == 'enrolled' %}
                                                         U P D A T E
                                                     {% else %}
@@ -326,10 +328,12 @@
                                              </div>
 
                                               <div class="col-4 ">
-                                                  {% if student.reg_status|lower != 'enrolled' %}
-                                                    <button class="btn btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new/True" >
-                                                        S A V E  &  Continue
-                                                    </button>
+                                                  {% if oprx_type == 'new-entry' %}
+                                                      {% if student.reg_status|lower != 'enrolled' %}
+                                                        <button class="btn btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new/{{oprx_type}}" >
+                                                            S A V E  &  Continue
+                                                        </button>
+                                                      {% endif %}
                                                   {% endif %}
                                               </div>
 
@@ -338,51 +342,52 @@
                                 </div>
                             </div>
                         </div>
-                        {% if show_parent_child %}
 
-                            <!-- Guardian Wards row -->
-                             <div class="row justify-content-center mb-1 ">
-                                 <div class="ml-2 col-sm-5  text-secondary fw-extrabold"> Children / Wards</div>
-                             </div>
+                        <div class="card-footer pb-1 pt-1">
+                            {% if show_parent_child %}
+                                <!-- Guardian Wards row -->
+                                 <div class="row justify-content-left mb-1 ml-5 pl-5 ">
+                                     <div class="ml-2 col-sm-5  text-secondary fw-extrabold"> Children / Wards</div>
+                                 </div>
 
-                            <div class="row d-flex justify-content-center ml-4 ">
-                                <!-- Start of Ward Column  -->
-                                {% for child in children %}
-                                    {% with count=forloop.counter %}
+                                <div class="row d-flex justify-content-left ml-5 pl-5 ">
+                                    <!-- Start of Ward Column  -->
+                                    {% for child in children %}
+                                        {% with count=forloop.counter %}
 
                                     <div class="col col-md-3">
-                                    <div class="card child-edit div-btn" value="{{count}}" id="child-{{count}}">
-                                        <div class="card-body">
-                                            <span class="font-weight-bolder text-primary  "> Ward {{count}}:</span>
-                                            <div class="row">
-                                                <div class="col col-sm-4">
-                                                    <!-- Picture Column -->
-                                                    <div class="avatar avatar-lg ">
-                                                        {% if child.stud_pic %}
-                                                            <img src="{{child.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
-                                                        {% else %}
-                                                            <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
-                                                        {% endif %}
+                                        <div class="card child-edit div-btn" value="{{count}}" id="child-{{count}}">
+                                            <div class="card-body mt-0 pt-0">
+                                                <div class="font-weight-bolder text-primary mt-0 pt-0 ">Ward-{{count}}:</div>
+                                                <div class="row">
+                                                    <div class="col col-sm-4">
+                                                        <!-- Picture Column -->
+                                                        <div class="avatar avatar-lg ">
+                                                            {% if child.stud_pic %}
+                                                                <img src="{{child.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
+                                                            {% else %}
+                                                                <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                                            {% endif %}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div class="col col-sm-8">
-                                                    <!-- Names and Class Column -->
-                                                    <span class="name-ward{{count}}">{{child.surname}} {{child.first_name}} {{child.middle_name}} </span>
-                                                    <span class="ward-class-{{count}}">(JSS 1)</span>
-                                                    <span class="id-ward{{count}} text-hide">{{child.id}}</span>
-                                                </div>
+                                                    <div class="col col-sm-8 ">
+                                                        <!-- Names and Class Column -->
+                                                        <span class="id-ward{{count}} text-hide">{{child.id}}</span>
+                                                        <span class="ward-class-{{count}} font-italic text-sm-center"> Guardian is {% if child.gender == 'Male' %} his {% else %} her {% endif %}: </span>
+                                                        <span class="related-{{count}} font-weight-bold "> {{child.guardian_is}} </span>
+                                                    </div>
+                                                    <div class="col-sm-12 name-ward{{count}}">{{child.surname}} {{child.first_name}} {{child.middle_name}}   </div>
 
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                        {% endwith %}
+                                    {% endfor %}
                                 </div>
-
-                                    {% endwith %}
-                                {% endfor %}
-                            </div>
-
-                        {% endif %}
-
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </form>
@@ -446,7 +451,7 @@
             let guard_name = $("#stud_guardian option:selected").text();
             if(gad_id!=''){
                 // alert('Guardian ID:' )
-                location.href='/guardians/update/' + gad_id + '/' + stud_id + '/new-entry'
+                location.href='/guardians/entry/' + gad_id + '/' + stud_id + '/new-entry'
             }else{
                 alert('Guardian is NOT Selected')
             }
@@ -458,39 +463,40 @@
 
             let stud_id = $('.id-ward'+ card_no).text()
             let stud_name = $('.name-ward'+ card_no).text()
+            let related = $('.related-'+ card_no).text()
 
-            relationship(stud_id, stud_name, card_no)
-
+            relationship(stud_id, stud_name, card_no, related)
         });
 
-        function relationship(stud_id, stud_name, card_no){
+        function relationship(stud_id, stud_name, card_no, related){
 
             swal({
-                // title: stud_name,
-                // text: "What would you like to do with the Student\'s \n relationship with this Parent or Guardian?",
                 title: 'Relationship Update',
-                text: "{{guardian.surname}} {{guardian.other_names}} is Father to \n" + stud_name + '?',
+                text: "{{guardian.surname}} {{guardian.other_names}} is " + related + ' to \n' + stud_name + '\n\n  IS THIS CORRECT?',
                 // icon: 'info',
                 buttons:{
                     yes: {
                         text: 'YES, Correct !',
                         value: 'yes',
-                        className : 'btn btn-outline-success btn-rounded '
+                        className : 'btn btn-outline-success btn-rounded btn-sm'
                     },
                     change: {
                         text : 'NO, Change !',
-                        className : 'btn btn-outline-info btn-rounded '
+                        className : 'btn btn-outline-info btn-rounded btn-sm'
                     },
                     remove: {
                         text : 'NO, Remove !',
-                        className : 'btn btn-outline-warning btn-rounded'
+                        value: 'remove',
+                        className : 'btn btn-outline-warning btn-rounded btn-sm'
+
                     }
                 }
             }).then((action) => {
 				if (action === 'change') {
-					//location.href = self.attr('href');
                     alert('Change the Guardian for this Ward')
-                    //alert
+                    let guard_id = 0
+                    let url = '/guardians/update/'+ guard_id + '/' + stud_id + '/new-entry'
+                    location.href = url
 
 				} else if (action === 'remove') {
                     let url = '/guardians/update_relationship'
@@ -498,6 +504,15 @@
 
                     update_relationship_ajax (url, data)
 
+                } else if (action === 'yes'){
+                   swal({
+                      icon: "success",
+                       button: {
+                          text: "OK",
+                          visible: false,
+                          closeModal: true,
+                        }
+                    });
                 }
             })
         };

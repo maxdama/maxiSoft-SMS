@@ -11,8 +11,8 @@ from apps.guardians import views as gv
 urlpatterns = [
     path('list', guardian_list, name ='guardians'),
     path('delete/<int:gad_id>', gv.delete_guardian, name='delete'),
-    path('new/<str:not_edit>', new_guardian, name="new"),
-    path('update/<int:gad_id>/<int:reg_id>/<str:oprx_type>', view_guardian_for_update, name="guardian"),
+    path('new/<str:oprx_type>', new_guardian, name="new"),
+    path('entry/<int:gad_id>/<int:reg_id>/<str:oprx_type>', view_guardian_for_update, name="guardian"),
     path('update_relationship', update_relationship, name='update_relationship')
     # path('enrollment/<int:reg_id>', view_enrollment, name='enrollment')
 ]
