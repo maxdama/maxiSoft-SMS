@@ -12,47 +12,46 @@
 		<div class="page-inner">
 			<div class="page-header">
 				<h4 class="page-title"><span class="fw-light fa-school">Academic</span> Calender</h4>
-
-
 			</div>
 
-			<div class="row">
-				<div class="col-md-12">
-					<div class="card">
-						<div class="card-header">
-							<div class="d-flex align-items-left">
-								<h5 class="card-title">Sessions List</h5>
+			<div class="row justify-content-center ">
+				<div class="col-md-12 ">
+					<div class="card border  pl-5 pr-5 ">
+						<div class="card-header  ">
+							<div class="row ">
+								<div class="col col-9 d-flex align-items-left ">
+									<h5 class="card-title">Sessions List</h5>
+								</div>
+								<div class="col col-3 float-right ">
+									<a href="/settings/academic-calender" class="btn btn-round btn-outline-primary btn-full btn-sm" role="button" >{{action}}</a>
+								</div>
 							</div>
-							<span class="float-right ">
-								<a href="/settings/academic-calender" class="btn btn-round btn-outline-dark btn-sm  " role="button" >{{action}}</a>
-							</span>
 						</div>
 						<div class="card-body" style="margin:0px; padding:0px">
 
-							<div class="table-responsive">
-								<table id="add-row" class="table table-hover table-bordered   "  >
+							<div class="table-responsive  ">
+								<table id="add-row" class="table table-hover  "  >
 
 									<thead>
-										<tr class="text-secondary small" >
+										<tr class="text-secondary text-sm-center " >
 											<th>Session</th>
 
-											<th>First-Term Starts</th>
-											<th>First-Term Ends</th>
+											<th>1st-Term Starts</th>
+											<th>1st-Term Ends</th>
 
-											<th>Second-Term Starts</th>
-											<th>Second-Term Ends</th>
+											<th>2nd-Term Starts</th>
+											<th>2nd-Term Ends</th>
 
-											<th>Third-Term Starts</th>
-											<th>Third-Term Ends</th>
+											<th>3rd-Term Starts</th>
+											<th>3rd-Term Ends</th>
 											<th>Status</th>
-
 										</tr>
 									</thead>
 
-									<tbody>
+									<tbody class=" table-bordered-bd-info   ">
 										{% for tl in timeline %}
 
-											<tr  class="small" style="padding:0px; margin:0px">
+											<tr  class="text-small text-sm-center text-info">
 												<td>{{tl.descx}}</td>
 
 												<td>{{tl.s1_starts|date:'d-m-Y'}}</td>
@@ -65,7 +64,6 @@
 												<td>{{tl.s3_ends|date:'d-m-Y'}}</td>
 
 												<td>{{tl.status|capfirst}}</td>
-
 											</tr>
 										{% endfor %}
 									</tbody>
@@ -92,7 +90,7 @@
             {% elif message.tags == 'warning' %}
                 <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
     {% endif %}

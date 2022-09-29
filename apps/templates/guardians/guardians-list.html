@@ -4,9 +4,38 @@
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
+<style class="">
+	.swal-title {
+      margin: 0px;
+      font-size: 23px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+        text-align: -moz-center;
+    }
 
-{% endblock stylesheets %}{% block content %}
+    .swal-text {
+      background-color: rgb(255, 255, 255);
+      padding: 17px;
+      border: 1px solid rgba(240, 225, 161, 0.94);
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+      font-size: 17px;
+    }
 
+    .swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 4px solid #E9EEF1;
+      overflow: hidden;
+    }
+</style>
+
+{% endblock stylesheets %}
+
+
+{% block content %}
 
 	<div class="content">
 		<div class="page-inner">
@@ -65,7 +94,7 @@
 											<th>Active Wards</th>
 											<th>Tot Wards</th>
 											<th>Tot Dues.</th>
-											<!-- <th>Reg_iD.</th> -->
+											<!-- <th>Guard_iD.</th> -->
 											<th style="width: 10%" class="border-gray-200">Action</th>
 										</tr>
 									</thead>
@@ -81,7 +110,7 @@
 												<td>{{guardian.active_wards}}</td>
 												<td>{{guardian.tot_wards}}</td>
 												<td>N12,000.00</td>
-												<!--<td>{{guardian.student.id_no}}</td> -->
+												<!-- <td>{{guardian.id}}</td> -->
 
 												<td class="">
 													<div class="btn-group form-button-action">
@@ -89,7 +118,7 @@
 														<b class="">..  ..  ..</b>
 													  </button>
 													  <div class="dropdown-menu">
-														  <a class="dropdown-item" href="#">Continue-> Registration</a>
+														  <a class="dropdown-item" href="#"></a>
 
 														  <div class="dropdown-divider"></div>
 														  <a class="dropdown-item" href="{% url 'guardian' gad_id=guardian.pk stud_id=guardian.student.id_no oprx_type='edit-entry' %}">Update Guardian</a>
@@ -125,7 +154,7 @@
             {% elif message.tags == 'warning' %}
                 <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.error('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -142,41 +171,34 @@
 
 		$('.delete').click(function(e){
 			var self = $(this);
-			console.log(self.data('title'));
+			// console.log(self.data('title'));
 			e.preventDefault();
 
 			swal({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
-				type: 'warning',
+				title: 'Delete Guardian !',
+				text: "Are you very sure you want to Delete \n the selected Guardian record ?",
 				buttons:{
 					confirm: {
-						text : 'Yes, delete it!',
-						className : 'btn btn-success'
+						text : 'YES, Delete it!',
+						className : 'btn btn-outline-success btn-rounded'
 					},
 					cancel: {
 						visible: true,
-						className: 'btn btn-danger'
+						text : 'NO, Stop !',
+						className: 'btn btn-outline-danger btn-rounded'
 					}
 				}
 			}).then((Delete) => {
 				if (Delete) {
 					location.href = self.attr('href');
-
 				} else {
 					swal({
-						title: 'Aborted!',
-						text: 'The record is retained.',
-						type: 'success',
+						icon: 'error', timer: 2000,
 						buttons : {
-							confirm: {
-								className : 'btn btn-info'
-							}
+							 visible: false,
 						}
 					});
-					swal.close();
 				}
-
 			});
 		});
 	</script>

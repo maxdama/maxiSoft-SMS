@@ -5,6 +5,34 @@
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 
+<style class="">
+	.swal-title {
+      margin: 0px;
+      font-size: 23px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+        text-align: -moz-center;
+    }
+
+    .swal-text {
+      background-color: rgb(255, 255, 255);
+      padding: 17px;
+      border: 1px solid rgba(240, 225, 161, 0.94);
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+      font-size: 17px;
+    }
+
+    .swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 4px solid #E9EEF1;
+      overflow: hidden;
+    }
+</style>
+
 {% endblock stylesheets %}
 
 {% block content %}
@@ -135,7 +163,7 @@
             {% elif message.tags == 'warning' %}
                 <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -156,17 +184,17 @@
 			e.preventDefault();
 
 			swal({
-				title: 'Are you sure?',
-				text: "You won't be able to revert this!",
-				type: 'warning',
+				title: 'Delete Student !',
+				text: "Are you very sure you want to Delete \n the selected Student record ?",
 				buttons:{
 					confirm: {
-						text : 'Yes, delete it!',
-						className : 'btn btn-success'
+						text : 'YES, Delete it!',
+						className : 'btn btn-outline-success btn-rounded btn-full btn-sm'
 					},
 					cancel: {
 						visible: true,
-						className: 'btn btn-danger'
+						text : 'NO, Stop !',
+						className: 'btn btn-outline-danger btn-rounded btn-sm'
 					}
 				}
 			}).then((Delete) => {
@@ -175,16 +203,11 @@
 
 				} else {
 					swal({
-						title: 'Abort!',
-						text: 'The record is retained.',
-						type: 'info',
+						icon: 'error', timer: 2000,
 						buttons : {
-							confirm: {
-								className : 'btn btn-info'
-							}
+							 visible: false,
 						}
 					});
-					swal.close();
 				}
 			});
 

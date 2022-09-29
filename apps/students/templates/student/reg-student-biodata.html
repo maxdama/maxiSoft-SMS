@@ -74,11 +74,7 @@
                                     {% endif %}
                                 </div>
                             </div>
-                            <!--
-                            <div class="card-action">
 
-                            </div>
-                            -->
                         </div>
                     </div>
                     <div class="col col-md-9">
@@ -93,64 +89,63 @@
 
                             <div class="card-body">
                                 <!-- Column Rows Left Justification  -->
-                                <div class="row d-flex justify-content-left text-left">
+                                <div class="row d-flex justify-content-left text-left pb-3">
                                     <div class="col-4 ">
 
                                         <div class="form-group form-floating-label">
-                                            <input id="surname" type="text" value="{{student.surname}}" class="form-control input-border-bottom" name="surname" required>
-                                            <label for="surname" class="placeholder">Surname</label>
+                                            <input id="surname" type="text" name="surname" value="{{student.surname}}" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom"  required>
+                                            <label for="surname" class="placeholder">* Surname</label>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group form-floating-label">
-                                            <input id="firstname" type="text" value="{{student.first_name}}" class="form-control input-border-bottom" name="first_name" required>
-                                            <label for="firstname" class="placeholder">First Name</label>
+                                            <input id="firstname" type="text" value="{{student.first_name}}" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" name="first_name" required>
+                                            <label for="firstname" class="placeholder">* First Name</label>
                                         </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group form-floating-label">
-                                            <input id="othername" type="text" value="{{student.middle_name}}" name="middle_name" class="form-control input-border-bottom">
+                                            <input id="othername" type="text" value="{{student.middle_name}}" name="middle_name" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom">
                                             <label for="othername" class="placeholder">Other Name</label>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row d-flex justify-content-left text-left">
+                                <div class="row d-flex justify-content-left text-left pb-3">
                                     <div class="col-4 ">
                                        <div class="form-group form-floating-label">
-										<select id="gender" name="gender" class="form-control input-border-bottom"  required>
+										<select id="gender" name="gender" class="form-control input-border-bottom pb-1"  required>
 											<option value="{{student.gender}}" hidden>{{student.gender}}</option>
 											<option>Male</option>
 											<option>Female</option>
-
 										</select>
-										<label for="gender" class="placeholder">Gender</label>
+										<label for="gender" class="placeholder">* Gender</label>
 									    </div>
                                     </div>
                                      <div class="col-4">
                                          <!-- Date of Birt -->
                                          <div class="form-group form-floating-label">
-                                             <input  type="date" id="dob" class="form-control input-border-bottom" name="dob"  value="{{student.dob|date:'Y-m-d'}}" required>
-                                             <label for="dob" class="placeholder">Birth Date</label>
+                                             <input  type="date" id="dob" class="form-control input-border-bottom pb-0" name="dob"  value="{{student.dob|date:'Y-m-d'}}" required>
+                                             <label for="dob" class="placeholder">* Date of Birth</label>
                                          </div>
                                     </div>
                                     <div class="col-4">
                                         <div class="form-group form-floating-label">
-                                            <input type="tel" id="phone" value="{{student.phone_no}}" class="form-control input-border-bottom" name="phoneno"  pattern="[0-9]{11}" >
+                                            <input type="tel" id="phone" value="{{student.phone_no}}" class="form-control input-border-bottom pb-0" name="phoneno"  pattern="[0-9]{11}" >
                                             <label for="phone" class="placeholder">Mobile No:</label>
                                         </div>
 
                                     </div>
                                 </div>
-                                <div class="row d-flex justify-content-left text-left">
+                                <div class="row d-flex justify-content-left text-left pb-3">
                                     <div class="col-5 ">
                                         <div class="form-group form-floating-label">
-                                            <input id="email" value="{{student.email}}" name="email" type="text" class="form-control input-border-bottom" >
+                                            <input id="email" value="{{student.email}}" name="email" type="text" class="form-control input-border-bottom pb-0" >
                                             <label for="email" class="placeholder">Email</label>
                                         </div>
                                     </div>
                                     <div class="col-3 ">
                                         <div class="form-group form-floating-label">
-                                            <select class="form-control input-border-bottom" id="bloodgroup" name="bloodgroup" >
+                                            <select class="form-control input-border-bottom pb-1" id="bloodgroup" name="bloodgroup" >
 											<option value="{{student.bloodgroup}}" hidden>{{student.bloodgroup}}</option>
 											<option>A+</option>
 											<option>O+</option>
@@ -166,21 +161,19 @@
                                     </div>
                                     <div class="col-4 ">
                                         <div class="form-group form-floating-label">
-                                            <select class="form-control input-border-bottom" id="religion" name="religion" >
-											<option value="{{student.religion}}" hidden>{{student.religion}}</option>
-											<option>Christianity</option>
-											<option>Islam</option>
-
-										</select>
+                                            <select class="form-control input-border-bottom pb-1" id="religion" name="religion" >
+                                                <option value="{{student.religion}}" hidden>{{student.religion}}</option>
+                                                <option>Christianity</option>
+                                                <option>Islam</option>
+										    </select>
 										<label for="religion" class="placeholder">Religion</label>
                                         </div>
                                     </div>
-
                                 </div>
-                                <div class="row d-flex justify-content-left text-left">
+                                <div class="row d-flex justify-content-left text-left pb-3">
                                     <div class="col-5 ">
                                         <div class="form-group form-floating-label">
-                                            <select class="form-control input-border-bottom" id="nationality"  name="nationality">
+                                            <select class="form-control input-border-bottom pb-1" id="nationality"  name="nationality">
 											<option value="{{student.nationality}}" selected hidden >{{student.nationality}}</option>
 											<option>Nigeria</option>
 											<option>Ghana</option>
@@ -195,23 +188,23 @@
                                     </div>
                                     <div class="col-3 ">
                                         <div class="form-group form-floating-label">
-                                            <select class="form-control input-border-bottom" id="state"  name="state">
-											<option value="{{student.state_origin}}" hidden>{{student.state_origin}}</option>
-											<option>Rivers</option>
-											<option>Bayelsa</option>
-                                            <option>Kwara</option>
-											<option>Niger</option>
-											<option>Adamawa</option>
-                                            <option>Yola</option>
-											<option>Kogi</option>
-                                            <option>Plateau</option>
+                                            <select class="form-control input-border-bottom pb-1" id="state"  name="state">
+                                                <option value="{{student.state_origin}}" hidden>{{student.state_origin}}</option>
+                                                <option>Rivers</option>
+                                                <option>Bayelsa</option>
+                                                <option>Kwara</option>
+                                                <option>Niger</option>
+                                                <option>Adamawa</option>
+                                                <option>Yola</option>
+                                                <option>Kogi</option>
+                                                <option>Plateau</option>
 										    </select>
 										    <label for="state" class="placeholder">State Origin</label>
                                         </div>
                                     </div>
                                     <div class="col-4 ">
                                         <div class="form-group form-floating-label">
-                                            <select class="form-control input-border-bottom" id="lga" name="lga" >
+                                            <select class="form-control input-border-bottom pb-1" id="lga" name="lga" >
                                                 <option value="{{student.lga_origin}}" hidden>{{student.lga_origin}}</option>
                                                 <option>Port Harcourt</option>
                                                 <option>Ahoada</option>
@@ -232,7 +225,7 @@
                                      </div>
 
                                      <div class="col-4 ">
-                                        <button class="btn btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new_registration" >
+                                        <button class="btn btn-full btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new_registration" >
                                             {% if student.reg_status|lower == 'enrolled' %}
                                                 UPDATE
                                             {% else %}
@@ -242,7 +235,7 @@
                                      </div>
                                       <div class="col-4 ">
                                           {% if student.reg_status|lower == 'pending' or student.reg_status is None %}
-                                         <button class="btn btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new_registration" >
+                                         <button class="btn btn-full btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new_registration" >
                                                 SAVE & CONTINUE . . .
                                          </button>
                                           {% endif %}

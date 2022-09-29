@@ -4,7 +4,6 @@
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
-    <link rel="stylesheet" href="../../static/assets/sweetalert/msgstyles.css">
 
     <style class="">
     .file {
@@ -52,8 +51,6 @@
 
     </style>
 
-
-
 {% endblock stylesheets %}
 
 {% load static %}
@@ -76,81 +73,81 @@
                         <!-- Card Body  Student to Assign  -->
                         <div class="card-body">
                             <div class="row ">
-
                                 <!-- Column for Student Name and Address Controls  -->
-                                <div class="col col-sm-7">
+                                <div class="col col-sm-7 ">
                                     <div class="float-left">
-                                    <h3 class=""><strong>Parent / Guardian Entry</strong></h3><p>
+                                        <h3 class=""><strong>Parent / Guardian Entry</strong></h3><p>
 
-                                    {% if oprx_type == 'new-entry' %}
-                                    <div class="row">
-                                        <div class="avatar avatar-lg ml-4">
-                                            {% if student.stud_pic %}
-                                                <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
-                                            {% else %}
-                                                <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                        {% if oprx_type == 'new-entry' %}
+                                        <div class="row">
+                                            <div class="avatar avatar-lg ml-4">
+                                                {% if student.stud_pic %}
+                                                    <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
+                                                {% else %}
+                                                    <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="col-md-8 form-floating-label">
+                                                <input id="stud_names" type="text" style="font-weight:bold; font-size: 17px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}"
+                                                       class="form-control input-border-bottom pb-0" name="studentnames" required>
+                                                <label for="stud_names" class="placeholder">For: </label>
+                                            </div>
+
+                                            <div class="col-md-2 form-floating-label" hidden >
+                                                <input type="text" class="form-control input-border-bottom pb-1" id="reg_id" name="reg_id" value="{{student.pk}}"  required>
+                                                <label for="reg_id" class="placeholder">Stud ID</label>
+                                            </div>
+                                            {% if student.reg_no %}
+                                            <div class="col-md-3 form-floating-label">
+                                                <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
+                                                <label for="regno" class="placeholder">Registration No:</label>
+                                            </div>
                                             {% endif %}
                                         </div>
 
-                                        <div class="col-md-8 form-floating-label">
-                                            <input id="stud_names" type="text" style="font-weight:bold; font-size: 16px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}"
-                                                   class="form-control input-border-bottom pb-0" name="studentnames" required>
-                                            <label for="stud_names" class="placeholder">For: </label>
+                                        <div class="form-check pt-0 pl-lg-5 ml-4 pb-0">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="checkbox" value="True" id="not-together" name="not_with_guard">
+                                                <span class="form-check-sign">Student is not living with Guardian</span>
+                                            </label>
                                         </div>
 
-                                        <div class="col-md-2 form-floating-label" hidden >
-                                            <input type="text" class="form-control input-border-bottom pb-1" id="reg_id" name="reg_id" value="{{student.pk}}"  required>
-                                            <label for="reg_id" class="placeholder">Stud ID</label>
-                                        </div>
-                                        {% if student.reg_no %}
-                                        <div class="col-md-3 form-floating-label">
-                                            <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
-                                            <label for="regno" class="placeholder">Registration No:</label>
+                                        <div class="row student-address ml-lg-5 pl-lg-5 "  >
+                                            <!-- Student Residential Address  -->
+                                            <div class="col-4">
+                                                <div class="form-group form-floating-label pt-1 mt-1">
+                                                    <input id="res_addr_l1" type="text" value="{{student.res_addr_l1|default_if_none:''}}" name="res_addr_l1" class="form-control input-border-bottom pb-2" >
+                                                    <label for="res_addr" class="placeholder pb-0 mb-0">Student Residential Addr:</label>
+                                                </div>
+                                            </div>
+                                            <!-- Student Residentials Area -->
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label pt-1 mt-1">
+                                                    <input id="res_addr_l2" type="text" value="{{student.res_addr_l2|default_if_none:''}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
+                                                    <label for="res_area" class="placeholder pb-0 mb-0">Residential Area:</label>
+                                                </div>
+                                            </div>
+
+
+                                            <!-- student Residence City -->
+                                            <div class="col-3 ">
+                                                <div class="form-group form-floating-label pb-0 mb-0">
+                                                    <select class="form-control input-border-bottom pb-1" id="res_city" name="stud_res_city" >
+                                                        <option value="{{student.res_city|default_if_none:''}}" hidden>{{student.res_city|default_if_none:''}}</option>
+                                                        <option>Port Harcourt</option>
+                                                        <option>Ahoada</option>
+                                                        <option>Emoha</option>
+                                                    </select>
+                                                    <label for="city" class="placeholder pb-0 mb-0">City Residence:</label>
+                                                </div>
+                                            </div>
+
                                         </div>
                                         {% endif %}
                                     </div>
-
-                                    <div class="form-check pt-0 pl-lg-5 ml-4 pb-0">
-                                        <label class="form-check-label">
-                                            <input class="form-check-input" type="checkbox" value="True" id="not-together" name="not_with_guard">
-                                            <span class="form-check-sign">Student is not living with Guardian</span>
-                                        </label>
-                                    </div>
-
-                                    <div class="row student-address ml-lg-5 pl-lg-5 "  >
-                                        <!-- Student Residential Address  -->
-                                        <div class="col-4">
-                                            <div class="form-group form-floating-label pt-1 mt-1">
-                                                <input id="res_addr_l1" type="text" value="{{student.res_addr_l1|default_if_none:''}}" name="res_addr_l1" class="form-control input-border-bottom pb-2" >
-                                                <label for="res_addr" class="placeholder pb-0 mb-0">Student Residential Addr:</label>
-                                            </div>
-                                        </div>
-                                        <!-- Student Residentials Area -->
-                                        <div class="col-3">
-                                            <div class="form-group form-floating-label pt-1 mt-1">
-                                                <input id="res_addr_l2" type="text" value="{{student.res_addr_l2|default_if_none:''}}" name="res_addr_l2" class="form-control input-border-bottom pb-2">
-                                                <label for="res_area" class="placeholder pb-0 mb-0">Residential Area:</label>
-                                            </div>
-                                        </div>
-
-
-                                        <!-- student Residence City -->
-                                        <div class="col-3 ">
-                                            <div class="form-group form-floating-label pb-0 mb-0">
-                                                <select class="form-control input-border-bottom pb-1" id="res_city" name="stud_res_city" >
-                                                    <option value="{{student.res_city|default_if_none:''}}" hidden>{{student.res_city|default_if_none:''}}</option>
-                                                    <option>Port Harcourt</option>
-                                                    <option>Ahoada</option>
-                                                    <option>Emoha</option>
-                                                </select>
-                                                <label for="city" class="placeholder pb-0 mb-0">City Residence:</label>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    {% endif %}
-                                    </div>
                                 </div>
+
                                 {% if oprx_type == 'new-entry' %}
                                 <!-- Column for Selection of existing Parent / Guardian control -->
                                 <div class="col col-sm-5 ">
@@ -172,6 +169,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                {% else %}
+                                     <div class="col col-5  ">
+                                    <!--  Close button at the TOP Right Corner. Closes the form to Guardian List -->
+                                    <button id="close" class=" btn  btn-outline-dark  btn-rounded btn-sm float-lg-right"  type="button" >X</button>
+                                </div>
                                 {% endif %}
 
                             </div>
@@ -189,14 +191,15 @@
                                      <!-- Card Body Guardian Details -->
                                     <div class="card-body">
                                         <!-- Column Rows Left Justification  -->
-                                        <div class="row d-flex justify-content-left text-left">
+                                        <div class="row d-flex justify-content-left text-left pb-3">
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom" id="title" name="title" >
+                                                    <select class="form-control input-border-bottom pb-1" id="title" name="title" >
                                                         <option value="{{guardian.title}}" hidden>{{guardian.title}}</option>
                                                         <option></option>
                                                         <option>Mr</option>
                                                         <option>Mrs</option>
+                                                        <option>Miss</option>
                                                         <option>Chief</option>
                                                     </select>
                                                     <label for="title" class="placeholder">Title:</label>
@@ -205,14 +208,14 @@
 
                                             <div class="col-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input  id="surname" type="text" value="{{guardian.surname}}" class="form-control input-border-bottom" name="surname" required>
+                                                    <input  id="surname" type="text" value="{{guardian.surname}}" name="surname" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom"  required>
                                                     <label for="surname" class="placeholder">* Surname</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-4">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" class="form-control input-border-bottom" required>
+                                                    <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" required>
                                                     <label for="other_names" class="placeholder">* Other Names</label>
                                                 </div>
                                             </div>
@@ -220,16 +223,16 @@
                                             <div class="col-2">
                                                 {% if oprx_type == 'new-entry' %}
                                                 <div class="form-group form-floating-label">
-                                                    <input id="relationship" type="text" value="{{student.guardian_is|default_if_none:''}}" class="form-control input-border-bottom" name="relationship" required>
+                                                    <input id="relationship" type="text" name="relationship" value="{{student.guardian_is|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom"  required>
                                                     <label for="relationship" class="placeholder">* Relationship To Ward</label>
                                                 </div>
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="row d-flex justify-content-left text-left">
+                                        <div class="row d-flex justify-content-left text-left pb-3">
                                             <div class="col-2 ">
                                                <div class="form-group form-floating-label">
-                                                <select id="gender" name="gender" class="form-control input-border-bottom"  required>
+                                                <select id="gender" name="gender" class="form-control input-border-bottom pb-1 "  required>
                                                     <option value="{{guardian.gender}}" hidden>{{guardian.gender}}</option>
                                                     <option>Male</option>
                                                     <option>Female</option>
@@ -241,20 +244,20 @@
 
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone1" value="{{guardian.mobile_no1}}" class="form-control input-border-bottom" name="mobile_no1"  pattern="[0-9]{11}" required >
+                                                    <input type="tel" id="phone1" value="{{guardian.mobile_no1}}" class="pb-0 form-control input-border-bottom" name="mobile_no1"  pattern="[0-9]{11}" required >
                                                     <label for="phone1" class="placeholder">* Mobile No:</label>
                                                 </div>
                                             </div>
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone2" value="{{student.mobile_no2}}" class="form-control input-border-bottom" name="mobile_no2"  pattern="[0-9]{11}" >
+                                                    <input type="tel" id="phone2" value="{{student.mobile_no2}}" class="pb-0 form-control input-border-bottom" name="mobile_no2"  pattern="[0-9]{11}" >
                                                     <label for="phone2" class="placeholder">Phone No:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-4 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="email" value="{{guardian.email}}" name="email" type="text" class="form-control input-border-bottom" >
+                                                    <input id="email" value="{{guardian.email}}" name="email" type="text" class="pb-0 form-control input-border-bottom" >
                                                     <label for="email" class="placeholder">Email</label>
                                                 </div>
                                             </div>
@@ -265,14 +268,14 @@
 
                                             <div class="col-5">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="res_addr" type="text" value="{{guardian.res_addr}}" name="res_addr" class="form-control input-border-bottom">
+                                                    <input id="res_addr" type="text" value="{{guardian.res_addr}}" name="res_addr" class="pb-0 form-control input-border-bottom">
                                                     <label for="res_addr" class="placeholder">Residential Addr:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="res_area" type="text" value="{{guardian.res_area}}" name="res_area" class="form-control input-border-bottom">
+                                                    <input id="res_area" type="text" value="{{guardian.res_area}}" name="res_area" class="pb-0 form-control input-border-bottom">
                                                     <label for="res_area" class="placeholder">Residential Area:</label>
                                                 </div>
                                             </div>
@@ -280,7 +283,7 @@
                                             <!-- Guardian Residence City  -->
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom" id="city" name="res_city" >
+                                                    <select class="form-control input-border-bottom pb-1" id="city" name="res_city" >
                                                         <option value="{{guardian.res_city}}" hidden>{{guardian.res_city}}</option>
                                                         <option>Port Harcourt</option>
                                                         <option>Ahoada</option>
@@ -292,7 +295,7 @@
 
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom" id="state"  name="res_state">
+                                                    <select class="form-control input-border-bottom pb-1" id="state"  name="res_state">
                                                     <option value="{{guardian.res_state}}" hidden>{{guardian.res_state}}</option>
                                                     <option>Rivers</option>
                                                     <option>Bayelsa</option>
@@ -318,10 +321,12 @@
                                                      {% if student.reg_status|lower == 'pending' %}
                                                         <button class="btn btn-outline-warning btn-rounded btn-sm"  type="reset" >Clear or Reset</button>
                                                      {% endif %}
+                                                 {% else %}
+
                                                  {% endif %}
                                              </div>
                                              <div class="col-4 ">
-                                                <button class="btn btn-outline-success btn-rounded btn-sm "  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/{{oprx_type}}" >
+                                                <button class="btn btn-full btn-outline-success btn-rounded btn-sm "  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/{{oprx_type}}" >
                                                     {% if student.reg_status|lower == 'enrolled' or oprx_type == 'edit-entry' %}
                                                          U P D A T E
                                                     {% else %}
@@ -333,7 +338,7 @@
                                               <div class="col-4 ">
                                                   {% if oprx_type == 'new-entry' %}
                                                       {% if student.reg_status|lower != 'enrolled' %}
-                                                        <button class="btn btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new/{{oprx_type}}" >
+                                                        <button class="btn btn-full btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new/{{oprx_type}}" >
                                                             S A V E  &  Continue
                                                         </button>
                                                       {% endif %}
@@ -432,6 +437,11 @@
     <script>
 
      $(document).ready(function(){
+          $("#close").click(function(){
+              location.href='/guardians/list'
+              // alert('The Close Button is CLICKED . . . ')
+          });
+
          if (!$('#not-together').is(':checked')) {  //If the CheckBox is NOT Checked
              $(".student-address").hide()
          }
@@ -516,7 +526,7 @@
                 } else if (action === 'yes'){
                    swal({
                        icon: "success",
-                       timer: 3000,
+                       timer: 2500,
                        button: {
                            text: "OK",
                            visible: false,

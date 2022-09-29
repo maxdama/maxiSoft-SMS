@@ -139,18 +139,19 @@ def delete_guardian(request, gad_id):
     if guardian:
         try:
             guardian.delete()
-            messages.warning(request, 'Guardian Record deleted')
+            messages.success(request, 'Guardian Record deleted')
 
         except RestrictedError:
-            messages.warning(request, 'Student is already assigned to this Guardian. Delete is Aborted')
+            messages.error(request, 'Delete of Guardian Record is Aborted. Student is already assigned to this Guardian.')
             gad_id = None
     else:
-        messages.info(request, 'Guardian Record can not be deleted')
+        messages.warning(request, 'Guardian Record can not be deleted')
     return redirect(guardian_list)
 
 
 @login_required
 def view_guardian_for_update(request, gad_id, stud_id, oprx_type='edit-entry'):
+    print('view_guardian_for_update: - Function ----')
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -161,36 +162,47 @@ def view_guardian_for_update(request, gad_id, stud_id, oprx_type='edit-entry'):
     context = {}
     children = []
     guardians = []
+    guardian = {}
 
     if oprx_type == 'edit-entry':
         print('----- Query Children of this Parent  ')
         children = sm.Students.objects.filter(school_id=sch_id, guardian_id=gad_id)
         print(children)
     else:
+        print('----- Query Guardians for Selection List ')
         # list of Parents/Guardians for Selection
         guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
 
     if stud_id > 0:
         student = sm.Students.objects.get(pk=stud_id)
+        print('----- Query the specified Student')
+        print(student)
     elif stud_id == 0 and gad_id > 0:
+        print('----- Query the last pending Student assigned to the Guardian')
         # Use guardian ID to get the ID of the last student assigned and pending.
         student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
         print(student)
+        guardian = gm.Guardians.objects.filter(id=gad_id).last()
 
-    context = {'student': student, 'gad_list': guardians, 'children': children, 'oprx_type':  oprx_type}
+    context = {'student': student, 'gad_list': guardians, 'children': children, 'oprx_type': oprx_type, 'guardian': guardian}
 
     if oprx_type == 'select-parent':
+        print('----- Query Quardian with the specified gad_id')
         guardian = gm.Guardians.objects.get(pk=gad_id)
         context2 ={'oprx_type': 'new-entry', 'guardian': guardian}
         context.update(context2)
 
     else:
         if gad_id > 0 and student:
+            print('----- gad_id > 0 and Student data is True ')
             try:
+                print('----- Query Quardian from Student assigned')
                 guardian = gm.Guardians.objects.get(pk=student.guardian_id)
                 context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
 
             except gm.Guardians.DoesNotExist:
+                print('----- Guardian does_not_exists is True. ')
+                print('----- Query Guardian with gad_id ')
                 messages.warning(request, 'Guardian was not found for Update')
                 guardian = gm.Guardians.objects.get(pk=gad_id)
                 context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
