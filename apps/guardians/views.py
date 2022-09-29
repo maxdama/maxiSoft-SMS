@@ -31,7 +31,7 @@ def update_guardian(request, sch_id):
         guardian.mobile_no1 = request.POST['mobile_no1']
         guardian.mobile_no2 = request.POST['mobile_no2']
         guardian.email = request.POST['email']
-        guardian.relationship = request.POST['relationship']
+        # guardian.relationship = request.POST['relationship']
         # guardian.stays_together = request.POST['stays_together']
         guardian.save()
 
@@ -74,31 +74,37 @@ def student_update(request, student, guardian):
 
 @login_required
 def new_guardian(request, oprx_type='edit-entry'):
+    print('New Guardian: -- ')
+
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
         return redirect("logout")
 
+    print(f'----- Operation Type:  {oprx_type}')
     reg_id = 0
     student = {}
     if request.method == 'POST':
+        print('----- POST Request Method ')
         if oprx_type == 'new-entry':
             reg_id = request.POST['reg_id']
             student = sm.Students.objects.get(pk=reg_id)
 
         form = GuardianForm(request.POST)
         if form.is_valid():
+            print('----- Valid Guardian Form Confirmation')
             g_id = request.POST['gad_id']
 
-            if request.POST['gad_id']:    # Check if Guardian ID exists from POSTED form.
-                guardian = update_guardian(request, sch_id)  # Update Guardian model
+            if request.POST['gad_id']:    # Check if Guardian ID exists from form Posted then Update.
+                # Update Guardian model
+                guardian = update_guardian(request, sch_id)
                 context = {'reg_id': reg_id, 'gad_id': request.POST['gad_id'], 'student': student, 'guardian': guardian}
                 messages.success(request, "Guardian Updated successfully.")
                 # return render(request, 'student/reg-enrollment.html', context)
             else:
+                # New Guardian Entry
                 # Get guardian model object–
                 # guardian = form.save(commit=False)  # commit=False means that we don't want to save the guardian model yet#
-
                 form.instance.title = request.POST['title']
                 form.instance.res_addr = request.POST['res_addr']
                 form.instance.res_area = request.POST['res_area']
@@ -120,6 +126,7 @@ def new_guardian(request, oprx_type='edit-entry'):
             else:
                 return redirect('guardians') # route through guardian-url to guardian_list below
         else:
+            print('----- Invalid Guardian Form Confirmation')
             context = {'student': student, 'guardian': form }
             return render(request, 'guardians/reg-guardians-biodata.html', context)
     else:
@@ -143,7 +150,7 @@ def delete_guardian(request, gad_id):
 
 
 @login_required
-def view_guardian_for_update(request, gad_id, reg_id, oprx_type='edit-entry'):
+def view_guardian_for_update(request, gad_id, stud_id, oprx_type='edit-entry'):
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -163,27 +170,34 @@ def view_guardian_for_update(request, gad_id, reg_id, oprx_type='edit-entry'):
         # list of Parents/Guardians for Selection
         guardians = gm.Guardians.objects.all().only('surname', 'other_names').order_by('surname')
 
-    if reg_id > 0:
-        student = sm.Students.objects.get(pk=reg_id)
-    elif reg_id == 0 and gad_id > 0:
+    if stud_id > 0:
+        student = sm.Students.objects.get(pk=stud_id)
+    elif stud_id == 0 and gad_id > 0:
         # Use guardian ID to get the ID of the last student assigned and pending.
         student = sm.Students.objects.filter(guardian_id=gad_id, reg_status='pending').order_by('-id').last()
         print(student)
+
     context = {'student': student, 'gad_list': guardians, 'children': children, 'oprx_type':  oprx_type}
 
-    if gad_id > 0 and student:
-        try:
-            guardian = gm.Guardians.objects.get(pk=student.guardian_id)
-            context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
+    if oprx_type == 'select-parent':
+        guardian = gm.Guardians.objects.get(pk=gad_id)
+        context2 ={'oprx_type': 'new-entry', 'guardian': guardian}
+        context.update(context2)
 
-        except gm.Guardians.DoesNotExist:
-            messages.warning(request, 'Guardian was not found for Update')
-            guardian = gm.Guardians.objects.get(pk=gad_id)
-            context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
-            gad_id = 0
+    else:
+        if gad_id > 0 and student:
+            try:
+                guardian = gm.Guardians.objects.get(pk=student.guardian_id)
+                context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
 
-        context1 = {'show_parent_child': True, 'children': children, 'oprx_type':  oprx_type}
-        context.update(context1)
+            except gm.Guardians.DoesNotExist:
+                messages.warning(request, 'Guardian was not found for Update')
+                guardian = gm.Guardians.objects.get(pk=gad_id)
+                context = {'student': student, 'guardian': guardian, 'gad_list': guardians}
+                gad_id = 0
+
+            context1 = {'show_parent_child': True, 'children': children, 'oprx_type':  oprx_type}
+            context.update(context1)
 
     return render(request, 'guardians/reg-guardians-biodata.html', context)
 

@@ -261,7 +261,7 @@ def new_student_registration(request):
                 else:
                     messages.success(request, 'Student register Updated ')
 
-                return redirect('guardian', gad_id=gad_id, reg_id=stud.pk, oprx_type='new-entry')
+                return redirect('guardian', gad_id=gad_id, stud_id=stud.pk, oprx_type='new-entry')
         else:
             return render(request, "student/reg-student-biodata.html", {'student': request.POST, 'sch_id': sch_id})
     else:

@@ -4,54 +4,55 @@
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
+    <link rel="stylesheet" href="../../static/assets/sweetalert/msgstyles.css">
+
     <style class="">
     .file {
       visibility: hidden;
       position: absolute;
     }
-    </style>
 
+    .div-btn{
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+    }
 
-    <style class="">
-        .div-btn{
-            color: #333;
-            background-color: #fff;
-            border-color: #ccc;
-        }
+    .div-btn:hover{
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+    }
 
-        .div-btn:hover{
-            color: #333;
-            background-color: #e6e6e6;
-            border-color: #adadad;
-        }
+    .swal-title {
+      margin: 0px;
+      font-size: 23px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+        text-align: -moz-center;
+    }
 
-        .swal-title {
-          margin: 0px;
-          font-size: 23px;
-          box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
-          margin-bottom: 28px;
-            text-align: -moz-center;
-        }
+    .swal-text {
+      background-color: rgb(255, 255, 255);
+      padding: 17px;
+      border: 1px solid rgba(240, 225, 161, 0.94);
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+      font-size: 17px;
+    }
 
-        .swal-text {
-          background-color: rgb(255, 255, 255);
-          padding: 17px;
-          border: 1px solid rgba(240, 225, 161, 0.94);
-          display: block;
-          margin: 22px;
-          text-align: center;
-          color: #61534e;
-          font-size: 17px;
-        }
-
-        .swal-footer {
-          background-color: rgb(245, 248, 250);
-          margin-top: 32px;
-          border-top: 4px solid #E9EEF1;
-          overflow: hidden;
-        }
+    .swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 4px solid #E9EEF1;
+      overflow: hidden;
+    }
 
     </style>
+
+
 
 {% endblock stylesheets %}
 
@@ -209,7 +210,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-5">
+                                            <div class="col-4">
                                                 <div class="form-group form-floating-label">
                                                     <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" class="form-control input-border-bottom" required>
                                                     <label for="other_names" class="placeholder">* Other Names</label>
@@ -217,10 +218,12 @@
                                             </div>
 
                                             <div class="col-2">
+                                                {% if oprx_type == 'new-entry' %}
                                                 <div class="form-group form-floating-label">
-                                                    <input id="relationship" type="text" value="{{guardian.relationship}}" class="form-control input-border-bottom" name="relationship" required>
-                                                    <label for="relationship" class="placeholder">* Relationship</label>
+                                                    <input id="relationship" type="text" value="{{student.guardian_is|default_if_none:''}}" class="form-control input-border-bottom" name="relationship" required>
+                                                    <label for="relationship" class="placeholder">* Relationship To Ward</label>
                                                 </div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="row d-flex justify-content-left text-left">
@@ -318,9 +321,9 @@
                                                  {% endif %}
                                              </div>
                                              <div class="col-4 ">
-                                                <button class="btn btn-outline-success btn-rounded btn-sm"  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/{{oprx_type}}" >
-                                                    {% if student.reg_status|lower == 'enrolled' %}
-                                                        U P D A T E
+                                                <button class="btn btn-outline-success btn-rounded btn-sm "  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/{{oprx_type}}" >
+                                                    {% if student.reg_status|lower == 'enrolled' or oprx_type == 'edit-entry' %}
+                                                         U P D A T E
                                                     {% else %}
                                                         S A V E
                                                     {% endif %}
@@ -347,7 +350,7 @@
                             {% if show_parent_child %}
                                 <!-- Guardian Wards row -->
                                  <div class="row justify-content-left mb-1 ml-5 pl-5 ">
-                                     <div class="ml-2 col-sm-5  text-secondary fw-extrabold"> Children / Wards</div>
+                                     <div class="ml-2 col-sm-5  text-secondary fw-extrabold">Guardian Children / Wards</div>
                                  </div>
 
                                 <div class="row d-flex justify-content-left ml-5 pl-5 ">
@@ -359,8 +362,8 @@
                                         <div class="card child-edit div-btn" value="{{count}}" id="child-{{count}}">
                                             <div class="card-body mt-0 pt-0">
                                                 <div class="font-weight-bolder text-primary mt-0 pt-0 ">Ward-{{count}}:</div>
-                                                <div class="row">
-                                                    <div class="col col-sm-4">
+                                                <div class="row  ">
+                                                    <div class="col col-sm-4 ">
                                                         <!-- Picture Column -->
                                                         <div class="avatar avatar-lg ">
                                                             {% if child.stud_pic %}
@@ -371,13 +374,20 @@
                                                         </div>
                                                     </div>
                                                     <div class="col col-sm-8 ">
-                                                        <!-- Names and Class Column -->
-                                                        <span class="id-ward{{count}} text-hide">{{child.id}}</span>
-                                                        <span class="ward-class-{{count}} font-italic text-sm-center"> Guardian is {% if child.gender == 'Male' %} his {% else %} her {% endif %}: </span>
-                                                        <span class="related-{{count}} font-weight-bold "> {{child.guardian_is}} </span>
+                                                        <div class="row">
+                                                            <div class="col col-12 ">
+                                                                <!-- Names and Class Column -->
+                                                                <span class="id-ward{{count}} text-hide">{{child.id}}</span>
+
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div class="col-sm-12 name-ward{{count}}">{{child.surname}} {{child.first_name}} {{child.middle_name}}   </div>
 
+                                                </div>
+                                                <div class="row text-small">
+                                                    <span class="ward-class-{{count}} font-italic "> Relationship to Guardian: </span>
+                                                    <span class="related-{{count}} font-weight-bold "> {{child.guardian_is}} </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -451,7 +461,7 @@
             let guard_name = $("#stud_guardian option:selected").text();
             if(gad_id!=''){
                 // alert('Guardian ID:' )
-                location.href='/guardians/entry/' + gad_id + '/' + stud_id + '/new-entry'
+                location.href='/guardians/entry/' + gad_id + '/' + stud_id + '/select-parent'
             }else{
                 alert('Guardian is NOT Selected')
             }
@@ -493,10 +503,9 @@
                 }
             }).then((action) => {
 				if (action === 'change') {
-                    alert('Change the Guardian for this Ward')
-                    let guard_id = 0
-                    let url = '/guardians/update/'+ guard_id + '/' + stud_id + '/new-entry'
-                    location.href = url
+                    //alert('Change the Guardian for this Ward')
+                    let guard_id = '{{guardian.pk}}'
+                    location.href = '/guardians/entry/'+ guard_id + '/' + stud_id + '/new-entry'
 
 				} else if (action === 'remove') {
                     let url = '/guardians/update_relationship'
@@ -506,11 +515,12 @@
 
                 } else if (action === 'yes'){
                    swal({
-                      icon: "success",
+                       icon: "success",
+                       timer: 3000,
                        button: {
-                          text: "OK",
-                          visible: false,
-                          closeModal: true,
+                           text: "OK",
+                           visible: false,
+
                         }
                     });
                 }
