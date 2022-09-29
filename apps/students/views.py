@@ -329,7 +329,7 @@ def continue_registration(request, reg_id, reg_step):
 
         if reg_step == 1:
             try:
-                # Query Guardian with Student Guardian ID and if successful request financial Enrollment Form
+                # Query Guardian with Student Guardian-ID and if successful request financial Enrollment Form
                 # otherwise, if no guarding entry an exception is thrown that request the Guardian form
                 guardian = gm.Guardians.objects.get(id=student.guardian_id or None)
                 if guardian:
@@ -344,6 +344,7 @@ def continue_registration(request, reg_id, reg_step):
                 context2 = { 'gad_list': guardians, 'show_parent_child': False, 'oprx_type': oprx_type}
                 context.update(context2)  # The update is used to concatenate context2 to context ( Concatenate )
                 messages.info(request, "Please Enter or Select Parent / Guardian for the Student")
+
                 return render(request, "guardians/reg-guardians-biodata.html", context)
 
             except Exception as e:

@@ -325,7 +325,7 @@
                                                     {% if student.reg_status|lower == 'enrolled' or oprx_type == 'edit-entry' %}
                                                          U P D A T E
                                                     {% else %}
-                                                        S A V E
+                                                        S A V E {{oprx_type}}
                                                     {% endif %}
                                                 </button>
                                              </div>
@@ -546,7 +546,7 @@
                     let x = data.card_id
                     $("#child-" + x).remove();
 
-                    //ajaxAction('success', data)
+                    ajaxAction('success', data)
                 },
                 error: function(xhr, status, error){
                     alert("An Error occured:" + "\n" + error);
@@ -561,8 +561,15 @@
 
          function ajaxAction(status, data){
              if (status == 'success'){
-                 alert(data.data)
-                 $("#card-1").remove();
+                  swal({
+                       icon: "success",
+                       timer: 2000,
+                       button: {
+                           text: "OK",
+                           visible: false,
+
+                        }
+                    });
              }else{
                  alert('Operation Failed')
              }

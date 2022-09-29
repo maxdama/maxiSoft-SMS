@@ -130,7 +130,7 @@ def new_guardian(request, oprx_type='edit-entry'):
             context = {'student': student, 'guardian': form }
             return render(request, 'guardians/reg-guardians-biodata.html', context)
     else:
-        return render(request, 'guardians/reg-guardians-biodata.html')
+        return render(request, 'guardians/reg-guardians-biodata.html', {'oprx_type': 'entry'})
 
 
 @login_required
@@ -213,6 +213,11 @@ def guardian_list(request):
 
 
 def update_relationship(request):
+    """ The function removes existing relationship between Parent and Student.
+        It does this by updating the guardian_id column to None
+    """
+    print('update_relationship function: ---')
+
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -221,13 +226,28 @@ def update_relationship(request):
     stud_id = request.POST['stud_id']
     card_id = request.POST['card_id']
 
-    print(f'Student ID: {stud_id}')
-    print('Testing Ajax URL POST Request . . .')
+    print(f'----- Student ID: {stud_id}')
+
     msg = f'Student being Processed: ID= {stud_id}'
+    try:
+        # If there is Student record is found
+        student = sm.Students.objects.filter(school_id=sch_id, id=stud_id)
+        reg_status = None
+        if student:
+            reg_status = student[0].reg_status
 
-    student = sm.Students.objects.filter(school_id=sch_id, id=stud_id).update(guardian_id=None)
+        if reg_status == 'pending':
+            print(reg_status)
+            # Update student guardian to None and set the registration steps to 1
+            update = student.update(guardian_id=None, reg_steps=1)
+        else:
+            # Update student guardian to None
+            update = student.update(guardian_id=None)
 
-    if not student:
-        card_id = 0
+        if not update:
+            card_id = 0
+    except:
+        print('-----  An Error Occured: Operation Failed')
+        messages.info (request, 'Student Record not found')
 
     return JsonResponse({'data': msg, 'card_id': card_id})
