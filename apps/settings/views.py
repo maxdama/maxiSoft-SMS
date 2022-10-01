@@ -215,7 +215,7 @@ def map_form_fields(request, term_id, data):
     if data == 'cal_data':
         context = {
             "school": request.POST['school'],
-            "tl_id": request.POST['tl_id'],
+            "timeline": request.POST['timeline'],
             "acad_yr": request.POST['acada_yr'],
             "start_dt": request.POST['start_dt'],
             "end_dt": request.POST['end_dt'],
@@ -254,6 +254,8 @@ def map_form_fields(request, term_id, data):
 
 
 def setup_academic_calender(request):
+    print('setup_academic_calener - Function ')
+
     school = schools(request)
     sch_id = school['sch_id']
     if sch_id == 0:
@@ -278,7 +280,7 @@ def setup_academic_calender(request):
                 # print(date_data)
 
                 try:
-                    acad_cal = AcademicCalender.objects.get(school=sch_id, tl_id=timeline.id, term_id=s.term_id)
+                    acad_cal = AcademicCalender.objects.get(school=sch_id, timeline=timeline.id, term_id=s.term_id)
                     # If acad_cal is not null (has data) then get AcademicCalender for update
                     form_cal = AcademicCalenderForm(cal_data or None, instance=acad_cal)
                     action = 'Updated'
@@ -322,16 +324,14 @@ def setup_academic_calender(request):
                     return render(request, 'setup/academic-calender.html', data)
 
         else:
-            data = {
-                # 'sch_id': sch_id,
-                'sessx': sessxs,
-                'timeline': timeline,
-            }
+            print('----- Request Method: = GET')
+            data = { 'sessx': sessxs, 'timeline': timeline,} # 'sch_id': sch_id,
+            print(sessxs)
             for s in sessxs:
                 try:
                     # acad_cal = AcademicCalender.objects.get(sch_id=sch_id, tl_id=timeline.id, term_id=s.term_id)
-                    acad_cal = AcademicCalender.objects.get(school=sch_id, tl_id=timeline.id, term_id=s.term_id)
-                    # print(acad_cal.acad_yr)
+                    acad_cal = AcademicCalender.objects.get(school=sch_id, timeline=timeline.id, term_id=s.term_id)
+                    print(acad_cal.acad_yr)
                     # form = AcademicCalenderForm(instance=acad_cal)
                     # tbl_data = map_form_fields(acad_cal, s.term_id, 'tbl_data')
                     if s.term_id == 1:

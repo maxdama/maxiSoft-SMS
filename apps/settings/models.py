@@ -108,7 +108,7 @@ class AcademicTimeLine(models.Model):
 class AcademicCalender(models.Model):
     sch_id = models.IntegerField(unique=False, null=True, blank=True)
     school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False, blank=True, null=True)
-    tl_id = models.ForeignKey(AcademicTimeLine, on_delete=models.RESTRICT, null=True, blank=True, unique=False, db_constraint=False)
+    timeline = models.ForeignKey(AcademicTimeLine, on_delete=models.RESTRICT, null=True, blank=True, unique=False, db_constraint=False)
     acad_yr = models.CharField(max_length=30, unique=False, null=False)
     start_dt = models.DateField(default=None, null=False, blank=True, db_index=True)
     end_dt = models.DateField(default=None, null=False, blank=True, db_index=True)

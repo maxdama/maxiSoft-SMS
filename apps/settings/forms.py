@@ -174,7 +174,7 @@ class AcademicTimelineForm(forms.ModelForm):
 class AcademicCalenderForm(forms.ModelForm):
     class Meta:
         model = AcademicCalender
-        fields = ('school', 'tl_id', 'acad_yr', 'start_dt', 'end_dt', 'term_id', 'cs_start_dt', 'cs_end_dt',
+        fields = ('school', 'timeline', 'acad_yr', 'start_dt', 'end_dt', 'term_id', 'cs_start_dt', 'cs_end_dt',
                   'mb_start_dt', 'mb_end_dt', 'hs_start_dt', 'hs_end_dt', 'status')
 
     """
