@@ -145,14 +145,14 @@ class AcademicTimelineForm(forms.ModelForm):
                             )
                             )
 
-    st_dt = forms.DateField(label='Begins', required=False,
+    st_dt = forms.DateField(label='Start Date', required=False,
                             widget=forms.DateInput(
                                 attrs={'id': 'st_id', "placeholder": "dd/mm/yyyy", 'type': 'date', 'required': True,
                                        'autofocus': True, 'class': 'form-control form-control-sm'}
                             )
                             )
 
-    ed_dt = forms.DateField(label='Ends', required=False,
+    ed_dt = forms.DateField(label='End Date', required=False,
                             widget=forms.DateInput(
                                 attrs={'id': 'ed_id', "placeholder": "dd/mm/yyyy", 'type': 'date',
                                        'class': 'datepicker form-control form-control-sm'}
