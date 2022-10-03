@@ -62,7 +62,7 @@ def query_acadamic_years(sch_id):
 def academic_timeline(request):
     # Initial call (GET) Display Academic timeline for Editing if data for school id is in table and status is 'Active'
     # otherwise a new Academic Year is saved into table
-    # If POST opoeration, form data is saved and redirected to Academic List
+    # If POST opoeration, form data is saved and redirected to Academic timeline List
 
     context = {}
     school = schools(request)
@@ -70,7 +70,7 @@ def academic_timeline(request):
     if sch_id == 0:
         return redirect("logout")
 
-    if not SchoolProfiles.objects.filter(sch_id=sch_id).exists():
+    if not SchoolProfiles.objects.filter(sch_id=sch_id).exists(): # if no school profile
         messages.info(request, 'Your School Profile must be entered first. Then after you can enter Academic Timeline.')
         return redirect('profile')
 
@@ -79,14 +79,14 @@ def academic_timeline(request):
 
     if request.method == 'GET':
         try:
-            new_opr = False
             timeline = AcademicTimeLine.objects.get(sch_id=sch_id, status='active')
             form = AcademicTimelineForm(instance=timeline)
             uid = timeline.id
+            new_opr = False
         except:
-            new_opr = True
             data = {'sch_id': sch_id}
             form = AcademicTimelineForm(data)
+            new_opr = True
 
         context = {'acad': form, 'new_opr': new_opr, 'sch_id': sch_id, 'uid': uid}
         return render(request, 'setup/academic-timeline.html', context)
@@ -119,13 +119,33 @@ def academic_timeline(request):
                 timeline = form.save(commit=False)
                 timeline.save()
                 sch_id = timeline.sch_id
+                messages.success(request, "The School Academic timeline is Updated Successfully.")
             else:
                 messages.warning(request, form.errors)
                 form = AcademicTimelineForm(request.POST)
                 context = {'sch_id': sch_id, "acad": form, 'new_opr': False, 'uid': uid}
                 return render(request, 'setup/academic-timeline.html', context)
 
-        return redirect(f"academic-timeline-list/{sch_id}")
+        return redirect("list-academic-timeline")
+
+
+def list_academic_timeline(request):
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
+    timeline = AcademicTimeLine.objects.filter(sch_id=sch_id).order_by('-id')
+    if timeline:
+        data = {'timelines': timeline}
+        return render(request, 'setup/academic-timeline-list.html', data)
+    else:
+        uid = None
+        data = {'sch_id': sch_id}
+        form = AcademicTimelineForm(data)
+        new_opr = True
+        context = {'acad': form, 'new_opr': new_opr, 'sch_id': sch_id, 'uid': uid}
+        return render(request, 'setup/academic-timeline.html', context)
 
 
 def setup_school_terms(request):
@@ -262,7 +282,7 @@ def setup_academic_calender(request):
         return redirect("logout")
 
     try:
-        timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id) # Return the first row from the queryset
+        timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id) # Returns the active Academictimeline to the queryset
         sessxs = AcademicSessions.objects.filter(status='Active', sch_id=sch_id).order_by('term_id').only("term_id", "descx")
 
         if not sessxs:
@@ -354,11 +374,9 @@ def setup_academic_calender(request):
             # return render(request, 'setup/academic-calender.html', {**data, **value1})
             return render(request, 'setup/academic-calender.html', context)
 
-
-
     except AcademicTimeLine.DoesNotExist:
-        messages.info(request, 'You have been redirect: Please enter Your School  '
-                               'Academic Timeline or Period, before your School Academic Calender.')
+        messages.info(request, 'You have been redirect here: Please enter Your School  '
+                               'Academic Timeline or Period, before entering the School Academic Calender.')
         return redirect('academic-timeline')
 
     except Exception as e:
@@ -384,8 +402,8 @@ def setup_academic_calender_1(request):
         # Acad_cal = AcademicCalender.objects.filter(AcademicTimeLine__in=time_line)
 
     except AcademicTimeLine.DoesNotExist:
-        messages.info(request, 'You have been redirect: Please enter Your School  '
-                               'Academic Timeline or Period, befor your School Academic Calender.')
+        messages.info(request, 'You have been redirect Here. Please enter Your School  '
+                               'Academic Timeline or Period, before you enter the Academic Calender.')
         return redirect('academic-timeline')
 
     if request.method == 'POST':
@@ -442,18 +460,6 @@ def setup_academic_calender_1(request):
             'timeline': time_line,
         }
         return render(request, 'setup/academic-calender.html', data)
-
-
-def list_academic_timeline(request, sch_id):
-    school = schools(request)
-    sch_id = school['sch_id']
-    if sch_id == 0:
-        return redirect("logout")
-
-    timeline = AcademicTimeLine.objects.filter(sch_id=sch_id).order_by('-id')
-
-    data = {'timelines': timeline}
-    return render(request, 'setup/academic-timeline-list.html', data)
 
 
 def setup_school_profile(request):

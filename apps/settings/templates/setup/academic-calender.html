@@ -89,7 +89,7 @@
                                     </div>
 
                                 </div>
-                                  <div id="tabs" class="border mt-4 pt-2">
+                                  <div id="tabs" class="border mt-4 pt-3 ">
                                       <!--  Tabs Header -->
                                       <ul role="tablist" class="nav  nav-tabs  nav-info nav-sm  pl-4 pb-0" >
                                           {% for s in sessx %}
@@ -393,7 +393,7 @@
 
 						if ( $('#start_dt').val() == "" || $('#end_dt').val() == "" ) {
 							// alert('Please start from session One First-Term');
-                            sweet_msg2 ('Please start from session One First-Term')
+                            sweet_msg2 ('Please start from session One 1st-Term \n Start Date followed by End Date')
                             $('.nav-tabs a[href="#tab-addr-1"]').tab('show');
 							$('#st_dt_tm_1').focus(); // set focus to the session one start date
 							$('#' + this.name).val(""); // set the current input to null or empty
@@ -452,7 +452,7 @@
 					if(lstchar4 != 'tm_1' && f2char == 'st'){
 						if ( $('#st_dt_tm_1').val() == "" || $('#ed_dt_tm_1').val() == "" ) {
 							// alert('Please start from session One First-Term');
-                            sweet_msg2 ('Please start from session One First-Term.')
+                            sweet_msg2 ('Please start from session One 1st-Term \n Start Date followed by End Date\'.')
 							$('#' + this.name).val(""); // set the current input to null or empty
                             $('.nav-tabs a[href="#tab-addr-1"]').tab('show'); // Change tab to session ONE
 							$('#st_dt_tm_1').focus(); // set focus to the session one start date

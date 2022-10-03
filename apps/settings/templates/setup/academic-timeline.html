@@ -1,0 +1,129 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} UI Alerts {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+	<div class="content">
+		<div class="page-inner">
+
+			<div class="row d-flex justify-content-center">
+
+				<div class="col-md-6">
+					<form action="" method="post" class="">
+						{% csrf_token %}
+
+						<div class="card">
+							<div class="card-header">
+								<div class="row alert-info ">
+									<div class="card-title col col- ">Academic Time Line</div>
+									<div class="col col-3  pt-0 pr-0 mr-0">
+										<span class="float-right">
+										<input id="close" type="button" class="btn btn-sm btn-round btn-outline-info" value="X">
+										</span>
+									</div>
+								</div>
+
+								<input name="uid" id="uid" value="{{uid}}" type="text" size="5px" class="form-control input-fixed form-control-sm " hidden>
+								{{acad.sch_id}}
+
+								<div class="card-category font-weight-light">
+									{% if new_opr %}
+										Enter a New Academic Year for the period <br> The previous Year has elapse.
+										<span class="float-right font-weight-bold">NEW</span>
+									{% else %}
+										The Academic Year is still active. <br> You can only do Updates
+										<span class="float-right font-weight-bold">UPDATE</span>
+									{% endif %}
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="form">
+									<div class="form-group form-show-notify row">
+										<div class="col-lg-3 col-md-3 col-sm-4 text-right float-lg-right">
+											<label>{{acad.descx.label}} :</label>
+										</div>
+										<div class="col-sm-5">
+											{{acad.descx}}
+										</div>
+
+									</div>
+									<div class="form-group form-show-notify row">
+										<div class="col-lg-3 col-md-3 col-sm-4 text-right">
+											<label> {{acad.st_dt.label}} :</label>
+										</div>
+										<div class="col-sm-5 ">
+											{{acad.st_dt}}
+										</div>
+									</div>
+									<div class="row form-group form-show-notify ">
+										<div class="col-lg-3 col-md-3 col-sm-4 text-right">
+											<label> {{acad.ed_dt.label}} :</label>
+										</div>
+										<div class="col-sm-5">
+											{{acad.ed_dt}}
+										</div>
+									</div>
+
+								</div>
+							</div>
+							<div class="card-footer">
+								<div class="form">
+									<div class="form-group from-show-notify row">
+										<div class="col-lg-3 col-md-3 col-sm-12">
+
+										</div>
+										<div class=" col-sm-6">
+											<button name="save_action" id="save_action" formaction="/settings/academic-timeline"
+													value="{% if new_opr %}new{% else %}update{% endif %}"
+													class="btn btn-outline-success btn-rounded btn-full btn-sm">{% if new_opr %}SAVE{% else %}UPDATE{% endif %}
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+	{% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr.success('{{ message }}', 'Very Good . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.info('{{ message }}')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+	<script src="/static/assets/js/setting-demo2.js"></script>
+
+	<script>
+		$(document).ready(function() {
+			$('#close').click(function(){
+				location.href="/settings/academic-timeline-list"
+			})
+		})
+
+	</script>
+
+{% endblock javascripts %}

@@ -138,7 +138,7 @@ class AcademicTimelineForm(forms.ModelForm):
                                 )
                                 )
 
-    descx = forms.CharField(label="Description:", max_length=30,
+    descx = forms.CharField(label="Academic Year:", max_length=30,
                             widget=forms.TextInput(
                                 attrs={'name': 'descx', "placeholder": "e.g.  2021/2022", 'autofocus': True,
                                        "class": "form-control form-control-sm"}
