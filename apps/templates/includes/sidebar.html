@@ -62,7 +62,7 @@
 
 						<li class="nav-item  {% if 'ui-' in segment %} active {% endif %}">
 							<a data-toggle="collapse" href="#submenu_1">
-								<i class="fas fa-bars"></i>
+								<i class="fas fa-user-graduate"></i>
 								<p>Students</p>
 								<span class="caret"></span>
 							</a>
@@ -108,7 +108,7 @@
 
 						<li class="nav-item  {% if 'ui-' in segment %} active {% endif %}">
 							<a data-toggle="collapse" href="#submenu_2">
-								<i class="fas fa-bars"></i>
+								<i class="fas fa-user-friends"></i>
 								<p>Guardians</p>
 								<span class="caret"></span>
 							</a>
@@ -131,7 +131,7 @@
 
 						<li class="nav-item  {% if 'ui-' in segment %} active {% endif %}">
 							<a data-toggle="collapse" href="#submenu_3">
-								<i class="fas fa-bars"></i>
+								<i class="fas fa-money-bill"></i>
 								<p>Financials</p>
 								<span class="caret"></span>
 							</a>
@@ -152,6 +152,29 @@
 							</div>
 						</li>
 
+						<li class="nav-item  {% if 'ui-' in segment %} active {% endif %}">
+							<a data-toggle="collapse" href="#submenu_4">
+								<i class="fas fa-chalkboard-teacher"></i>
+								<p>Employees</p>
+								<span class="caret"></span>
+							</a>
+							<div class="collapse" id="submenu_4">
+								<ul class="nav nav-collapse">
+									<li>
+										<a href="{% url 'list-employees' %}">
+											<span class="sub-item">Employee List</span>
+										</a>
+									</li>
+									<li>
+										<a href="">
+											<span class="sub-item">Employee (Add, Edit or Disable ) </span>
+										</a>
+									</li>
+
+								</ul>
+							</div>
+						</li>
+
 						<li class="nav-section">
 							<span class="sidebar-mini-icon">
 								<i class="fa fa-ellipsis-h"></i>
@@ -161,7 +184,7 @@
 
 						<li class="nav-item">
 							<a data-toggle="collapse" href="#settings">
-								<i class="fas fa-layer-group"></i>
+								<i class="fas fa-school"></i>
 								<p>School</p>
 								<span class="caret"></span>
 							</a>

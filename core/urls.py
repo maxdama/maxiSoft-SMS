@@ -15,7 +15,7 @@ urlpatterns += [
     path('admin/', admin.site.urls),          # Django admin route
     path('settings/', include('apps.settings.urls')),
     path('financials/', include('apps.financials.urls')),
-
+    path('employees/', include('apps.employees.urls')),
     path('students/', include("apps.students.urls")),
     path('guardians/', include("apps.guardians.urls")),
     path("", include("apps.authentication.urls")), # Auth routes - login / register

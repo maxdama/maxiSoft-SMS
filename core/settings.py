@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'apps.students',
     'apps.guardians.apps.GuardiansConfig',
     'apps.settings',
-    'apps.financials'
+    'apps.financials',
+    'apps.employees'
 
 
 ]
