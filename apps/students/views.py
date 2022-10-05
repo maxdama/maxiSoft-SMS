@@ -51,15 +51,16 @@ def student_list(request):
     try:
         acada_yr = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
     except AcademicTimeLine.DoesNotExist:
-        messages.info(request,
-                      'Student Registration List can not be viewed now:  The school Academic Year have not been set. Please consult with your Software Administrator to set it up.')
-        return render(request, 'student/students-list.html', {'title': title})
+        messages.info(request, 'Student Registration List can not be viewed now:  The school Academic Year have not '
+                               'been set. Please consult with your Software Administrator to set it up.')
+
+        return render(request, 'students-list.html', {'title': title})
 
     # Put the data into the context
     context = {
         'title': title, 'students': student, 'acada_yr': acada_yr.descx
     }
-    return render(request, 'student/students-list.html', context)
+    return render(request, 'students-list.html', context)
 
 
 def update_student_register(reg_id, request):

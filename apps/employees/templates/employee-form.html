@@ -1,0 +1,691 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Guardian Forms {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+    <style class="">
+    .file {
+      visibility: hidden;
+      position: absolute;
+    }
+
+    .div-btn{
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+    }
+
+    .div-btn:hover{
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+    }
+
+    .swal-title {
+      margin: 0px;
+      font-size: 23px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+        text-align: -moz-center;
+    }
+
+    .swal-text {
+      background-color: rgb(255, 255, 255);
+      padding: 17px;
+      border: 1px solid rgba(240, 225, 161, 0.94);
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+      font-size: 17px;
+    }
+
+    .swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 4px solid #E9EEF1;
+      overflow: hidden;
+    }
+
+    </style>
+
+{% endblock stylesheets %}
+
+{% load static %}
+
+{% block content %}
+
+	<div class="content">
+        <div class="page-inner">
+
+            <form action="" class="" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-row col-md-3 d-none" >
+                    <label for="gad_id">Employee ID</label>
+                    <input type="text" class="form-control form-control-sm" id="gad_id" name="gad_id" value="{{guardian.pk}}">
+			    </div>
+
+                <div class="container" >
+                    <div class="card border" >
+                        <!-- Card Body  Employee to Assign  -->
+                        <div class="card-body">
+                            <div class="row border ">
+                                <!-- Column for Employee Name and Address Controls  -->
+                                <div class="col col-sm-8 border">
+                                    <div class="">
+                                        <h3 class=""><strong>Employee Entry</strong></h3><p>
+
+                                        {% if oprx_type != 'new-entry' %}
+                                        <div class="row justify-content-center ">
+
+                                            <div class="col-md-2 form-floating-label" hidden >
+                                                <input type="text" class="form-control input-border-bottom pb-1" id="reg_id" name="reg_id" value="{{student.pk}}"  required>
+                                                <label for="reg_id" class="placeholder">Stud ID</label>
+                                            </div>
+                                            {% if not student.reg_no %}
+                                            <div class="col-md-4 form-floating-label">
+                                                <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
+                                                <label for="regno" class="placeholder">Staff No:</label>
+                                            </div>
+                                            {% endif %}
+
+                                            <div class="avatar avatar-lg ml-5">
+                                                {% if student.stud_pic %}
+                                                    <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle ">
+                                                {% else %}
+                                                    <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                                {% endif %}
+                                            </div>
+
+                                        </div>
+
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col col-4  ">
+                                    <!--  Close button at the TOP Right Corner. Closes the form to Employee List -->
+                                    <button id="close" class=" btn  btn-outline-dark  btn-rounded btn-sm float-lg-right"  type="button" >X</button>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="row d-flex justify-content-center">
+                            <div class="col col-md-10">
+                                <div class="card border">
+                                    <!-- Card Header Guardian Details-->
+                                    <div class="card-header pt-1 pb-1 ">
+                                        <div class="card-title card-success "><h4>Employee ( Bio Data and Address ) </h4>
+                                            <div class="text-small float-md-right ">{% if student.reg_status|lower != 'enrolled' %} NEW {% endif %} Registration Form-2</div>
+                                        </div>
+                                    </div>
+                                     <!-- Card Body Guardian Details -->
+                                    <div class="card-body">
+                                        <!-- Column Rows Left Justification  -->
+                                        <div class="row d-flex justify-content-left text-left pb-3">
+                                            <div class="col-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="title" name="title" >
+                                                        <option value="{{guardian.title}}" hidden>{{guardian.title}}</option>
+                                                        <option></option>
+                                                        <option>Mr</option>
+                                                        <option>Mrs</option>
+                                                        <option>Miss</option>
+                                                        <option>Chief</option>
+                                                    </select>
+                                                    <label for="title" class="placeholder">Title:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <input  id="surname" type="text" value="{{guardian.surname}}" name="surname" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom"  required>
+                                                    <label for="surname" class="placeholder">* Surname</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" required>
+                                                    <label for="other_names" class="placeholder">* Other Names</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="dob" type="date" name="dob" value="{{student.guardian_is|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom"  required>
+                                                    <label for="dob" class="placeholder">* Birth Date</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row d-flex justify-content-left text-left pb-3">
+                                            <div class="col-2 ">
+                                               <div class="form-group form-floating-label">
+                                                <select id="gender" name="gender" class="form-control input-border-bottom pb-1 "  required>
+                                                    <option value="{{guardian.gender}}" hidden>{{guardian.gender}}</option>
+                                                    <option>Male</option>
+                                                    <option>Female</option>
+
+                                                </select>
+                                                <label for="gender" class="placeholder">* Gender</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input type="tel" id="phone1" value="{{guardian.mobile_no1}}" class="pb-0 form-control input-border-bottom" name="mobile_no1"  pattern="[0-9]{11}" required >
+                                                    <label for="phone1" class="placeholder">* Mobile No:</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input type="tel" id="phone2" value="{{student.mobile_no2}}" class="pb-0 form-control input-border-bottom" name="mobile_no2"  pattern="[0-9]{11}" >
+                                                    <label for="phone2" class="placeholder">Phone No:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="email" value="{{guardian.email}}" name="email" type="text" class="pb-0 form-control input-border-bottom" >
+                                                    <label for="email" class="placeholder">Email</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row d-flex justify-content-left text-left">
+
+                                            <div class="col-4">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="res_addr" type="text" value="{{guardian.res_addr}}" name="res_addr" class="pb-0 form-control input-border-bottom">
+                                                    <label for="res_addr" class="placeholder">Residential Addr:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="res_area" type="text" value="{{guardian.res_area}}" name="res_area" class="pb-0 form-control input-border-bottom">
+                                                    <label for="res_area" class="placeholder">Residential Area:</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Guardian Residence City  -->
+                                            <div class="col-sm-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="city" name="res_city" >
+                                                        <option value="{{guardian.res_city}}" hidden>{{guardian.res_city}}</option>
+                                                        <option>Port Harcourt</option>
+                                                        <option>Ahoada</option>
+                                                        <option>Emoha</option>
+                                                    </select>
+                                                    <label for="city" class="placeholder">City Residence:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="state"  name="res_state">
+                                                    <option value="{{guardian.res_state}}" hidden>{{guardian.res_state}}</option>
+                                                    <option>Rivers</option>
+                                                    <option>Bayelsa</option>
+                                                    <option>Kwara</option>
+                                                    <option>Niger</option>
+                                                    <option>Adamawa</option>
+                                                    <option>Yola</option>
+                                                    <option>Kogi</option>
+                                                    <option>Plateau</option>
+                                                    </select>
+                                                    <label for="state" class="placeholder">State Residence</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                     <!-- Sub Header _________________________________________________________ -->
+                                    <div class="card-sub mb-0 pb-0">
+                                        <div class="row pb-0"><div class="col card-success">Employment Position</div></div>
+                                    </div>
+                                    <div class="card-body">
+                                        Staff Employment Position entry section
+
+                                    </div>
+
+                                    <!-- Sub Header  ________________________________________________________   -->
+                                    <div class="card-sub mb-0 pb-0">
+                                        <div class="row "><div class="col card-success">Next of Kin Details:</div></div>
+                                    </div>
+                                    <!-- -->
+                                    <div class="card-body">
+                                        <!--  Next of Kin.  Column Rows Left Justification  -->
+                                        <div class="row d-flex justify-content-left text-left pb-3">
+                                            <div class="col-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="title" name="title" >
+                                                        <option value="{{guardian.title}}" hidden>{{guardian.title}}</option>
+                                                        <option></option>
+                                                        <option>Mr</option>
+                                                        <option>Mrs</option>
+                                                        <option>Miss</option>
+                                                        <option>Chief</option>
+                                                    </select>
+                                                    <label for="title" class="placeholder">Title:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <input  id="surname" type="text" value="{{guardian.surname}}" name="surname" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom"  required>
+                                                    <label for="surname" class="placeholder">* Surname</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" required>
+                                                    <label for="other_names" class="placeholder">* Other Names</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-2">
+                                                {% if oprx_type != 'new-entry' %}
+                                                <div class="form-group form-floating-label">
+                                                    <input id="relationship" type="text" name="relationship" value="{{student.guardian_is|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom"  required>
+                                                    <label for="relationship" class="placeholder">* Relationship</label>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="row d-flex justify-content-left text-left pb-3">
+                                            <div class="col-2 ">
+                                               <div class="form-group form-floating-label">
+                                                <select id="gender" name="gender" class="form-control input-border-bottom pb-1 "  required>
+                                                    <option value="{{guardian.gender}}" hidden>{{guardian.gender}}</option>
+                                                    <option>Male</option>
+                                                    <option>Female</option>
+
+                                                </select>
+                                                <label for="gender" class="placeholder">* Gender</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input type="tel" id="phone1" value="{{guardian.mobile_no1}}" class="pb-0 form-control input-border-bottom" name="mobile_no1"  pattern="[0-9]{11}" required >
+                                                    <label for="phone1" class="placeholder">* Mobile No:</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input type="tel" id="phone2" value="{{student.mobile_no2}}" class="pb-0 form-control input-border-bottom" name="mobile_no2"  pattern="[0-9]{11}" >
+                                                    <label for="phone2" class="placeholder">Phone No:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="email" value="{{guardian.email}}" name="email" type="text" class="pb-0 form-control input-border-bottom" >
+                                                    <label for="email" class="placeholder">Email</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row d-flex justify-content-left text-left">
+
+                                            <div class="col-4">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="res_addr" type="text" value="{{guardian.res_addr}}" name="res_addr" class="pb-0 form-control input-border-bottom">
+                                                    <label for="res_addr" class="placeholder">Residential Addr:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input id="res_area" type="text" value="{{guardian.res_area}}" name="res_area" class="pb-0 form-control input-border-bottom">
+                                                    <label for="res_area" class="placeholder">Residential Area:</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Guardian Residence City  -->
+                                            <div class="col-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="city" name="res_city" >
+                                                        <option value="{{guardian.res_city}}" hidden>{{guardian.res_city}}</option>
+                                                        <option>Port Harcourt</option>
+                                                        <option>Ahoada</option>
+                                                        <option>Emoha</option>
+                                                    </select>
+                                                    <label for="city" class="placeholder">City Residence:</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="state"  name="res_state">
+                                                    <option value="{{guardian.res_state}}" hidden>{{guardian.res_state}}</option>
+                                                    <option>Rivers</option>
+                                                    <option>Bayelsa</option>
+                                                    <option>Kwara</option>
+                                                    <option>Niger</option>
+                                                    <option>Adamawa</option>
+                                                    <option>Yola</option>
+                                                    <option>Kogi</option>
+                                                    <option>Plateau</option>
+                                                    </select>
+                                                    <label for="state" class="placeholder">State Residence</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <!-- Sub Header _________________________________________________________ -->
+                                    <div class="card-sub mb-0 pb-0">
+                                        <div class="row pb-0"><div class="col card-success">Staff Login Details</div></div>
+                                    </div>
+                                    <div class="card-body">
+                                        Login Details Here
+                                    </div>
+
+                                    <!-- Card Action Guardian Details-->
+                                    <div class="card-action pt-3 pb-2">
+                                         <div class="row d-flex justify-content-center text-center">
+                                             <div class="col-4 ">
+                                                 {% if oprx_type == 'new-entry' %}
+                                                     {% if student.reg_status|lower == 'pending' %}
+                                                        <button class="btn btn-outline-warning btn-rounded btn-sm"  type="reset" >Clear or Reset</button>
+                                                     {% endif %}
+                                                 {% else %}
+
+                                                 {% endif %}
+                                             </div>
+                                             <div class="col-4 ">
+                                                <button class="btn btn-full btn-outline-success btn-rounded btn-sm "  type="submit" name="save_pause" value="save&pause" formaction="/guardians/new/{{oprx_type}}" >
+                                                    {% if student.reg_status|lower == 'enrolled' or oprx_type == 'edit-entry' %}
+                                                         U P D A T E
+                                                    {% else %}
+                                                        S A V E {{oprx_type}}
+                                                    {% endif %}
+                                                </button>
+                                             </div>
+
+                                              <div class="col-4 ">
+                                                  {% if oprx_type == 'new-entry' %}
+                                                      {% if student.reg_status|lower != 'enrolled' %}
+                                                        <button class="btn btn-full btn-outline-success btn-rounded btn-sm" type="submit" name="save_continue" value="save&continue" formaction="/guardians/new/{{oprx_type}}" >
+                                                            S A V E  &  Continue
+                                                        </button>
+                                                      {% endif %}
+                                                  {% endif %}
+                                              </div>
+
+                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer pb-1 pt-1">
+                            {% if show_parent_child %}
+                                <!-- Guardian Wards row -->
+                                 <div class="row justify-content-left mb-1 ml-5 pl-5 ">
+                                     <div class="ml-2 col-sm-5  text-secondary fw-extrabold">Guardian Children / Wards</div>
+                                 </div>
+
+                                <div class="row d-flex justify-content-left ml-5 pl-5 ">
+                                    <!-- Start of Ward Column  -->
+                                    {% for child in children %}
+                                        {% with count=forloop.counter %}
+
+                                    <div class="col col-md-3">
+                                        <div class="card child-edit div-btn" value="{{count}}" id="child-{{count}}">
+                                            <div class="card-body mt-0 pt-0">
+                                                <div class="font-weight-bolder text-primary mt-0 pt-0 ">Ward-{{count}}:</div>
+                                                <div class="row  ">
+                                                    <div class="col col-sm-4 ">
+                                                        <!-- Picture Column -->
+                                                        <div class="avatar avatar-lg ">
+                                                            {% if child.stud_pic %}
+                                                                <img src="{{child.stud_pic.url}}" alt="..." class="avatar-img rounded-circle">
+                                                            {% else %}
+                                                                <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col col-sm-8 ">
+                                                        <div class="row">
+                                                            <div class="col col-12 ">
+                                                                <!-- Names and Class Column -->
+                                                                <span class="id-ward{{count}} text-hide">{{child.id}}</span>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12 name-ward{{count}}">{{child.surname}} {{child.first_name}} {{child.middle_name}}   </div>
+
+                                                </div>
+                                                <div class="row text-small">
+                                                    <span class="ward-class-{{count}} font-italic "> Relationship to Guardian: </span>
+                                                    <span class="related-{{count}} font-weight-bold "> {{child.guardian_is}} </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                        {% endwith %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+     {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr["success"]('{{ message }}', 'Very Good . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.error('{{ message }}', 'Error . . . ')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+	<script src="/static/assets/js/setting-demo2.js"></script>  <!-- Script that controlls the settings by the right side -->
+
+    <script>
+
+     $(document).ready(function(){
+          $("#close").click(function(){
+              location.href='/employees/staff-list'
+          });
+
+         if (!$('#not-together').is(':checked')) {  //If the CheckBox is NOT Checked
+             $(".student-address").hide()
+         }
+
+         if ($('#res_addr_l1').val() != ''){  // check if the first control of Student Address has value
+             $('#not-together').prop('checked', true);  // Check the CheckBox
+             $(".student-address").show()  //  Show inputs for Student Address
+         }
+
+         $('#not-together').click(function(e) {         // When the Check box is Click
+             if ($('#not-together').is(':checked')) {   //If the CheckBox is Checked
+                 $(".student-address").show()  //  Show inputs for Student Address
+                 $('#res_addr_l1').attr('required', true);
+                 $('#res_addr_l1').focus()
+
+             } else {
+                 $(".student-address").hide()   //  Hide inputes for Student Address
+                 $('#res_addr_l1').attr('required', false);
+                 // alert('Student is living with Guardian?')
+             }
+		});
+
+        $('#stud_guardian').change(function() {
+            let stud_id = $('#reg_id').val();
+
+            let gad_id = $(this).val();
+            let guard_name = $("#stud_guardian option:selected").text();
+            if(gad_id!=''){
+                // alert('Guardian ID:' )
+                location.href='/guardians/entry/' + gad_id + '/' + stud_id + '/select-parent'
+            }else{
+                alert('Guardian is NOT Selected')
+            }
+        });
+
+        $(".child-edit").click(function(){
+        /// your code for click event here ///
+            var card_no = $(this).attr('value');
+
+            let stud_id = $('.id-ward'+ card_no).text()
+            let stud_name = $('.name-ward'+ card_no).text()
+            let related = $('.related-'+ card_no).text()
+
+            relationship(stud_id, stud_name, card_no, related)
+        });
+
+        function relationship(stud_id, stud_name, card_no, related){
+
+            swal({
+                title: 'Relationship Update',
+                text: "{{guardian.surname}} {{guardian.other_names}} is " + related + ' to \n' + stud_name + '\n\n  IS THIS CORRECT?',
+                // icon: 'info',
+                buttons:{
+                    yes: {
+                        text: 'YES, Correct !',
+                        value: 'yes',
+                        className : 'btn btn-outline-success btn-rounded btn-sm'
+                    },
+                    change: {
+                        text : 'NO, Change !',
+                        className : 'btn btn-outline-info btn-rounded btn-sm'
+                    },
+                    remove: {
+                        text : 'NO, Remove !',
+                        value: 'remove',
+                        className : 'btn btn-outline-warning btn-rounded btn-sm'
+
+                    }
+                }
+            }).then((action) => {
+				if (action === 'change') {
+                    //alert('Change the Guardian for this Ward')
+                    let guard_id = '{{guardian.pk}}'
+                    location.href = '/guardians/entry/'+ guard_id + '/' + stud_id + '/new-entry'
+
+				} else if (action === 'remove') {
+                    let url = '/guardians/update_relationship'
+                    let data = {'stud_id': stud_id, 'card_id': card_no }
+
+                    update_relationship_ajax (url, data)
+
+                } else if (action === 'yes'){
+                   swal({
+                       icon: "success",
+                       timer: 2500,
+                       button: {
+                           text: "OK",
+                           visible: false,
+
+                        }
+                    });
+                }
+            })
+        };
+
+         function update_relationship_ajax(url, stud_data, x)
+         {
+             let csrftoken = getCookie('csrftoken'); // Get csrftoken from cookie ( function )
+
+            $.ajax({
+                method: "POST",
+                url: url,
+                headers: {'X-CSRFToken': csrftoken},
+                async: "True",
+                dataType: "json",
+                data:stud_data,
+                success: function(data, status)
+                {
+                    console.log(data);
+                    // var  new_reg = response.new_reg_no;
+                    // $( '#reg_no' ).val(new_reg);
+                    let x = data.card_id
+                    $("#child-" + x).remove();
+
+                    ajaxAction('success', data)
+                },
+                error: function(xhr, status, error){
+                    alert("An Error occured:" + "\n" + error);
+                    // let msg = 'An error ocurred:' + '\n' + error;
+                    // sweet_alert('Error: Registration No', msg, 'info')
+                    ajaxAction('failed', data)
+                }
+
+            });
+
+         }
+
+         function ajaxAction(status, data){
+             if (status == 'success'){
+                  swal({
+                       icon: "success",
+                       timer: 2000,
+                       button: {
+                           text: "OK",
+                           visible: false,
+
+                        }
+                    });
+             }else{
+                 alert('Operation Failed')
+             }
+
+         }
+
+
+         function getCookie(name) {
+            // Get the value of the csrfToken from cookie
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                let cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+     });
+
+
+    </script>
+
+{% endblock javascripts %}

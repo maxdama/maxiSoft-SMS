@@ -1,10 +1,207 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Employees</title>
-</head>
-<body>
-    List of All of Employees
-</body>
-</html>
+{% extends "layouts/base.html" %}
+
+{% block title %}Employees{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style class="">
+    .exportExcel{
+      padding: 5px;
+      border: 1px solid grey;
+      margin: 5px;
+      cursor: pointer;
+    }
+
+</style>
+
+<link rel="stylesheet" href="../../static/assets/sweetalert/msgstyle.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="content">
+		<div class="page-inner border">
+
+			<div class="page-header border ">
+                <h4 class="page-title">Employees</h4>
+				<ul class="breadcrumbs">
+					<li class="nav-home">
+						<a href="#">
+							<i class="flaticon-home"></i>
+						</a>
+					</li>
+					<li class="separator">
+						<i class="flaticon-right-arrow"></i>
+					</li>
+					<li class="nav-item">
+						<a href="#">Tables</a>
+					</li>
+					<li class="separator">
+						<i class="flaticon-right-arrow"></i>
+					</li>
+					<li class="nav-item">
+						<a href="#">Datatables</a>
+					</li>
+				</ul>
+            </div>
+
+            <div class="row ">
+				<div class="col-md-12">
+
+					<div class="card border">
+                        <div class="card-header">
+							<div class="d-flex align-items-center">
+								<h4 class="card-title">Staff List</h4>
+
+								<button class="btn btn-outline-info btn-round  ml-auto new-student" data-toggle="modal">
+									<i class="fa fa-plus"></i>
+									 New Employee
+								</button>
+							</div>
+						</div>
+
+                        <div class="card-body">
+							<!--  Table Starts Here   -->
+							<div class="table-responsive-sm">
+
+                                <table id="staff-list" class=" display table table-responsive-sm table-hover  " cellspacing="0" cellpadding="0">
+                                    <thead>
+
+                                        <tr class="text-secondary text-md-left">
+                                            <th>S/n</th>
+                                            <th>Staff ID</th>
+                                            <th class="">Staff Names <br> <span class="text-small">Position</span></th>
+                                            <th>Sex</th>
+                                            <th>Age</th>
+                                            <th>Marital Status</th>
+                                            <th>Department </th>
+                                            <th>Years Worked</th>
+                                            <th class="text">Phone No <br> <span class="text-small">Email</span></th>
+                                          </tr>
+
+                                    </thead>
+                                    <tbody class="">
+                                    {% for emp in employees %}
+                                      <tr class="row-sel text-small text-info">
+                                          <td>{{forloop.counter}}</td>
+                                          <td class="text small">{{emp.staff_no}}</td>
+                                          <td><span class="staff-name">{{emp.surname}} {{emp.other_names}} </span>
+                                              {% if emp.position %}
+                                                <br> <span class="text-small">{{emp.position}}</span>
+                                              {% endif %} </td>
+                                          <td>{{emp.gender|first}}</td>
+                                          <td>{{emp.age}}</td>
+                                          <td>{{emp.marital_status}}</td>
+                                          <td>{{emp.department}}</td>
+                                          <td>{{emp.years_worked}}</td>
+                                          <td>{{emp.mobile_no}} <br> <span class="small">{% if emp.email_addr %} {{emp.email_addr}} {% endif %}</span> </td>
+                                      </tr>
+                                    {% endfor %}
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script class="">
+    $(document).ready(function() {
+          let table = $('#staff-list').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                  extend: 'excel',
+                  text: 'Export excel',
+                  className: 'exportExcel',
+                  filename: 'Export excel',
+                  exportOptions: {
+                    modifier: {
+                      page: 'all'
+                    }
+                  }
+                },
+                {
+                  extend: 'copy',
+                  text: '<u>C</u>opie presse papier',
+                  className: 'exportExcel',
+                  key: {
+                    key: 'c',
+                    altKey: true
+                  }
+                },
+                {
+                  text: 'Alert Js',
+                  className: 'exportExcel',
+                  action: function(e, dt, node, config) {
+                    alert('Activated!');
+                    // console.log(table);
+
+                    // new $.fn.dataTable.Buttons(table, {
+                    //   buttons: [{
+                    //     text: 'gfdsgfsd',
+                    //     action: function(e, dt, node, config) {
+                    //       alert('ok!');
+                    //     }
+                    //   }]
+                    // });
+                  }
+                }
+            ]
+          });
+
+          $("tbody tr").click(function () {
+              let currentRow=$(this).closest("tr");
+
+              let staff_id = currentRow.find("td:eq(1)").text(); // get current row 1st TD value
+              let staff_name = currentRow.find(".staff-name").html(); // get current row cell TD value for staff-name
+              let msg = "What would you like to do with \n the selected Staff record?"
+
+              swal({
+                  title: staff_name,
+                  text: msg,
+                  buttons: {
+                      eidt: {
+						text : 'Edit Staff Profile!',
+						className : 'btn btn-outline-success btn-rounded btn-full btn-sm'
+					},
+					cancel: {
+						visible: true,
+						text : 'Do nothing !',
+						className: 'btn btn-outline-danger btn-rounded btn-sm'
+					}
+                  }
+              }).then((action) => {
+				if (action) {
+					// location.href = self.attr('href');
+                    alert('Take the neccessary action')
+
+				} else {
+					swal({
+						icon: 'error', timer: 1200,
+						buttons : {
+							 visible: false,
+						}
+					});
+				}
+			});
+          })
+
+    });
+</script>
+
+
+
+{% endblock javascripts %}
