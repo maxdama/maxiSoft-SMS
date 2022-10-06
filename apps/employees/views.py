@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+
+from apps.employees.forms import EmployeeForm
 from apps.employees.models import Employees
 from apps.utils import schools
 
@@ -20,16 +22,28 @@ def list_employees(request):
 
 
 def employee_entry(req):
+    """ New Employee Entry"""
+    emp_id = 0
     if req.method == 'POST':
-        pass
+        employee = EmployeeForm(req.POST or None)
+        if employee.is_valid():
+            employee.save(commit=False)
+            employee.staff_no = 'NGS-006'
+
+            return redirect("list-employees")
     else:
-        return render(req, 'employee-form.html')
+        context = {'header': 'Employee Entry', 'emp_id': emp_id}
+        return render(req, 'employee-form.html', context)
 
 
 def employee_update(req, emp_id=0):
-    if emp_id == 0:
-        return HttpResponse('Employee for Update is not given . . . ')
+    """ Function to Update Employee Details:"""
+    if req.method == 'POST':
+        if emp_id == 0:
+            return HttpResponse('Employee for Update is not given . . . ')
+        else:
+            return HttpResponse('Employee Updated . . . ')
     else:
-        return HttpResponse('Employee Updated . . . ')
-
-    return render(req, 'employee-form.html')
+        header = 'Employee Update'
+        context = {'header': header, 'emp_id': emp_id}
+        return render(req, 'employee-form.html', context)

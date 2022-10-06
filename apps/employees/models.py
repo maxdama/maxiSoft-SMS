@@ -8,6 +8,7 @@ class Employees(models.Model):
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING, unique=True, null=True, blank=True)
     staff_no = models.CharField(max_length=25, unique=True, blank=True, db_index=True)
+    title = models.CharField(max_length=10, blank=True, null=True)
     surname = models.CharField(max_length=30, unique=False, blank=True)
     other_names = models.CharField(max_length=60, unique=False, null=True, blank=True)
     gender = models.CharField(max_length=10, blank=True, db_index=True)
