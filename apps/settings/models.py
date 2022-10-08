@@ -8,6 +8,7 @@ from django.db.models import Q, F
 
 
 class SchoolProfiles(models.Model):
+    objects = None
     sch_id = models.IntegerField(unique=True, db_index=True, primary_key=True)
     rc_no = models.CharField(max_length=35, unique=True, null=True)
     sch_name = models.CharField(max_length=300, unique=True, null=False, db_index=True)

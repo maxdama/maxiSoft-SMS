@@ -76,20 +76,21 @@
                                 <!-- Column for Employee Name and Address Controls  -->
                                 <div class="col col-sm-8">
                                     <div class="">
-                                        <h3 class=""><strong>{{header}}</strong></h3><p>
+                                        <h3 class="pl-5 ml-4 "><strong>{{header}}</strong></h3>
+                                        <p>
 
                                         {% if oprx_type != 'new-entry' %}
                                         <div class="row justify-content-center ">
 
-                                            <div class="col-md-2 form-floating-label" hidden >
-                                                <input type="text" class="form-control input-border-bottom pb-1" id="reg_id" name="reg_id" value="{{student.pk}}"  >
-                                                <label for="reg_id" class="placeholder">Stud ID</label>
+                                            <div class="col-md-2 form-floating-label"  >
+                                                <input type="text" class="form-control input-border-bottom pb-1" id="emp_id" name="id" value="{{emp.id}}"  >
+                                                <label for="emp_id" class="placeholder">Employee ID</label>
                                             </div>
 
-                                            <div class="col-md-5 form-floating-label">
-                                                 {% if emp_id != 0 %}
-                                                <input id="regno" type="text" value="{{student.reg_no}}" class="form-control input-border-bottom" name="reg_no" >
-                                                <label for="regno" class="placeholder">Staff No:</label>
+                                            <div class="col-md-5 form-floating-label pt-2">
+                                                 {% if emp_id is not 0 %}
+                                                <input id="staff_no" type="text" value="{{emp.staff_no}}" class="fw-extrabold form-control input-border-bottom pb-0" name="staff_no" >
+                                                <label for="staff_no" class=" placeholder">Staff No:</label>
                                                 {% endif %}
                                             </div>
 
@@ -122,7 +123,7 @@
                                     <!-- Card Header Employee Details-->
                                     <div class="card-header pt-1 pb-1 ">
                                         <div class="card-title card-success ">
-                                            <h4>Employee ( Bio Data and Address ) </h4>
+                                            <h4>Bio Data and Contact</h4>
                                             <div class="text-small float-md-right ">{% if student.reg_status|lower != 'enrolled' %} NEW {% endif %} Registration Form-2</div>
                                         </div>
                                     </div>
@@ -133,12 +134,18 @@
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
                                                     <select class="form-control input-border-bottom pb-1" id="title" name="title" >
-                                                        <option value="{{guardian.title}}" hidden>{{guardian.title}}</option>
+                                                        <option value="{{emp.title|default_if_none:''}}" hidden>{{emp.title|default_if_none:''}}</option>
                                                         <option></option>
-                                                        <option>Mr</option>
-                                                        <option>Mrs</option>
-                                                        <option>Miss</option>
                                                         <option>Chief</option>
+                                                        <option>Mr</option>
+                                                        <option>Ms</option>
+                                                        <option>Miss</option>
+                                                        <option>Mrs</option>
+                                                        <option>Dr</option>
+                                                        <option>Dr Ms</option>
+                                                        <option>Prof.</option>
+                                                        <option>Prof Dr</option>
+                                                        <option>Mx</option>
                                                     </select>
                                                     <label for="title" class="placeholder">Title:</label>
                                                 </div>
@@ -146,21 +153,21 @@
 
                                             <div class="col-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input  id="surname" type="text" value="{{guardian.surname}}" name="surname" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom"  required>
+                                                    <input  id="surname" type="text" value="{{emp.surname}}" name="surname" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom"  required>
                                                     <label for="surname" class="placeholder">* Surname</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-4">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="other_names" type="text" value="{{guardian.other_names}}" name="other_names" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" required>
+                                                    <input id="other_names" type="text" value="{{emp.other_names|default_if_none:''}}" name="other_names" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" required>
                                                     <label for="other_names" class="placeholder">* Other Names</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="dob" type="date" name="dob" value="{{student.guardian_is|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom"  required>
+                                                    <input id="dob" type="date" name="dob" value="{{emp.dob|date:'Y-m-d'}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom"  required>
                                                     <label for="dob" class="placeholder">* Birth Date</label>
                                                 </div>
                                             </div>
@@ -170,10 +177,9 @@
                                             <div class="col-2 ">
                                                <div class="form-group form-floating-label">
                                                 <select id="gender" name="gender" class="form-control input-border-bottom pb-1 "  required>
-                                                    <option value="{{guardian.gender}}" hidden>{{guardian.gender}}</option>
+                                                    <option value="{{emp.gender}}" hidden>{{emp.gender|default_if_none:''}}</option>
                                                     <option>Male</option>
                                                     <option>Female</option>
-
                                                 </select>
                                                 <label for="gender" class="placeholder">* Gender</label>
                                                 </div>
@@ -181,46 +187,40 @@
 
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone1" value="{{guardian.mobile_no1}}" class="pb-0 form-control input-border-bottom" name="mobile_no1"  pattern="[0-9]{11}" required >
+                                                    <input type="tel" id="phone1" value="{{emp.mobile_no1|default_if_none:''}}" class="pb-0 form-control input-border-bottom" name="mobile_no1" Required >
                                                     <label for="phone1" class="placeholder">* Mobile No:</label>
                                                 </div>
                                             </div>
+
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone2" value="{{student.mobile_no2}}" class="pb-0 form-control input-border-bottom" name="mobile_no2"  pattern="[0-9]{11}" >
+                                                    <input type="tel" id="phone2" value="{{emp.mobile_no2|default_if_none:''}}" class="pb-0 form-control input-border-bottom" name="mobile_no2"  >
                                                     <label for="phone2" class="placeholder">Phone No:</label>
                                                 </div>
                                             </div>
 
-                                            <div class="col-3 ">
+                                            <div class="col-4 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="email" value="{{guardian.email}}" name="email" type="text" class="pb-0 form-control input-border-bottom" >
-                                                    <label for="email" class="placeholder">Email</label>
+                                                    <input id="email_addr" value="{{emp.email_addr|default_if_none:''}}" name="email_addr" type="text" class="pb-0 form-control input-border-bottom" >
+                                                    <label for="email_addr" class="placeholder">Email</label>
                                                 </div>
                                             </div>
 
                                         </div>
-                                        <div class="row d-flex justify-content-left text-left">
+                                        <div class="row d-flex justify-content-center text-left pb-3">
 
-                                            <div class="col-4">
+                                            <div class="col-5">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="res_addr" type="text" value="{{guardian.res_addr}}" name="res_addr" class="pb-0 form-control input-border-bottom">
-                                                    <label for="res_addr" class="placeholder">Residential Addr:</label>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-3">
-                                                <div class="form-group form-floating-label">
-                                                    <input id="res_area" type="text" value="{{guardian.res_area}}" name="res_area" class="pb-0 form-control input-border-bottom">
-                                                    <label for="res_area" class="placeholder">Residential Area:</label>
+                                                    <input id="resid_addr" type="text" value="{{emp.resid_addr|default_if_none:''}}" name="resid_addr" class="pb-0 form-control input-border-bottom">
+                                                    <label for="resid_addr" class="placeholder">Residential Addr:</label>
                                                 </div>
                                             </div>
 
                                             <!-- Guardian Residence City  -->
                                             <div class="col-sm-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="city" name="res_city" >
-                                                        <option value="{{guardian.res_city}}" hidden>{{guardian.res_city}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="city" name="resid_city" >
+                                                        <option value="{{emp.resid_city}}" hidden> {{emp.resid_city|default_if_none:''}}</option>
                                                         <option>Port Harcourt</option>
                                                         <option>Ahoada</option>
                                                         <option>Emoha</option>
@@ -231,8 +231,8 @@
 
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="state"  name="res_state">
-                                                    <option value="{{guardian.res_state}}" hidden>{{guardian.res_state}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="state"  name="resid_state">
+                                                    <option value="{{emp.resid_state}}" hidden>{{emp.resid_state|default_if_none:''}}</option>
                                                     <option>Rivers</option>
                                                     <option>Bayelsa</option>
                                                     <option>Kwara</option>
@@ -247,15 +247,80 @@
                                             </div>
 
                                         </div>
+                                         <div class="row d-flex justify-content-center text-left  border-top-1">
+                                             <!-- Employee Marital Status -->
+                                            <div class="col-sm-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1" id="marital_status" name="marital_status" style="font-weight:bold;">
+                                                        <option value="{{emp.marital_status}}" hidden> {{emp.marital_status|default_if_none:''}}</option>
+                                                        <option>Married</option>
+                                                        <option>Single</option>
+                                                    </select>
+                                                    <label for="city" class="placeholder">Marital Status:</label>
+                                                </div>
+                                            </div>
+                                         </div>
 
                                     </div>
 
                                      <!-- Sub Header Employee Position ____________________________________________ -->
                                     <div class="card-sub mb-0 pb-0">
-                                        <div class="row pb-0"><div class="col card-success">Employment Position</div></div>
+                                        <div class="row pb-0"><div class="col card-success">Employment</div></div>
                                     </div>
-                                    <div class="card-body">
-                                        Staff Employment Position entry section
+                                    <div class="card-body  pb-1">
+                                        <div class="row d-flex justify-content-center text-left pb-0 mb-0 ">
+
+                                            <div class="col-3">
+                                                <div class="form-group form-floating-label">
+                                                    <input required id="hire_date" type="date" name="hire_date" value="{{emp.hire_date|date:'Y-m-d'}}"  class="pb-0 pt-1 form-control input-border-bottom">
+                                                    <label for="hire_date" class="placeholder pb-0">Hired Date</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Employee Position -->
+                                            <div class="col-sm-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select required class="form-control input-border-bottom pb-1 pt-2" id="position" name="position" >
+                                                        <option  hidden> {{emp.position|default_if_none:''}}</option>
+                                                        {% for posx in positions %}
+                                                            <option>{{posx.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="position" class="placeholder">Position</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Employee Depoartment -->
+                                            <div class="col-sm-3 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1 pt-2" id="department" name="department" >
+                                                        <option value="{{emp.department_id}}" hidden> {{emp.department.name|default_if_none:''}}</option>
+                                                        {% for dept in departments %}
+                                                            <option value="{{dept.id}}">{{dept.name}}</option>
+                                                        {% endfor %}
+                                                        <option value="-1" class="">-------------------------------</option>
+                                                        <option value="0">* New Department</option>
+                                                    </select>
+                                                    <label for="department" class="placeholder">Department</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Employee Status -->
+                                            <div class="col-sm-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select class="form-control input-border-bottom pb-1 pt-2" id="status" name="status" >
+                                                        <option value="{{emp.status}}" hidden> {{emp.status|default_if_none:''}}</option>
+                                                        <option>Active</option>
+                                                        <option>Resigned</option>
+                                                        <option>Terminated</option>
+                                                        <option>On-Leave</option>
+                                                        <option>On-Training</option>
+                                                    </select>
+                                                    <label for="status" class="placeholder">Status</label>
+                                                </div>
+                                            </div>
+
+                                        </div>
 
                                     </div>
 
@@ -398,13 +463,17 @@
                                          <div class="row d-flex justify-content-center text-center">
 
                                              <div class="col-4 ">
-                                                <button class="btn btn-full btn-outline-success btn-rounded btn-sm "  type="submit" name="save_pause" value="save&pause" formaction="{% url 'new-employee' %}" >
-                                                    {% if student.reg_status|lower == 'enrolled' or oprx_type == 'edit-entry' %}
-                                                         U P D A T E
-                                                    {% else %}
-                                                        S A V E {{oprx_type}}
-                                                    {% endif %}
-                                                </button>
+                                                  {% if emp_id is not 0 %}
+                                                    <button class="btn btn-full btn-outline-success btn-rounded btn-sm "
+                                                            type="submit" name="save_pause" value="save&pause"
+                                                            formaction="{% url 'update-employee' emp.id %}" >U P D A T E
+                                                    </button>
+                                                 {% else %}
+                                                    <button class="btn btn-full btn-outline-success btn-rounded btn-sm "
+                                                            type="submit" name="save_pause" value="save&pause"
+                                                            formaction="{% url 'new-employee' %}" >S A V E
+                                                    </button>
+                                                 {% endif %}
                                              </div>
 
                                          </div>
@@ -432,13 +501,13 @@
      {% if messages %}
         {% for message in messages %}
             {% if message.tags == 'success'%}
-                <script type=text/javascript>toastr["success"]('{{ message }}', 'Very Good . . . ')</script>
+                <script type=text/javascript>toastr.success('{{ message }}', 'Very Good . . . ')</script>
             {% elif message.tags == 'info' %}
-                <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
+                <script type=text/javascript>toastr.info('{{ message }}')</script>
             {% elif message.tags == 'warning' %}
-                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
+                <script type=text/javascript>toastr.warning('{{ message }}')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.error('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -487,6 +556,20 @@
             }else{
                 alert('Guardian is NOT Selected')
             }
+        });
+
+        $('#department').change(function() {
+            let item_id = $(this).val();
+            let item_name = $("#department option:selected").text();
+
+            // alert('The item Selected from drop down: \n' + 'Item ID: ' +item_id + '\n Item Name: ' + item_name )
+            if (item_id == -1){
+                $("#department option:selected").text(' ---- Not Valid ---- ')
+            } else if (item_id == 0){
+                alert('Enter New Departemnt')
+            }
+
+
         });
 
         $(".child-edit").click(function(){
