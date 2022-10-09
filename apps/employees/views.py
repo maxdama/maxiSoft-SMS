@@ -1,10 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth.models import Group
 from django.db import utils
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from apps.employees.forms import EmployeeForm
-from apps.employees.models import Employees, Departments
+from apps.employees.models import Employees, Departments, Workgroup
 from apps.settings.models import SchoolProfiles
 from apps.utils import schools
 
@@ -149,3 +149,29 @@ def employee_update(req, emp_id=0):
         print(employee)
         context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix, 'departments': emp_dept}
         return render(req, 'employee-form.html', context)
+
+
+def modalform_save(request):
+    print('Function: -- modalform_save  -- ')
+
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
+    data = {}
+
+    if request.method == 'POST':
+        posix = request.POST['new_position']
+        frm = request.POST['frm_name']
+        print(sch_id)
+        print(posix)
+
+        g = Group.objects.create(name=posix)  # Insert the new Position
+        wg = Workgroup.objects.create(group=g.id, school=sch_id)
+
+        print(f'Group ID: {g.id},  Workgroup ID: {wg.id}')
+
+        data = {'id': g.id, 'position': posix, 'frm_name': frm}
+
+    return JsonResponse({'data': data})

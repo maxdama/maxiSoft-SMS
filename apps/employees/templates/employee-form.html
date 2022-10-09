@@ -285,6 +285,8 @@
                                                         {% for posx in positions %}
                                                             <option>{{posx.name}}</option>
                                                         {% endfor %}
+                                                        <option disabled> ────────────── </option>
+                                                        <option value="0">*  Add Position </option>
                                                     </select>
                                                     <label for="position" class="placeholder">Position</label>
                                                 </div>
@@ -298,7 +300,8 @@
                                                         {% for dept in departments %}
                                                             <option value="{{dept.id}}">{{dept.name}}</option>
                                                         {% endfor %}
-                                                        <option value="-1" class="">-------------------------------</option>
+                                                        <!-- <option value="-1" class="">-------------------------------</option> -->
+                                                         <option disabled> ─────────────── </option>
                                                         <option value="0">* New Department</option>
                                                     </select>
                                                     <label for="department" class="placeholder">Department</label>
@@ -488,6 +491,100 @@
                     </div>
                 </div>
             </form>
+
+             <!-- The Workgroup Modal -->
+            <div class="modal fade" id="positionModal">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Add Position</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <form id="workgroup"  action="" class="" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <!-- Modal body -->
+                            <div class="modal-body ml-4 mr-4">
+                                <div class="row ">
+                                       <div class="col-lg-12">
+                                           <!-- This input is used to identity the form and to get it name in views -->
+                                            <input type="hidden" name="frm_name" value="position">
+
+                                            <div class="form-group form-floating-label">
+                                                <input id="new_position" type="text" value="{{emp.new_position|default_if_none:''}}"
+                                                       name="new_position" class="pb-0 form-control input-border-bottom">
+                                                <label for="new_position" class="placeholder">Employee Position:</label>
+                                            </div>
+                                       </div>
+                                  </div>
+
+                            </div>
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+
+                                <div class="col-sm-5  pl-1">
+                                    <!-- <button type="button" class="btn btn-outline-danger btn-rounded btn-sm" data-dismiss="modal">Close</button> -->
+                                </div>
+                                <div class="col-sm-7  pl-0 ">
+                                    <button id="save-position" type="button" class="btn btn-outline-success btn-rounded btn-sm" >Save</button>
+                                </div>
+
+                            </div>
+                        </form>
+
+                    </div>
+              </div>
+            </div>
+
+             <!-- The Department Modal -->
+            <div class="modal fade" id="departmentModal">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Add Department</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <form id="departments"  action="" class="" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <!-- Modal body -->
+                            <div class="modal-body ml-4 mr-4">
+                                <div class="row ">
+                                       <div class="col-lg-12">
+                                           <!-- This input is used to identity the form and to get it name in views -->
+                                            <input type="hidden" name="frm_name" value="departments">
+
+                                            <div class="form-group form-floating-label">
+                                                <input id="new_department" type="text" value="{{emp.new_department|default_if_none:''}}"
+                                                       name="new_department" class="pb-0 form-control input-border-bottom">
+                                                <label for="new_department" class="placeholder">Employee Departments:</label>
+                                            </div>
+                                       </div>
+                                  </div>
+
+                            </div>
+                            <!-- Modal footer -->
+                            <div class="modal-footer">
+
+                                <div class="col-sm-5  pl-1">
+                                    <!-- <button type="button" class="btn btn-outline-danger btn-rounded btn-sm" data-dismiss="modal">Close</button> -->
+                                </div>
+
+                                <div class="col-sm-7  pl-0 ">
+                                    <button id="save_department" type="button" class="btn btn-outline-success btn-rounded btn-sm" >Save</button>
+                                </div>
+
+                            </div>
+                        </form>
+
+                    </div>
+              </div>
+            </div>
+
         </div>
     </div>
 
@@ -519,9 +616,90 @@
     <script>
 
      $(document).ready(function(){
+         // This function is being Used
           $("#close").click(function(){
               location.href='/employees/staff-list'
           });
+
+          // This function is being Used when the position selection is change or selected
+         // The modal form is callup when the selected item is 'Add Position' otherwise an item is selected and displayed
+        $('#position').change(function() {
+            let item_id = $(this).val();
+            let item_name = $("#position option:selected").text();
+            // alert('The item Selected from drop down: \n' + 'Item ID: ' +item_id + '\n Item Name: ' + item_name )
+
+            if (item_id == -1){
+                $("#position option:selected").text(' ---- Not Valid ---- ')
+            } else if (item_id == 0){
+                $('#positionModal').modal('show');
+            }
+        });
+
+         // This function is being Used
+         // The Click event function to Save New Position of modal form
+          $('#save-position').click(function(){
+
+              let form = $(this).closest('form');
+              let data = form.serializeArray() // [{'demo: 'value'}]
+              //let data = $('#workgroup').serializeArray(); // [{'demo: 'value'}]
+              let url = '/employees/modalform-save'
+
+              save_modalform_ajax (url, data)
+              $('#positionModal').modal('toggle');
+          })
+
+          // This function is being Used when the department selection is change or selected
+        $('#departments').change(function() {
+            let item_id = $(this).val();
+            let item_name = $("#department option:selected").text();
+            // alert('The item Selected from drop down: \n' + 'Item ID: ' +item_id + '\n Item Name: ' + item_name )
+            if (item_id == -1){
+                $("#department option:selected").text(' ---- Not Valid ---- ')
+            } else if (item_id == 0){
+                $('#departmentModal').modal('show');
+            }
+        });
+
+         function save_modalform_ajax(url, stud_data, x)
+         {
+             let csrftoken = getCookie('csrftoken'); // Get csrftoken from cookie ( function )
+
+            $.ajax({
+                method: "POST",
+                url: url,
+                headers: {'X-CSRFToken': csrftoken},
+                async: "True",
+                dataType: "json",
+                data:stud_data,
+                success: function(response, status)
+                {
+                    console.log(response);
+                    let id = response.data.id
+                    let position = response.data.position
+                    let frm_name = response.data.frm_name
+
+                    if (frm_name == 'position') {
+                        $('#position').prepend(`<option value="$id}">${position}</option>`);
+
+                        //$('#position option:selected').val(id)
+                        //$("#position option:selected").text(position)
+
+                        // alert('Returned ID: ' + id + "\n Position: " + position)
+                    }
+                    // ajaxAction('success', data)
+                },
+                error: function(xhr, status, error){
+                    alert("An Error occured:" + "\n" + error);
+                    // let msg = 'An error ocurred:' + '\n' + error;
+                    // sweet_alert('Error: Registration No', msg, 'info')
+                    ajaxAction('failed', data)
+                }
+
+            });
+
+         }
+
+
 
          if (!$('#not-together').is(':checked')) {  //If the CheckBox is NOT Checked
              $(".student-address").hide()
@@ -558,18 +736,9 @@
             }
         });
 
-        $('#department').change(function() {
-            let item_id = $(this).val();
-            let item_name = $("#department option:selected").text();
-
-            // alert('The item Selected from drop down: \n' + 'Item ID: ' +item_id + '\n Item Name: ' + item_name )
-            if (item_id == -1){
-                $("#department option:selected").text(' ---- Not Valid ---- ')
-            } else if (item_id == 0){
-                alert('Enter New Departemnt')
-            }
-
-
+        // This Function is being Used
+        $("#myModal").on('shown.bs.modal', function(){
+            $(this).find('#new_position').focus();
         });
 
         $(".child-edit").click(function(){
@@ -680,7 +849,6 @@
              }
 
          }
-
 
          function getCookie(name) {
             // Get the value of the csrfToken from cookie

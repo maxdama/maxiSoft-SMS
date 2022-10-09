@@ -66,10 +66,14 @@ class Employees(models.Model):
             return age
 
 
-class Position(models.Model):
+class Workgroup(models.Model):
     """The Position model is used in conjunction with the Django Group model. The Employee Position is store in
-        Group and its related to the Position model that has the specific school id. Theis enables that the
+        Group, and it's related to the Position model that has the specific school id. The is so that the
         Staff Position of specified school can be filtered """
     objects = None
-    group = models.OneToOneField(Group,on_delete=models.CASCADE, null=True, blank=True, unique=True)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, null=True, blank=True, unique=True)
+    test = models.ForeignKey
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
+
+    class Meta:
+        db_table = "apps_Workgroup"
