@@ -273,17 +273,17 @@
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
                                                     <input required id="hire_date" type="date" name="hire_date" value="{{emp.hire_date|date:'Y-m-d'}}"  class="pb-0 pt-1 form-control input-border-bottom">
-                                                    <label for="hire_date" class="placeholder pb-0">Hired Date</label>
+                                                    <label for="hire_date" class="placeholder pb-0">* Hired Date</label>
                                                 </div>
                                             </div>
 
                                             <!-- Employee Position -->
                                             <div class="col-sm-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select required class="form-control input-border-bottom pb-1 pt-2" id="position" name="position" >
-                                                        <option  hidden> {{emp.position|default_if_none:''}}</option>
+                                                    <select required class="form-control input-border-bottom pb-1 pt-2" id="position" name="group" >
+                                                        <option value="{{emp.group_id}}" hidden> {{emp.group.name|default_if_none:''}}</option>
                                                         {% for posx in positions %}
-                                                            <option>{{posx.name}}</option>
+                                                            <option value="{{posx.id}}" >{{posx.name}}</option>
                                                         {% endfor %}
                                                         <option disabled> ────────────── </option>
                                                         <option value="0">*  Add Position </option>
@@ -311,7 +311,7 @@
                                             <!-- Employee Status -->
                                             <div class="col-sm-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1 pt-2" id="status" name="status" >
+                                                    <select class="form-control input-border-bottom pb-1 pt-2" id="status" name="status" required >
                                                         <option value="{{emp.status}}" hidden> {{emp.status|default_if_none:''}}</option>
                                                         <option>Active</option>
                                                         <option>Resigned</option>
@@ -556,12 +556,12 @@
                                 <div class="row ">
                                        <div class="col-lg-12">
                                            <!-- This input is used to identity the form and to get it name in views -->
-                                            <input type="hidden" name="frm_name" value="departments">
+                                            <input type="hidden" name="frm_name" value="department">
 
                                             <div class="form-group form-floating-label">
                                                 <input id="new_department" type="text" value="{{emp.new_department|default_if_none:''}}"
                                                        name="new_department" class="pb-0 form-control input-border-bottom">
-                                                <label for="new_department" class="placeholder">Employee Departments:</label>
+                                                <label for="new_department" class="placeholder">Employee Department:</label>
                                             </div>
                                        </div>
                                   </div>
@@ -575,7 +575,7 @@
                                 </div>
 
                                 <div class="col-sm-7  pl-0 ">
-                                    <button id="save_department" type="button" class="btn btn-outline-success btn-rounded btn-sm" >Save</button>
+                                    <button id="save-department" type="button" class="btn btn-outline-success btn-rounded btn-sm" >Save</button>
                                 </div>
 
                             </div>
@@ -635,6 +635,11 @@
             }
         });
 
+        // This Function is being Used
+        $("#positionModal").on('shown.bs.modal', function(){
+            $(this).find('#new_position').focus();
+        });
+
          // This function is being Used
          // The Click event function to Save New Position of modal form
           $('#save-position').click(function(){
@@ -648,8 +653,21 @@
               $('#positionModal').modal('toggle');
           })
 
+         // This function is being Used
+         // The Click event function to Save New Position of modal form
+          $('#save-department').click(function(){
+
+              let form = $(this).closest('form');
+              let data = form.serializeArray() // [{'demo: 'value'}]
+              //let data = $('#workgroup').serializeArray(); // [{'demo: 'value'}]
+              let url = '/employees/modalform-save'
+
+              save_modalform_ajax (url, data)
+              $('#positionModal').modal('toggle');
+          })
+
           // This function is being Used when the department selection is change or selected
-        $('#departments').change(function() {
+        $('#department').change(function() {
             let item_id = $(this).val();
             let item_name = $("#department option:selected").text();
             // alert('The item Selected from drop down: \n' + 'Item ID: ' +item_id + '\n Item Name: ' + item_name )
@@ -658,6 +676,12 @@
             } else if (item_id == 0){
                 $('#departmentModal').modal('show');
             }
+        });
+
+        // This Function is being Used. When the department modal popsup
+         // set foucus to the new_department input control
+        $("#departmentModal").on('shown.bs.modal', function(){
+            $(this).find('#new_department').focus();
         });
 
          function save_modalform_ajax(url, stud_data, x)
@@ -679,7 +703,7 @@
                     let frm_name = response.data.frm_name
 
                     if (frm_name == 'position') {
-                        $('#position').prepend(`<option value="$id}">${position}</option>`);
+                        $('#position').prepend(`<option value="${id}">${position}</option>`);
 
                         //$('#position option:selected').val(id)
                         //$("#position option:selected").text(position)
@@ -736,10 +760,7 @@
             }
         });
 
-        // This Function is being Used
-        $("#myModal").on('shown.bs.modal', function(){
-            $(this).find('#new_position').focus();
-        });
+
 
         $(".child-edit").click(function(){
         /// your code for click event here ///

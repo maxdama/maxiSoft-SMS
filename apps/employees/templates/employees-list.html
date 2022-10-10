@@ -83,16 +83,17 @@
 
                                     <tbody class="">
                                         {% for emp in employees %}
-                                          <tr class="row-sel text-small ">
+                                          <tr class="row-sel text-small m-0 p-0 ">
                                               <!-- <td>{{forloop.counter}}</td> -->
-                                              <td class="staff-id text small">{{emp.staff_no}}</td>
-                                              <td><span class="staff-name">{{emp.surname}} {{emp.other_names}} </span>
-                                                  {% if emp.position %}
-                                                    <br> <span class="text-small">{{emp.position|default_if_none:''}}</span>
+                                              <td class="staff-id text small ">{{emp.staff_no}}</td>
+                                              <td><span class="staff-name text text-md-left   font-weight-bold small ">
+                                                  {{emp.surname}} {{emp.other_names}} </span>
+                                                  {% if emp.group %}
+                                                    <br> <span class="text-small text-secondary  ">{{emp.group.name|default_if_none:''}}</span>
                                                   {% endif %} </td>
                                               <td>{{emp.gender|first}}</td>
                                               <td>{{emp.age}}</td>
-                                              <td>{{emp.marital_status}}</td>
+                                              <td>{{emp.marital_status|default_if_none:''}}</td>
                                               <td>{{emp.mobile_no1}}
                                                   {% if emp.mobile_no2 %} <br> {{emp.mobile_no2}} {% endif %}
                                                   {% if emp.email_addr %} <br> <span class="small"> {{emp.email_addr}} </span>  {% endif %} </td>

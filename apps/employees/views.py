@@ -72,7 +72,8 @@ def new_employee_entry(req):
 
     emp_id = 0
     header = 'Employee Entry'
-    emp_posix = Group.objects.all().order_by('id')  # Get the list of Positions stored in django Group table
+    # Get the list of Positions stored in django Group table for the specific School ID
+    emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')
     # Get the list of departments from Departments table
     emp_dept = Departments.objects.filter(school=sch_id).order_by('id')
 
@@ -121,7 +122,8 @@ def employee_update(req, emp_id=0):
     employee = Employees.objects.get(id=emp_id, school=sch_id)
     # Get the list of departments from Departments table
     emp_dept = Departments.objects.filter(school=sch_id).order_by('id')
-    emp_posix = Group.objects.all().order_by('id')  # Get the list of Positions stored in django Group table
+    # Get the list of Positions stored in django Group table for the specific School ID
+    emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')
 
     if req.method == 'POST':
         emp_id = req.POST['id']
@@ -146,7 +148,7 @@ def employee_update(req, emp_id=0):
                 context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix, 'departments': emp_dept}
                 return render(req, 'employee-form.html', context)
     else:
-        print(employee)
+        print(emp_posix)
         context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix, 'departments': emp_dept}
         return render(req, 'employee-form.html', context)
 
@@ -162,16 +164,22 @@ def modalform_save(request):
     data = {}
 
     if request.method == 'POST':
-        posix = request.POST['new_position']
         frm = request.POST['frm_name']
         print(sch_id)
-        print(posix)
 
-        g = Group.objects.create(name=posix)  # Insert the new Position
-        wg = Workgroup.objects.create(group=g.id, school=sch_id)
+        if frm == 'position':
+            posix = request.POST['new_position']
+            g = Group.objects.create(name=posix)  # Insert the new Position
+            wg = Workgroup.objects.create(group=g, school_id=sch_id)
 
-        print(f'Group ID: {g.id},  Workgroup ID: {wg.id}')
+            print(f'Group ID: {g.id},  Workgroup ID: {wg.id}')
+            data = {'id': g.id, 'position': posix, 'frm_name': frm}
 
-        data = {'id': g.id, 'position': posix, 'frm_name': frm}
+        elif frm == 'department':
+            dept = request.POST['new_department']
+            print('Department Entered: ' + dept)
+            d = Departments.objects.create(school_id=sch_id, name=dept)
+            print(f'Department ID: {d.id},  Name: {d.name}')
+            data = {'id': d.id, 'department': dept, 'frm_name': frm}
 
     return JsonResponse({'data': data})

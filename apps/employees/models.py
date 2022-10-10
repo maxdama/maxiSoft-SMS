@@ -20,11 +20,24 @@ class Departments(models.Model):
     """
 
 
+class Workgroup(models.Model):
+    """The Position model is used in conjunction with the Django Group model. The Employee Position is store in
+        Group, and it's related to the Position model that has the specific school id. The is so that the
+        Staff Position of specified school can be filtered """
+    objects = None
+    group = models.OneToOneField(Group, on_delete=models.SET_NULL,  null=True, blank=True, unique=True)
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
+
+    class Meta:
+        db_table = "apps_Workgroup"
+
+
 class Employees(models.Model):
     """Custom table created to store information about Employees of an organisation"""
     objects = None
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
     department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, blank=True, unique=False)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, unique=False)
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING, unique=True, null=True, blank=True)
     staff_no = models.CharField(max_length=25, unique=True, blank=True, db_index=True)
     title = models.CharField(max_length=10, blank=True, null=True)
@@ -39,8 +52,8 @@ class Employees(models.Model):
     resid_addr = models.CharField(max_length=150, null=True, blank=True)
     resid_city = models.CharField(max_length=35, null=True, blank=True)
     resid_state = models.CharField(max_length=25, null=True, blank=True)
-    depart = models.CharField(max_length=25, null=True, blank=True, unique=False)
-    position = models.CharField(max_length=25, null=True, blank=True, unique=False)
+    # depart = models.CharField(max_length=25, null=True, blank=True, unique=False)
+    # position = models.CharField(max_length=25, null=True, blank=True, unique=False)
     hire_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=15, blank=True)
     # lga_origin =
@@ -64,16 +77,3 @@ class Employees(models.Model):
         if self.hire_date is not None:
             age = date.today().year - self.hire_date.year
             return age
-
-
-class Workgroup(models.Model):
-    """The Position model is used in conjunction with the Django Group model. The Employee Position is store in
-        Group, and it's related to the Position model that has the specific school id. The is so that the
-        Staff Position of specified school can be filtered """
-    objects = None
-    group = models.OneToOneField(Group, on_delete=models.CASCADE, null=True, blank=True, unique=True)
-    test = models.ForeignKey
-    school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
-
-    class Meta:
-        db_table = "apps_Workgroup"
