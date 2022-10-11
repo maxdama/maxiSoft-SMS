@@ -75,5 +75,28 @@ class Employees(models.Model):
     @property
     def years_worked(self):
         if self.hire_date is not None:
-            age = date.today().year - self.hire_date.year
-            return age
+            yrs_work = date.today().year - self.hire_date.year
+            return yrs_work
+
+
+class Nextofkin(models.Model):
+    objects = None
+    employee = models.OneToOneField(Employees, on_delete=models.CASCADE, null=True, blank=True, unique=True)
+    title_k = models.CharField(max_length=10, blank=True, null=True)
+    surname_k = models.CharField(max_length=30, unique=False, blank=True)
+    other_names_k = models.CharField(max_length=60, unique=False, null=True, blank=True)
+    relationship = models.CharField(max_length=25, unique=False, null=False, blank=True)
+    gender_k = models.CharField(max_length=10, blank=True, db_index=True)
+    mobile_no1_k = models.CharField(max_length=30, null=True, blank=True)
+    mobile_no2_k = models.CharField(max_length=30, null=True, blank=True)
+    email_addr_k = models.EmailField(null=True, blank=True)
+    resid_addr_k = models.CharField(max_length=150, null=True, blank=True)
+    resid_city_k = models.CharField(max_length=35, null=True, blank=True)
+    resid_state_k = models.CharField(max_length=25, null=True, blank=True)
+
+    def __str__(self):
+        return "%s %s %s %s" % (self.surname_k, self.other_names_k, self.gender_k, self.mobile_no1_k)
+
+    class Meta:
+        db_table = "apps_Nextofkin"
+

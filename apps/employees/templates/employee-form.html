@@ -302,7 +302,7 @@
                                                         {% endfor %}
                                                         <!-- <option value="-1" class="">-------------------------------</option> -->
                                                          <option disabled> ─────────────── </option>
-                                                        <option value="0">* New Department</option>
+                                                        <option value="0">* Add Department</option>
                                                     </select>
                                                     <label for="department" class="placeholder">Department</label>
                                                 </div>
@@ -332,40 +332,40 @@
                                         <div class="row "><div class="col card-success">Next of Kin Details:</div></div>
                                     </div>
                                     <!-- -->
-                                    <div class="card-body">
+                                    <div class="card-body pb-0">
                                         <!--  Next of Kin.  Column Rows Left Justification  -->
                                         <div class="row d-flex justify-content-left text-left pb-3">
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="title_kin" name="title_kin" >
-                                                        <option value="{{guardian.title}}" hidden>{{guardian.title}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="title_k" name="title_k" >
+                                                        <option value="{{guardian.title_k}}" hidden>{{guardian.title_k}}</option>
                                                         <option></option>
                                                         <option>Mr</option>
                                                         <option>Mrs</option>
                                                         <option>Miss</option>
                                                         <option>Chief</option>
                                                     </select>
-                                                    <label for="title_kin" class="placeholder">Title:</label>
+                                                    <label for="title_k" class="placeholder">Title:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input  id="surname_kin" type="text" value="{{guardian.surname}}" name="surname_kin" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" >
+                                                    <input  id="surname_k" type="text" value="{{guardian.surname_k}}" name="surname_k" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" >
                                                     <label for="surname" class="placeholder">Surname</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-4">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="other_names_kin" type="text" value="{{guardian.other_names}}" name="other_names_kin" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom">
-                                                    <label for="other_names_kin" class="placeholder">Other Names</label>
+                                                    <input id="other_names_k" type="text" value="{{guardian.other_names_k}}" name="other_names_k" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom">
+                                                    <label for="other_names_k" class="placeholder">Other Names</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-2">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="relationship" type="text" name="relationship" value="{{student.guardian_is|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom" >
+                                                    <input id="relationship" type="text" name="relationship" value="{{student.relationship|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom" >
                                                     <label for="relationship" class="placeholder">Relationship</label>
                                                 </div>
                                             </div>
@@ -373,70 +373,70 @@
                                         <div class="row d-flex justify-content-left text-left pb-3">
                                             <div class="col-2 ">
                                                <div class="form-group form-floating-label">
-                                                <select id="gender_kin" name="gender_kin" class="form-control input-border-bottom pb-1 " >
-                                                    <option value="{{guardian.gender}}" hidden>{{guardian.gender}}</option>
+                                                <select id="gender_k" name="gender_k" class="form-control input-border-bottom pb-1 " >
+                                                    <option value="{{guardian.gender}}" hidden>{{guardian.gender_k}}</option>
                                                     <option>Male</option>
                                                     <option>Female</option>
 
                                                 </select>
-                                                <label for="gender_kin" class="placeholder">Gender</label>
+                                                <label for="gender_k" class="placeholder">Gender</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone1_kin" value="{{guardian.mobile_no1}}" class="pb-0 form-control input-border-bottom" name="mobile_no1_kin"  pattern="[0-9]{11}"  >
-                                                    <label for="phone1_kin" class="placeholder">Mobile No:</label>
+                                                    <input type="tel" id="phone1_k" value="{{guardian.mobile_no1_k}}" class="pb-0 form-control input-border-bottom" name="mobile_no1_k"  pattern="[0-9]{11}"  >
+                                                    <label for="phone1_k" class="placeholder">Mobile No:</label>
                                                 </div>
                                             </div>
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone2_kin" value="{{student.mobile_no2}}" class="pb-0 form-control input-border-bottom" name="mobile_no2_kin"  pattern="[0-9]{11}" >
+                                                    <input type="tel" id="phone2_k" value="{{student.mobile_no2_k}}" class="pb-0 form-control input-border-bottom" name="mobile_no2_k"  pattern="[0-9]{11}" >
                                                     <label for="phone2" class="placeholder">Phone No:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="email_kin" value="{{guardian.email}}" name="email_kin" type="text" class="pb-0 form-control input-border-bottom" >
-                                                    <label for="email_kin" class="placeholder">Email</label>
+                                                    <input id="email_k" value="{{guardian.email_k}}" name="email_k" type="text" class="pb-0 form-control input-border-bottom" >
+                                                    <label for="email_k" class="placeholder">Email</label>
                                                 </div>
                                             </div>
 
                                         </div>
-                                        <div class="row d-flex justify-content-left text-left">
+                                        <div class="row d-flex justify-content-center text-left ">
 
                                             <div class="col-4">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="res_addr_kin" type="text" value="{{guardian.res_addr}}" name="res_addr_kin" class="pb-0 form-control input-border-bottom">
-                                                    <label for="res_addr_kin" class="placeholder">Residential Addr:</label>
+                                                    <input id="res_addr_k" type="text" value="{{guardian.res_addr_k}}" name="res_addr_k" class="pb-0 form-control input-border-bottom">
+                                                    <label for="res_addr_k" class="placeholder">Residential Addr:</label>
                                                 </div>
                                             </div>
-
+                                            <!--
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="res_area_kin" type="text" value="{{guardian.res_area}}" name="res_area_kin" class="pb-0 form-control input-border-bottom">
-                                                    <label for="res_area_kin" class="placeholder">Residential Area:</label>
+                                                    <input id="res_area_k" type="text" value="{{guardian.res_area_k}}" name="res_area_k" class="pb-0 form-control input-border-bottom">
+                                                    <label for="res_area_k" class="placeholder">Residential Area:</label>
                                                 </div>
                                             </div>
-
+                                            -->
                                             <!-- Guardian Residence City  -->
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="city_kin" name="res_city_kin" >
-                                                        <option value="{{guardian.res_city}}" hidden>{{guardian.res_city}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="city_k" name="res_city_k" >
+                                                        <option value="{{guardian.res_city_k}}" hidden>{{guardian.res_city_k}}</option>
                                                         <option>Port Harcourt</option>
                                                         <option>Ahoada</option>
                                                         <option>Emoha</option>
                                                     </select>
-                                                    <label for="city_kin" class="placeholder">City Residence:</label>
+                                                    <label for="city_k" class="placeholder">City Residence:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="state_kin"  name="res_state_kin">
-                                                    <option value="{{guardian.res_state}}" hidden>{{guardian.res_state}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="state_k"  name="res_state_k">
+                                                    <option value="{{guardian.res_state_k}}" hidden>{{guardian.res_state_k}}</option>
                                                     <option>Rivers</option>
                                                     <option>Bayelsa</option>
                                                     <option>Kwara</option>
@@ -446,7 +446,7 @@
                                                     <option>Kogi</option>
                                                     <option>Plateau</option>
                                                     </select>
-                                                    <label for="state_kin" class="placeholder">State Residence</label>
+                                                    <label for="state_k" class="placeholder">State Residence</label>
                                                 </div>
                                             </div>
 
@@ -650,20 +650,7 @@
               let url = '/employees/modalform-save'
 
               save_modalform_ajax (url, data)
-              $('#positionModal').modal('toggle');
-          })
-
-         // This function is being Used
-         // The Click event function to Save New Position of modal form
-          $('#save-department').click(function(){
-
-              let form = $(this).closest('form');
-              let data = form.serializeArray() // [{'demo: 'value'}]
-              //let data = $('#workgroup').serializeArray(); // [{'demo: 'value'}]
-              let url = '/employees/modalform-save'
-
-              save_modalform_ajax (url, data)
-              $('#positionModal').modal('toggle');
+              $('#positionModal').modal('hide');
           })
 
           // This function is being Used when the department selection is change or selected
@@ -678,11 +665,26 @@
             }
         });
 
-        // This Function is being Used. When the department modal popsup
+         // This Function is being Used. When the department modal popsup
          // set foucus to the new_department input control
         $("#departmentModal").on('shown.bs.modal', function(){
             $(this).find('#new_department').focus();
         });
+
+         // This function is being Used
+         // The Click event function to Save New Position of modal form
+         $('#save-department').click(function(){
+
+              let form = $(this).closest('form');
+              let data = form.serializeArray() // [{'demo: 'value'}]
+              //let data = $('#workgroup').serializeArray(); // [{'demo: 'value'}]
+              let url = '/employees/modalform-save'
+
+              save_modalform_ajax (url, data)
+             $('#departmentModal').modal('hide');
+         })
+
+
 
          function save_modalform_ajax(url, stud_data, x)
          {
@@ -698,28 +700,68 @@
                 success: function(response, status)
                 {
                     console.log(response);
-                    let id = response.data.id
-                    let position = response.data.position
                     let frm_name = response.data.frm_name
 
                     if (frm_name == 'position') {
-                        $('#position').prepend(`<option value="${id}">${position}</option>`);
+                        if (response.data.error != ''){
+                            ajaxAction('failed', response.data.error)
+                        } else {
+                            let id = response.data.id
+                            let position = response.data.position
 
-                        //$('#position option:selected').val(id)
-                        //$("#position option:selected").text(position)
-
+                            $('#position').prepend(`<option value="${id}">${position}</option>`);
+                            $('#position option:selected').val(-1)
+                            $("#position option:selected").text('Added: Select It')
+                        }
                         // alert('Returned ID: ' + id + "\n Position: " + position)
+                    } else if (frm_name == 'department'){
+                        if (response.data.error != ''){
+                            // alert(response.data.error)
+                            data = response.data.error
+                            ajaxAction('failed', data)
+
+                        } else {
+                            let id = response.data.id
+                            let department = response.data.department
+
+                            $('#department').prepend(`<option value="${id}">${department}</option>`);
+                            $('#department option:selected').val(-1)
+                            $("#department option:selected").text('Added: Select It')
+                        }
                     }
                     // ajaxAction('success', data)
                 },
                 error: function(xhr, status, error){
-                    alert("An Error occured:" + "\n" + error);
-                    // let msg = 'An error ocurred:' + '\n' + error;
-                    // sweet_alert('Error: Registration No', msg, 'info')
+                    //alert("An Error occured:" + "\n" + xhr.data.error);
                     ajaxAction('failed', data)
                 }
 
             });
+
+         }
+
+         function ajaxAction(status, data){
+             if (status == 'success'){
+                  swal({
+                       icon: "success",
+                       timer: 2000,
+                       button: {
+                           text: "OK",
+                           visible: false,
+
+                        }
+                    });
+             }else{
+                 swal({
+                       icon: "error",
+                        text: data,
+                       button: {
+                           text: "OK",
+                           visible: true,
+
+                        }
+                    });
+             }
 
          }
 
@@ -854,22 +896,7 @@
 
          }
 
-         function ajaxAction(status, data){
-             if (status == 'success'){
-                  swal({
-                       icon: "success",
-                       timer: 2000,
-                       button: {
-                           text: "OK",
-                           visible: false,
 
-                        }
-                    });
-             }else{
-                 alert('Operation Failed')
-             }
-
-         }
 
          function getCookie(name) {
             // Get the value of the csrfToken from cookie

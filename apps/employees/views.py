@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.models import Group
-from django.db import utils
+from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from apps.employees.forms import EmployeeForm
@@ -88,9 +88,10 @@ def new_employee_entry(req):
             try:
                 emp.save()
 
-            except utils.IntegrityError:
-                print('Integrity Error: A key field was duplicated')
-                messages.error(req, 'The Data you entered was NOT SAVED: There is integrity of data in a key field.')
+            except IntegrityError as e:
+                err_msg = getattr(e, 'message', repr(e))
+                print(err_msg)
+                messages.error(req, err_msg)
                 context = {'header': header, 'emp_id': emp_id, 'emp': req.POST}
 
                 return render(req, 'employee-form.html', context)
@@ -154,6 +155,8 @@ def employee_update(req, emp_id=0):
 
 
 def modalform_save(request):
+    """ Save Modal forms in Employee form. The Modal Forms are Position and Department forms
+        The forms will pop up when the Add Position or Add Department of the Select Inputs are Selected """
     print('Function: -- modalform_save  -- ')
 
     school = schools(request)
@@ -169,17 +172,26 @@ def modalform_save(request):
 
         if frm == 'position':
             posix = request.POST['new_position']
-            g = Group.objects.create(name=posix)  # Insert the new Position
-            wg = Workgroup.objects.create(group=g, school_id=sch_id)
+            try:
+                g = Group.objects.create(name=posix)  # Insert the new Position
+                wg = Workgroup.objects.create(group=g, school_id=sch_id)
+                data = {'id': g.id, 'position': posix, 'frm_name': frm, 'error': ''}
+                print(f'Group ID: {g.id},  Workgroup ID: {wg.id}')
 
-            print(f'Group ID: {g.id},  Workgroup ID: {wg.id}')
-            data = {'id': g.id, 'position': posix, 'frm_name': frm}
+            except IntegrityError as e:
+                err_msg = getattr(e, 'message', repr(e))
+                data = {'error': str(err_msg), 'frm_name': frm}
 
         elif frm == 'department':
             dept = request.POST['new_department']
             print('Department Entered: ' + dept)
-            d = Departments.objects.create(school_id=sch_id, name=dept)
-            print(f'Department ID: {d.id},  Name: {d.name}')
-            data = {'id': d.id, 'department': dept, 'frm_name': frm}
+            try:
+                d = Departments.objects.create(school_id=sch_id, name=dept)
+                print(f'Department ID: {d.id},  Name: {d.name} frm_name: {frm} ')
+                data = {'id': d.id, 'department': dept, 'frm_name': frm, 'error': ''}
+
+            except IntegrityError as e:
+                err_msg = getattr(e, 'message', repr(e))
+                data = {'error': str(err_msg), 'frm_name': frm}
 
     return JsonResponse({'data': data})

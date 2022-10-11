@@ -1,5 +1,5 @@
 from django import forms
-from .models import Employees
+from .models import Employees, Nextofkin
 
 
 class EmployeeForm(forms.ModelForm):
@@ -16,3 +16,10 @@ class EmployeeForm(forms.ModelForm):
         model = Employees
         fields = '__all__'
         exclude = ['school', 'user', 'staff_no']
+
+
+class NextofkinForm(forms.ModelForm):
+    class Meta:
+        model = Nextofkin
+        fields = '__all__'
+        exclude = ['employee']
