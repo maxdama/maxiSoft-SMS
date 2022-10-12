@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.models import Group
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from apps.employees.forms import EmployeeForm
-from apps.employees.models import Employees, Departments, Workgroup
+from apps.employees.forms import EmployeeForm, NextofkinForm
+from apps.employees.models import Employees, Departments, Workgroup, Nextofkin
 from apps.settings.models import SchoolProfiles
 from apps.utils import schools
 
@@ -39,7 +40,8 @@ def new_staff_no(sch_id):
 
             try:
                 # Generate the Next Staff_No in the Employee table sequence
-                staff_no = Employees.objects.exclude(staff_no__isnull=True, school=sch_id).order_by('staff_no').last().staff_no
+                staff_no = Employees.objects.exclude(staff_no__isnull=True, school=sch_id).order_by(
+                    'staff_no').last().staff_no
                 abr = staff_no[0:tl]  # strip out the Abbreviation and school id part of last staff_no
                 num = int(staff_no[tl:])  # Strip out the number part from last staff_no
                 num = num + 1
@@ -61,6 +63,41 @@ def new_staff_no(sch_id):
         return None
 
 
+def nextofkin(action, req, sch_id, emp):
+    print('Function: save_nextofking')
+
+    if req.POST.get('surname_k') != '' or req.POST.get('other_names_k') != '':
+    # if emp.has_nextkin == "Yes":
+        if action == 'save':
+            kin_form = NextofkinForm(req.POST or None)
+            if kin_form.is_valid():
+                print('----- Next of Kin Form is Valid')
+                kin = kin_form.save(commit=False)
+                kin.school_id = sch_id
+                kin.employee_id = emp.id
+                kin.save()
+            else:
+                messages.warning(req, kin_form.errors)
+
+        elif action == 'update':
+            kin = Nextofkin.objects.get(school_id=sch_id, employee_id=emp.id)
+            kin_form = NextofkinForm(req.POST or None, instance=kin)
+            if kin_form.is_valid():
+                try:
+                    kin = kin_form.save(commit=False)
+                    kin.school_id = sch_id
+                    kin.save()
+
+                except IntegrityError as e:
+                    err_msg = getattr(e, 'message', repr(e))
+                    messages.error(req, err_msg)
+            else:
+                messages.warning(req, kin_form.errors)
+    else:
+        messages.info(req, 'Next of Kin is NOT Saved or Updated')
+
+
+@transaction.atomic()
 def new_employee_entry(req):
     """ New Employee Entry"""
     print('new_employee_entry :  -------------')
@@ -72,21 +109,22 @@ def new_employee_entry(req):
 
     emp_id = 0
     header = 'Employee Entry'
-    # Get the list of Positions stored in django Group table for the specific School ID
-    emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')
-    # Get the list of departments from Departments table
-    emp_dept = Departments.objects.filter(school=sch_id).order_by('id')
+    emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')  # Get Position List ( or Group list)
+    emp_dept = Departments.objects.filter(school=sch_id).order_by('id')  # Get Departments list
 
     if req.method == 'POST':
         print('---- Posting Form')
         emp_form = EmployeeForm(req.POST or None)
+
         if emp_form.is_valid():
             print('----- Form is Valid')
             emp = emp_form.save(commit=False)
             emp.school_id = sch_id
-            emp.staff_no = new_staff_no(sch_id)
+            # emp.staff_no = new_staff_no(sch_id)
             try:
                 emp.save()
+                # if req.POST.get('surname_k') != '':
+                nextofkin('save', req, sch_id, emp)
 
             except IntegrityError as e:
                 err_msg = getattr(e, 'message', repr(e))
@@ -100,17 +138,21 @@ def new_employee_entry(req):
             return redirect("list-employees")
         else:
             # if the form processed is having in-Valid data
-            messages.error(req, 'The Data you entered was NOT SAVED: The form data is NOT valid.')
+            messages.error(req, emp_form.errors)
             context = {'header': header, 'emp_id': emp_id, 'emp': req.POST, 'positions': emp_posix,
                        'departments': emp_dept}
             return render(req, 'employee-form.html', context)
     else:
-        print('----- GET Operation: Blanc Form for New Entry')
-        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept}
+        staff_no = new_staff_no(sch_id)
+        next_staff_no = {'staff_no': staff_no}
+        print('----- GET Operation: Blank Form for New Entry')
+        print(next_staff_no)
+        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept, 'emp': next_staff_no}
 
         return render(req, 'employee-form.html', context)
 
 
+@transaction.atomic()
 def employee_update(req, emp_id=0):
     """ Function to Update Employee Details:"""
 
@@ -121,10 +163,12 @@ def employee_update(req, emp_id=0):
 
     header = 'Employee Update'
     employee = Employees.objects.get(id=emp_id, school=sch_id)
-    # Get the list of departments from Departments table
-    emp_dept = Departments.objects.filter(school=sch_id).order_by('id')
-    # Get the list of Positions stored in django Group table for the specific School ID
-    emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')
+    try:
+        next_kin = Nextofkin.objects.get(school=sch_id, employee=employee)  # Query for next of kin
+    except Nextofkin.DoesNotExist:
+        next_kin = {}   # if nextofkin does not exist set next_kin to empty dictionary object
+    emp_dept = Departments.objects.filter(school=sch_id).order_by('id')  # Get department list
+    emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')  # Get Position list (or Group list)
 
     if req.method == 'POST':
         emp_id = req.POST['id']
@@ -136,21 +180,33 @@ def employee_update(req, emp_id=0):
 
             if form.is_valid():
                 emp = form.save(commit=False)
-                emp.staff_no = req.POST['staff_no']
                 emp.save()
+                msg1 = ''
+                if next_kin: # If successful query of next of kin,
+                    nextofkin('update', req, sch_id, emp)  # Update
+                    msg1 = ' and Next of Kin'
+                else:
+                    #  if next of kin is entered
+                    if req.POST.get('surname_k') != '' and req.POST.get('other_names_k') != '':
+                        nextofkin('save', req, sch_id, emp)  # create a new next of kin record
+                        msg1 = ' and Next of Kin'
 
-                messages.success(req, 'Employee Updated successfully.')
+                msg = 'Employee ' + msg1 + ' Updated successfully.'
+                messages.success(req, msg)
                 print('---- Employee Form is Valid. And Updated')
                 return redirect('list-employees')
             else:
                 print('----- Employee form is NOT Valid ')
-                messages.error(req, 'Employee NOT Updated: There is an Invalid Form Entry.')
+                # messages.error(req, 'Employee NOT Updated: There is an Invalid Form Entry.')
+                messages.error(req, form.errors)
 
-                context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix, 'departments': emp_dept}
+                context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix,
+                           'departments': emp_dept, 'kin': next_kin}
                 return render(req, 'employee-form.html', context)
     else:
-        print(emp_posix)
-        context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix, 'departments': emp_dept}
+        print(employee)
+        context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix,
+                   'departments': emp_dept}
         return render(req, 'employee-form.html', context)
 
 

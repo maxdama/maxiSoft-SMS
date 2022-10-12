@@ -15,7 +15,7 @@ class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employees
         fields = '__all__'
-        exclude = ['school', 'user', 'staff_no']
+        exclude = ['school', 'user']
 
 
 class NextofkinForm(forms.ModelForm):

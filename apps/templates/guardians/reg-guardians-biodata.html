@@ -159,7 +159,7 @@
                                     </span>
                                     <div class="col-10 ">
                                         <div class="form-group form-floating-label pb-0 mb-0">
-                                            <select class="form-control input-border-bottom pb-1" id="stud_guardian" name="stud_guardian" >
+                                            <select class="form-control input-border-bottom pb-1 selectpicker " data-live-search="true" id="stud_guardian" name="stud_guardian" >
                                                 <option value=""></option>
                                                 {% for gad in gad_list %}
                                                     <option value="{{gad.id}}">{{gad.surname}} {{gad.other_names}}</option>

@@ -69,9 +69,9 @@
                                             <!-- <th>S/n</th> -->
                                             <th>Staff ID</th>
                                             <th class="">Staff Names <br> <span class="text-small">Position</span></th>
-                                            <th>Sex</th>
+                                            <th>Sex <br><span class="text-small">Marital</span> </th>
                                             <th>Age</th>
-                                            <th>Marital Status</th>
+                                            <!-- <th>Marital Status</th> -->
                                             <th class="text">Phone No <br> <span class="text-small">Email</span></th>
                                             <th>Department </th>
                                             <th>Years Hired</th>
@@ -91,9 +91,10 @@
                                                   {% if emp.group %}
                                                     <br> <span class="text-small text-secondary  ">{{emp.group.name|default_if_none:''}}</span>
                                                   {% endif %} </td>
-                                              <td>{{emp.gender|first}}</td>
+                                              <td>{{emp.gender|first}}
+                                                  {% if emp.marital_status %} <br> <span class="text-small text-primary">{{emp.marital_status|default_if_none:''}}</span>  {% endif %}</td>
                                               <td>{{emp.age}}</td>
-                                              <td>{{emp.marital_status|default_if_none:''}}</td>
+                                              <!-- <td>{{emp.marital_status|default_if_none:''}}</td> -->
                                               <td>{{emp.mobile_no1}}
                                                   {% if emp.mobile_no2 %} <br> {{emp.mobile_no2}} {% endif %}
                                                   {% if emp.email_addr %} <br> <span class="small"> {{emp.email_addr}} </span>  {% endif %} </td>

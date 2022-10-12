@@ -74,24 +74,23 @@
                         <div class="card-body">
                             <div class="row ">
                                 <!-- Column for Employee Name and Address Controls  -->
-                                <div class="col col-sm-8">
+                                <div class="col col-sm-8 ">
                                     <div class="">
-                                        <h3 class="pl-5 ml-4 "><strong>{{header}}</strong></h3>
+                                        <h3 class="pl-5 ml-4 text-success "><strong>{{header}}</strong></h3>
                                         <p>
 
-                                        {% if oprx_type != 'new-entry' %}
                                         <div class="row justify-content-center ">
 
-                                            <div class="col-md-2 form-floating-label"  >
+                                            <div class="col-md-2 form-floating-label" hidden >
                                                 <input type="text" class="form-control input-border-bottom pb-1" id="emp_id" name="id" value="{{emp.id}}"  >
                                                 <label for="emp_id" class="placeholder">Employee ID</label>
                                             </div>
 
-                                            <div class="col-md-5 form-floating-label pt-2">
-                                                 {% if emp_id is not 0 %}
-                                                <input id="staff_no" type="text" value="{{emp.staff_no}}" class="fw-extrabold form-control input-border-bottom pb-0" name="staff_no" >
-                                                <label for="staff_no" class=" placeholder">Staff No:</label>
-                                                {% endif %}
+                                            <div class="col-md-5 no-bd no-box-shadow   pt-2">
+
+                                                <label for="staff_no" class="placeholder font-italic  ">Staff No:</label>
+                                                <input id="staff_no" name="staff_no" readonly  type="text" value="{{emp.staff_no}}" class="fw-extrabold  input-border-bottom pb-0">
+
                                             </div>
 
                                             <div class="col-4 border m-0 p-0">
@@ -105,13 +104,12 @@
                                             </div>
                                         </div>
 
-                                        {% endif %}
                                     </div>
                                 </div>
 
                                 <div class="col col-4  ">
                                     <!--  Close button at the TOP Right Corner. Closes the form to Employee List -->
-                                    <button id="close" class=" btn  btn-outline-dark  btn-rounded btn-sm float-lg-right"  type="button" >X</button>
+                                    <button id="close" class=" btn  btn-outline-dark  btn-rounded btn-sm float-lg-right alert-success "  type="button" >X</button>
                                 </div>
 
                             </div>
@@ -259,6 +257,19 @@
                                                     <label for="city" class="placeholder">Marital Status:</label>
                                                 </div>
                                             </div>
+
+                                              <!-- Employee Has Next of Kin?
+                                            <div class="col-sm-2 ">
+                                                <div class="form-group form-floating-label">
+                                                    <select required class="form-control input-border-bottom pb-1" id="has_nextkin" name="has_nextkin" style="font-weight:bold;">
+                                                        <option  hidden> {{emp.has_nextkin|default_if_none:''}}</option>
+                                                        <option>Yes</option>
+                                                        <option>No</option>
+                                                    </select>
+                                                    <label for="has_nextkin" class="placeholder">Has Next of Kin?</label>
+                                                </div>
+                                            </div> -->
+
                                          </div>
 
                                     </div>
@@ -329,16 +340,18 @@
 
                                     <!-- Sub Header Next of Kin _________________________________________________   -->
                                     <div class="card-sub mb-0 pb-0">
-                                        <div class="row "><div class="col card-success">Next of Kin Details:</div></div>
+                                        <div class="row">
+                                            <div class="col card-success">Next of Kin Details:</div>
+                                        </div>
                                     </div>
-                                    <!-- -->
-                                    <div class="card-body pb-0">
+
+                                    <div class="card-body pb-0" >
                                         <!--  Next of Kin.  Column Rows Left Justification  -->
-                                        <div class="row d-flex justify-content-left text-left pb-3">
+                                        <div class="row d-flex justify-content-left text-left pb-3" disbled>
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
                                                     <select class="form-control input-border-bottom pb-1" id="title_k" name="title_k" >
-                                                        <option value="{{guardian.title_k}}" hidden>{{guardian.title_k}}</option>
+                                                        <option  hidden>{{emp.nextofkin.title_k|default_if_none:""}}</option>
                                                         <option></option>
                                                         <option>Mr</option>
                                                         <option>Mrs</option>
@@ -351,21 +364,21 @@
 
                                             <div class="col-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input  id="surname_k" type="text" value="{{guardian.surname_k}}" name="surname_k" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" >
+                                                    <input  id="surname_k" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="surname_k" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom" >
                                                     <label for="surname" class="placeholder">Surname</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-4">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="other_names_k" type="text" value="{{guardian.other_names_k}}" name="other_names_k" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom">
+                                                    <input id="other_names_k" type="text" value="{{emp.nextofkin.other_names_k|default_if_none:''}}" name="other_names_k" style="font-weight:bold; font-size: 17px;" class="pb-0 form-control input-border-bottom">
                                                     <label for="other_names_k" class="placeholder">Other Names</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-2">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="relationship" type="text" name="relationship" value="{{student.relationship|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom" >
+                                                    <input id="relationship" type="text" name="relationship" value="{{emp.nextofkin.relationship|default_if_none:''}}" style="font-weight:bold; font-size: 16px;" class="pb-0 form-control input-border-bottom" >
                                                     <label for="relationship" class="placeholder">Relationship</label>
                                                 </div>
                                             </div>
@@ -374,7 +387,7 @@
                                             <div class="col-2 ">
                                                <div class="form-group form-floating-label">
                                                 <select id="gender_k" name="gender_k" class="form-control input-border-bottom pb-1 " >
-                                                    <option value="{{guardian.gender}}" hidden>{{guardian.gender_k}}</option>
+                                                    <option  hidden>{{emp.nextofkin.gender_k|default_if_none:''}}</option>
                                                     <option>Male</option>
                                                     <option>Female</option>
 
@@ -385,21 +398,21 @@
 
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone1_k" value="{{guardian.mobile_no1_k}}" class="pb-0 form-control input-border-bottom" name="mobile_no1_k"  pattern="[0-9]{11}"  >
+                                                    <input type="tel" id="phone1_k" value="{{emp.nextofkin.mobile_no1_k|default_if_none:''}}" class="pb-0 form-control input-border-bottom" name="mobile_no1_k"  pattern="[0-9]{11}"  >
                                                     <label for="phone1_k" class="placeholder">Mobile No:</label>
                                                 </div>
                                             </div>
                                             <div class="col-3">
                                                 <div class="form-group form-floating-label">
-                                                    <input type="tel" id="phone2_k" value="{{student.mobile_no2_k}}" class="pb-0 form-control input-border-bottom" name="mobile_no2_k"  pattern="[0-9]{11}" >
+                                                    <input type="tel" id="phone2_k" value="{{emp.nextofkin.mobile_no2_k|default_if_none:''}}" class="pb-0 form-control input-border-bottom" name="mobile_no2_k"  pattern="[0-9]{11}" >
                                                     <label for="phone2" class="placeholder">Phone No:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-3 ">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="email_k" value="{{guardian.email_k}}" name="email_k" type="text" class="pb-0 form-control input-border-bottom" >
-                                                    <label for="email_k" class="placeholder">Email</label>
+                                                    <input id="email_addr_k" value="{{emp.nextofkin.email_addr_k|default_if_none:''}}" name="email_addr_k" type="text" class="pb-0 form-control input-border-bottom" >
+                                                    <label for="email_addr_k" class="placeholder">Email</label>
                                                 </div>
                                             </div>
 
@@ -408,35 +421,28 @@
 
                                             <div class="col-4">
                                                 <div class="form-group form-floating-label">
-                                                    <input id="res_addr_k" type="text" value="{{guardian.res_addr_k}}" name="res_addr_k" class="pb-0 form-control input-border-bottom">
-                                                    <label for="res_addr_k" class="placeholder">Residential Addr:</label>
+                                                    <input id="resid_addr_k" type="text" value="{{emp.nextofkin.resid_addr_k|default_if_none:''}}" name="resid_addr_k" class="pb-0 form-control input-border-bottom">
+                                                    <label for="resid_addr_k" class="placeholder">Residential Addr:</label>
                                                 </div>
                                             </div>
-                                            <!--
-                                            <div class="col-3">
-                                                <div class="form-group form-floating-label">
-                                                    <input id="res_area_k" type="text" value="{{guardian.res_area_k}}" name="res_area_k" class="pb-0 form-control input-border-bottom">
-                                                    <label for="res_area_k" class="placeholder">Residential Area:</label>
-                                                </div>
-                                            </div>
-                                            -->
+
                                             <!-- Guardian Residence City  -->
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="city_k" name="res_city_k" >
-                                                        <option value="{{guardian.res_city_k}}" hidden>{{guardian.res_city_k}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="resid_city_k" name="resid_city_k" >
+                                                        <option hidden>{{emp.nextofkin.resid_city_k|default_if_none:''}}</option>
                                                         <option>Port Harcourt</option>
                                                         <option>Ahoada</option>
                                                         <option>Emoha</option>
                                                     </select>
-                                                    <label for="city_k" class="placeholder">City Residence:</label>
+                                                    <label for="resid_city_k" class="placeholder">City Residence:</label>
                                                 </div>
                                             </div>
 
                                             <div class="col-2 ">
                                                 <div class="form-group form-floating-label">
-                                                    <select class="form-control input-border-bottom pb-1" id="state_k"  name="res_state_k">
-                                                    <option value="{{guardian.res_state_k}}" hidden>{{guardian.res_state_k}}</option>
+                                                    <select class="form-control input-border-bottom pb-1" id="resid_state_k"  name="resid_state_k">
+                                                    <option  hidden>{{emp.nextofkin.resid_state_k|default_if_none:''}}</option>
                                                     <option>Rivers</option>
                                                     <option>Bayelsa</option>
                                                     <option>Kwara</option>
@@ -446,7 +452,7 @@
                                                     <option>Kogi</option>
                                                     <option>Plateau</option>
                                                     </select>
-                                                    <label for="state_k" class="placeholder">State Residence</label>
+                                                    <label for="resid_state_k" class="placeholder">State Residence</label>
                                                 </div>
                                             </div>
 
