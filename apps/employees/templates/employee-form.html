@@ -464,7 +464,45 @@
                                         <div class="row pb-0"><div class="col card-success">Staff Login Details</div></div>
                                     </div>
                                     <div class="card-body">
-                                        Login Details Here
+                                        <div class="row">
+                                            <div class="col nav-tabs pl-5 ml-4 mb-3">
+                                            <input id="is_user" name="is_staff" type="checkbox" class="form-check-input" {{is_user}} value="checked">
+                                            <label for="is_user" class="font-weight-bold font-italic ">Employee is a User and can Login</label>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center ">
+                                            <div class="col-3">
+                                                <input id="use_default" type="checkbox" class="pt-3">
+                                                <label for="use_default" class="form-group pt-3">Use Default User Name</label>
+                                            </div>
+                                            <div class="col col-sm-4 pb-0 mb-0">
+                                                <div class="form-group form-floating-label">
+                                                    <input  id="login_name" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="username" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control input-border-bottom" >
+                                                    <label for="login_name" class="placeholder pb-0 ">User Name</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-3 ">
+                                                <label for="sup_user"  class="form-group  pt-3">Is Supper User?</label>
+                                                <input id="sup_user" name="is_superuser" type="checkbox" class="pt-3" >
+                                            </div>
+                                        </div>
+
+                                        <div class="row justify-content-center">
+                                            <div class="col col-sm-4  pb-0 mb-0">
+                                                <div class="form-group form-floating-label">
+                                                    <input  id="password" type="password" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="password" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control  input-border-bottom" >
+                                                    <label for="password" class="placeholder  pb-0 ">Password</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row justify-content-center">
+                                            <div class="col col-sm-4  pb-0 mb-0 ">
+                                                <input id="is_active" name="is_active" type="checkbox" class="pt-3">
+                                                <label for="is_active" class="form-group  pt-3">Is Active</label>
+                                            </div>
+                                        </div>
+
                                     </div>
 
                                     <!-- Card Action Guardian Details-->
@@ -622,10 +660,15 @@
     <script>
 
      $(document).ready(function(){
+         $('#is_user').click(function() {
+            xstate = $(this).is(':checked');
+            alert(xstate)
+        });
+
          // This function is being Used
-          $("#close").click(function(){
-              location.href='/employees/staff-list'
-          });
+         $("#close").click(function(){
+             location.href='/employees/staff-list'
+         });
 
           // This function is being Used when the position selection is change or selected
          // The modal form is callup when the selected item is 'Add Position' otherwise an item is selected and displayed

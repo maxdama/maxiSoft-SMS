@@ -1,10 +1,11 @@
 from django.contrib import messages
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
+from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from apps.employees.forms import EmployeeForm, NextofkinForm
+from apps.employees.forms import EmployeeForm, NextofkinForm, UserForm
 from apps.employees.models import Employees, Departments, Workgroup, Nextofkin
 from apps.settings.models import SchoolProfiles
 from apps.utils import schools
@@ -97,6 +98,22 @@ def nextofkin(action, req, sch_id, emp):
         messages.info(req, 'Next of Kin is NOT Saved or Updated')
 
 
+def user(action, req, sch_id, emp):
+    if action == 'save':
+        user_form = UserForm(req.POST or None)
+        if user_form.is_valid():
+            print('----- User Form is valid')
+            user = user_form.save(commit=False)
+            user.password = make_password(req.POST['password'])
+            is_superuser = req.POST.get('is_superuser')
+            user.save()
+            print('Is Superuser:')
+            print(is_superuser)
+        else:
+            print('----- User Form is NOT valid')
+            messages.warning(req, user_form.errors)
+
+
 @transaction.atomic()
 def new_employee_entry(req):
     """ New Employee Entry"""
@@ -125,6 +142,7 @@ def new_employee_entry(req):
                 emp.save()
                 # if req.POST.get('surname_k') != '':
                 nextofkin('save', req, sch_id, emp)
+                user('save', req, sch_id, emp)  # Update
 
             except IntegrityError as e:
                 err_msg = getattr(e, 'message', repr(e))
@@ -147,7 +165,7 @@ def new_employee_entry(req):
         next_staff_no = {'staff_no': staff_no}
         print('----- GET Operation: Blank Form for New Entry')
         print(next_staff_no)
-        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept, 'emp': next_staff_no}
+        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept, 'emp': next_staff_no, 'is_user': ''}
 
         return render(req, 'employee-form.html', context)
 
@@ -177,6 +195,10 @@ def employee_update(req, emp_id=0):
         else:
             employee = Employees.objects.get(id=emp_id, school=sch_id)
             form = EmployeeForm(req.POST or None, instance=employee)
+            checkboxval = req.POST.get('is_user')
+            #for c_val in checkboxval:
+            print('----- Check Box Value:')
+            print(checkboxval)
 
             if form.is_valid():
                 emp = form.save(commit=False)
@@ -184,6 +206,7 @@ def employee_update(req, emp_id=0):
                 msg1 = ''
                 if next_kin: # If successful query of next of kin,
                     nextofkin('update', req, sch_id, emp)  # Update
+                    user('update', req, sch_id, emp)  # Update
                     msg1 = ' and Next of Kin'
                 else:
                     #  if next of kin is entered

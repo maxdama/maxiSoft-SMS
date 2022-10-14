@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.models import User
+
 from .models import Employees, Nextofkin
 
 
@@ -23,3 +25,9 @@ class NextofkinForm(forms.ModelForm):
         model = Nextofkin
         fields = '__all__'
         exclude = ['employee']
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'is_staff', 'is_superuser']
