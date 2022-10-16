@@ -30,4 +30,4 @@ class NextofkinForm(forms.ModelForm):
 class UserForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['username', 'password', 'is_staff', 'is_superuser']
+        fields = ['username', 'password', 'is_staff', 'is_superuser', 'is_active']

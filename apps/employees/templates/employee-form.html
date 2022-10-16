@@ -76,7 +76,7 @@
                                 <!-- Column for Employee Name and Address Controls  -->
                                 <div class="col col-sm-8 ">
                                     <div class="">
-                                        <h3 class="pl-5 ml-4 text-success "><strong>{{header}}</strong></h3>
+                                        <h3 class="pl-5 ml-4 text-success header"><strong>{{header}}</strong></h3>
                                         <p>
 
                                         <div class="row justify-content-center ">
@@ -467,18 +467,20 @@
                                         <div class="row">
                                             <div class="col nav-tabs pl-5 ml-4 mb-3">
                                             <input id="is_user" name="is_staff" type="checkbox" class="form-check-input" {{is_user}} value="checked">
-                                            <label for="is_user" class="font-weight-bold font-italic ">Employee is a User and can Login</label>
+                                            <label for="is_user" class="font-weight-bold font-italic ">Employee is a User</label>
                                             </div>
                                         </div>
                                         <div class="row justify-content-center ">
                                             <div class="col-3">
+                                                <!---
                                                 <input id="use_default" type="checkbox" class="pt-3">
                                                 <label for="use_default" class="form-group pt-3">Use Default User Name</label>
+                                                -->
                                             </div>
                                             <div class="col col-sm-4 pb-0 mb-0">
                                                 <div class="form-group form-floating-label">
-                                                    <input  id="login_name" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="username" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control input-border-bottom" >
-                                                    <label for="login_name" class="placeholder pb-0 ">User Name</label>
+                                                    <input  id="username" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="username" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control input-border-bottom" >
+                                                    <label for="username" class="placeholder pb-0 ">User Name</label>
                                                 </div>
                                             </div>
                                             <div class="col-3 ">
@@ -661,8 +663,22 @@
 
      $(document).ready(function(){
          $('#is_user').click(function() {
-            xstate = $(this).is(':checked');
-            alert(xstate)
+             let checked = $(this).is(':checked');  // Get the boolean value of cheeckbox (true of false)
+             let header = '{{header}}'  // Assign django template variable to header (jquery variable)
+
+             if (header == "Employee Entry"){
+                 let s = $('#surname').val().slice(0,1)
+                 let o = $('#other_names').val().slice(0,1)
+                 alert(s + o)
+
+                if ( checked == true){
+                     $('#username').val($('#staff_no').val())
+                 } else {
+                     $('#username').val("")
+                 }
+             }
+
+            // alert(xstate + '\n ' + header)
         });
 
          // This function is being Used
