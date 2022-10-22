@@ -107,11 +107,13 @@ def user(action, req, sch_id, emp):
             user.password = make_password(req.POST['password'])
             is_superuser = req.POST.get('is_superuser')
             user.save()
-            print('Is Superuser:')
-            print(is_superuser)
+            # user.id
+            Employees.objects.get(id=emp.id).update(user_id=user.id)
         else:
             print('----- User Form is NOT valid')
             messages.warning(req, user_form.errors)
+    elif action == 'update':
+        pass
 
 
 @transaction.atomic()
@@ -165,7 +167,7 @@ def new_employee_entry(req):
         next_staff_no = {'staff_no': staff_no}
         print('----- GET Operation: Blank Form for New Entry')
         print(next_staff_no)
-        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept, 'emp': next_staff_no, 'is_user': ''}
+        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept, 'emp': next_staff_no}
 
         return render(req, 'employee-form.html', context)
 
@@ -181,8 +183,11 @@ def employee_update(req, emp_id=0):
 
     header = 'Employee Update'
     employee = Employees.objects.get(id=emp_id, school=sch_id)
+    #user = User.objects.get(employees__id=emp_id)
+
     try:
         next_kin = Nextofkin.objects.get(school=sch_id, employee=employee)  # Query for next of kin
+
     except Nextofkin.DoesNotExist:
         next_kin = {}   # if nextofkin does not exist set next_kin to empty dictionary object
     emp_dept = Departments.objects.filter(school=sch_id).order_by('id')  # Get department list
@@ -227,7 +232,6 @@ def employee_update(req, emp_id=0):
                            'departments': emp_dept, 'kin': next_kin}
                 return render(req, 'employee-form.html', context)
     else:
-        print(employee)
         context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix,
                    'departments': emp_dept}
         return render(req, 'employee-form.html', context)

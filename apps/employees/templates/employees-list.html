@@ -102,7 +102,7 @@
                                               <td>{{emp.years_worked|default_if_none:''}}</td>
 
                                               <td class="text-small">{{emp.status}}</td>
-                                              <td class="row-id" hidden>{{emp.id}}</td>
+                                              <td class="emp-id" hidden>{{emp.id}}</td>
                                           </tr>
                                         {% endfor %}
                                     </tbody>
@@ -188,11 +188,12 @@
               });
 
             $("tbody tr").click(function () {
+                // alert('The Row is Clicked')
                   let currentRow=$(this).closest("tr");
 
                     let staff_id = currentRow.find("td:eq(1)").text(); // get current row 1st TD value
                     let staff_name = currentRow.find(".staff-name").html(); // get current row cell TD value for staff-name
-                    let row_id = currentRow.find(".row-id").html(); // get current row cell TD value for staff-name
+                    let emp_id = currentRow.find(".emp-id").html(); // get current row cell TD value for staff-name
                     let msg = "What would you like to do with \n the selected Staff record?"
 
                   swal({
@@ -212,7 +213,7 @@
                   }).then((action) => {
                     if (action) {
                         // location.href = self.attr('href');
-                        location.href="/employees/update-entry/" + row_id
+                        location.href="/employees/update-entry/" + emp_id
 
                     } else {
                         swal({

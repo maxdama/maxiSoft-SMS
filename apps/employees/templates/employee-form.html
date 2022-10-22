@@ -466,7 +466,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col nav-tabs pl-5 ml-4 mb-3">
-                                            <input id="is_user" name="is_staff" type="checkbox" class="form-check-input" {{is_user}} value="checked">
+                                            <input id="is_user" name="is_staff" type="checkbox" class="form-check-input" {% if emp.user.is_staff %} checked {% else %}  {% endif %} >
                                             <label for="is_user" class="font-weight-bold font-italic ">Employee is a User</label>
                                             </div>
                                         </div>
@@ -478,9 +478,9 @@
                                                 -->
                                             </div>
                                             <div class="col col-sm-4 pb-0 mb-0">
-                                                <div class="form-group form-floating-label">
-                                                    <input  id="username" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="username" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control input-border-bottom" >
-                                                    <label for="username" class="placeholder pb-0 ">Default User Name</label>
+                                                <div class="form-group ">
+                                                    <label for="username" class="placeholder pb-0 mb-0">User Name ( Default )</label>
+                                                    <input  id="username" type="text" value="{{emp.user.username|default_if_none:''}}" name="username" readonly  style="font-weight: bold; font-size: 14px;" class="pb-0 pt-0 mb-0 form-control " >
                                                 </div>
                                             </div>
                                             <div class="col-3 ">
@@ -491,16 +491,17 @@
 
                                         <div class="row justify-content-center">
                                             <div class="col col-sm-4  pb-0 mb-0">
-                                                <div class="form-group form-floating-label">
-                                                    <input  id="password" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="password" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control  input-border-bottom" >
-                                                    <label for="password" class="placeholder  pb-0 ">Default Password</label>
+                                                <div class="form-group ">
+                                                    <label for="password" class="placeholder  pb-0 mb-0 ">Password ( Default )</label>
+                                                    <input  id="password" type="text" value="{% if emp.user.is_staff %}  * * * * * * * * * {% else %}  {% endif %}" name="password" readonly style="font-weight:bolder; font-size: 14px;" class="pb-0 pt-0 mb-0 form-control  " >
+
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="row justify-content-center">
                                             <div class="col col-sm-4  pb-0 mb-0 ">
-                                                <input id="is_active" name="is_active" type="checkbox" class="pt-3">
+                                                <input id="is_active" name="is_active" type="checkbox" class="pt-3" {% if emp.user.is_active %} checked {% else %}  {% endif %}>
                                                 <label for="is_active" class="form-group  pt-3">Is Active</label>
                                             </div>
                                         </div>
@@ -673,11 +674,13 @@
                  pwd = $('#staff_no').val()
 
                 if ( checked == true){
-                     $('#username').val(uid)
+                    $('#username').val(uid)
                     $('#password').val(pwd)
+                    $( "#is_active" ).prop( "checked", true );
                  } else {
-                     $('#username').val("")
+                    $('#username').val("")
                     $('#password').val("")
+                    $( "#is_active" ).prop( "checked", false );
                  }
              }
 
