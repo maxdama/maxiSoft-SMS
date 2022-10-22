@@ -480,7 +480,7 @@
                                             <div class="col col-sm-4 pb-0 mb-0">
                                                 <div class="form-group form-floating-label">
                                                     <input  id="username" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="username" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control input-border-bottom" >
-                                                    <label for="username" class="placeholder pb-0 ">User Name</label>
+                                                    <label for="username" class="placeholder pb-0 ">Default User Name</label>
                                                 </div>
                                             </div>
                                             <div class="col-3 ">
@@ -492,8 +492,8 @@
                                         <div class="row justify-content-center">
                                             <div class="col col-sm-4  pb-0 mb-0">
                                                 <div class="form-group form-floating-label">
-                                                    <input  id="password" type="password" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="password" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control  input-border-bottom" >
-                                                    <label for="password" class="placeholder  pb-0 ">Password</label>
+                                                    <input  id="password" type="text" value="{{emp.nextofkin.surname_k|default_if_none:''}}" name="password" style="font-weight:bold; font-size: 17px;" class="pb-0 pt-1 mb-0 form-control  input-border-bottom" >
+                                                    <label for="password" class="placeholder  pb-0 ">Default Password</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -669,12 +669,15 @@
              if (header == "Employee Entry"){
                  let s = $('#surname').val().slice(0,1)
                  let o = $('#other_names').val().slice(0,1)
-                 alert(s + o)
+                 uid = s+o + $('#staff_no').val().slice(2)
+                 pwd = $('#staff_no').val()
 
                 if ( checked == true){
-                     $('#username').val($('#staff_no').val())
+                     $('#username').val(uid)
+                    $('#password').val(pwd)
                  } else {
                      $('#username').val("")
+                    $('#password').val("")
                  }
              }
 
