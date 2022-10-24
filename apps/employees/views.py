@@ -99,6 +99,7 @@ def nextofkin(action, req, sch_id, emp):
 
 
 def user(action, req, sch_id, emp):
+    print('Function: user')
     if action == 'save':
         user_form = UserForm(req.POST or None)
         if user_form.is_valid():
@@ -112,8 +113,13 @@ def user(action, req, sch_id, emp):
         else:
             print('----- User Form is NOT valid')
             messages.warning(req, user_form.errors)
+
     elif action == 'update':
-        pass
+        print('----- User Update: ' + emp.staff_no)
+        try:
+            user = User.objects.get(username=emp.staff_no)
+        except User.DoesNotExist:
+            print('----- User does not exists')
 
 
 @transaction.atomic()
@@ -211,13 +217,14 @@ def employee_update(req, emp_id=0):
                 msg1 = ''
                 if next_kin: # If successful query of next of kin,
                     nextofkin('update', req, sch_id, emp)  # Update
-                    user('update', req, sch_id, emp)  # Update
                     msg1 = ' and Next of Kin'
                 else:
                     #  if next of kin is entered
                     if req.POST.get('surname_k') != '' and req.POST.get('other_names_k') != '':
                         nextofkin('save', req, sch_id, emp)  # create a new next of kin record
                         msg1 = ' and Next of Kin'
+
+                user('update', req, sch_id, emp)  # Update
 
                 msg = 'Employee ' + msg1 + ' Updated successfully.'
                 messages.success(req, msg)
