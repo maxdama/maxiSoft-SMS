@@ -31,3 +31,10 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'password', 'is_staff', 'is_superuser', 'is_active']
+
+
+class UserFormUpdate(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['is_staff', 'is_superuser', 'is_active']
+

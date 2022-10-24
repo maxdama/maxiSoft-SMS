@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from apps.employees.forms import EmployeeForm, NextofkinForm, UserForm
+from apps.employees.forms import EmployeeForm, NextofkinForm, UserForm, UserFormUpdate
 from apps.employees.models import Employees, Departments, Workgroup, Nextofkin
 from apps.settings.models import SchoolProfiles
 from apps.utils import schools
@@ -105,21 +105,44 @@ def user(action, req, sch_id, emp):
         if user_form.is_valid():
             print('----- User Form is valid')
             user = user_form.save(commit=False)
+            user.username = req.POST['username'].lower()
             user.password = make_password(req.POST['password'])
             is_superuser = req.POST.get('is_superuser')
             user.save()
-            # user.id
-            Employees.objects.get(id=emp.id).update(user_id=user.id)
+
+            # Update user_id column in Employees model to the new user_id created
+            emp.user_id = user.id
+            emp.save()
         else:
             print('----- User Form is NOT valid')
             messages.warning(req, user_form.errors)
 
     elif action == 'update':
         print('----- User Update: ' + emp.staff_no)
-        try:
-            user = User.objects.get(username=emp.staff_no)
-        except User.DoesNotExist:
-            print('----- User does not exists')
+        if emp.user_id:
+            print('----- User ID: ' + str(emp.user_id))
+            user = User.objects.get(id=emp.user_id)
+            user_form = UserFormUpdate(req.POST or None, instance=emp.user)
+            if user_form.is_valid():
+                print('----- User Form is Valid for Update')
+                user_form.save()
+            else:
+                print('----- Form is NOT valid for Update')
+        else:
+            print('----- Creating New User')
+            user_form = UserForm(req.POST or None)
+            if user_form.is_valid():
+                print('----- New User Form is Valid')
+                user = user_form.save(commit=False)
+                user.username = req.POST['username'].lower()
+                user.password = make_password(req.POST['password'])
+
+                user.save()
+                # Update user_id column in Employees model to the new user_id created
+                emp.user_id = user.id
+                emp.save()
+            else:
+                print('----- New User Form is NOT Valid')
 
 
 @transaction.atomic()
@@ -144,6 +167,7 @@ def new_employee_entry(req):
         if emp_form.is_valid():
             print('----- Form is Valid')
             emp = emp_form.save(commit=False)
+            emp.staff_no = req.POST['staff_no'].lower()
             emp.school_id = sch_id
             # emp.staff_no = new_staff_no(sch_id)
             try:
@@ -189,7 +213,6 @@ def employee_update(req, emp_id=0):
 
     header = 'Employee Update'
     employee = Employees.objects.get(id=emp_id, school=sch_id)
-    #user = User.objects.get(employees__id=emp_id)
 
     try:
         next_kin = Nextofkin.objects.get(school=sch_id, employee=employee)  # Query for next of kin
@@ -204,7 +227,7 @@ def employee_update(req, emp_id=0):
         if emp_id == 0:
             return HttpResponse('Employee for Update is not given . . . ')
         else:
-            employee = Employees.objects.get(id=emp_id, school=sch_id)
+            # employee = Employees.objects.get(id=emp_id, school=sch_id)
             form = EmployeeForm(req.POST or None, instance=employee)
             checkboxval = req.POST.get('is_user')
             #for c_val in checkboxval:

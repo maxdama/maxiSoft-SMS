@@ -670,8 +670,8 @@
              if (header == "Employee Entry"){
                  let s = $('#surname').val().slice(0,1)
                  let o = $('#other_names').val().slice(0,1)
-                 uid = s+o + $('#staff_no').val().slice(2)
-                 pwd = $('#staff_no').val()
+                 pwd = s+o + $('#staff_no').val().slice(2)  // Concatenate to get the default password
+                 uid = $('#staff_no').val()  // Get the staff_no to be use as User Id
 
                 if ( checked == true){
                     $('#username').val(uid)
@@ -680,7 +680,7 @@
                  } else {
                     $('#username').val("")
                     $('#password').val("")
-                    $( "#is_active" ).prop( "checked", false );
+                    $("#is_active").prop( "checked", false );
                  }
              }
 
