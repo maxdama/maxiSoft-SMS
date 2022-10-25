@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.models import Group, User
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
@@ -68,7 +68,7 @@ def nextofkin(action, req, sch_id, emp):
     print('Function: save_nextofking')
 
     if req.POST.get('surname_k') != '' or req.POST.get('other_names_k') != '':
-    # if emp.has_nextkin == "Yes":
+        # if emp.has_nextkin == "Yes":
         if action == 'save':
             kin_form = NextofkinForm(req.POST or None)
             if kin_form.is_valid():
@@ -106,7 +106,7 @@ def user(action, req, sch_id, emp):
             print('----- User Form is valid')
             user = user_form.save(commit=False)
             user.username = req.POST['username'].lower()
-            user.password = make_password(req.POST['password'])
+            user.password = make_password(req.POST['password'].lower())
             is_superuser = req.POST.get('is_superuser')
             user.save()
 
@@ -135,9 +135,9 @@ def user(action, req, sch_id, emp):
                 print('----- New User Form is Valid')
                 user = user_form.save(commit=False)
                 user.username = req.POST['username'].lower()
-                user.password = make_password(req.POST['password'])
-
+                user.password = make_password(req.POST['password'].lower())
                 user.save()
+
                 # Update user_id column in Employees model to the new user_id created
                 emp.user_id = user.id
                 emp.save()
@@ -167,7 +167,7 @@ def new_employee_entry(req):
         if emp_form.is_valid():
             print('----- Form is Valid')
             emp = emp_form.save(commit=False)
-            emp.staff_no = req.POST['staff_no'].lower()
+            emp.staff_no = req.POST['staff_no']
             emp.school_id = sch_id
             # emp.staff_no = new_staff_no(sch_id)
             try:
@@ -197,7 +197,8 @@ def new_employee_entry(req):
         next_staff_no = {'staff_no': staff_no}
         print('----- GET Operation: Blank Form for New Entry')
         print(next_staff_no)
-        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept, 'emp': next_staff_no}
+        context = {'header': header, 'emp_id': emp_id, 'positions': emp_posix, 'departments': emp_dept,
+                   'emp': next_staff_no}
 
         return render(req, 'employee-form.html', context)
 
@@ -212,13 +213,17 @@ def employee_update(req, emp_id=0):
         return redirect("logout")
 
     header = 'Employee Update'
-    employee = Employees.objects.get(id=emp_id, school=sch_id)
-
     try:
-        next_kin = Nextofkin.objects.get(school=sch_id, employee=employee)  # Query for next of kin
+        employee = Employees.objects.get(id=emp_id, school=sch_id)
+        try:
+            next_kin = Nextofkin.objects.get(school=sch_id, employee=employee)  # Query for next of kin
+        except Nextofkin.DoesNotExist:
+            next_kin = {}  # if nextofkin does not exist set next_kin to empty dictionary object
+    except:
+        employee = 0
+        messages.warning(req, 'The Employee record you searched for does not exist.  You have being re-directed to Employee list.  ')
+        return redirect('list-employees')
 
-    except Nextofkin.DoesNotExist:
-        next_kin = {}   # if nextofkin does not exist set next_kin to empty dictionary object
     emp_dept = Departments.objects.filter(school=sch_id).order_by('id')  # Get department list
     emp_posix = Group.objects.filter(workgroup__school_id=sch_id).order_by('id')  # Get Position list (or Group list)
 
@@ -230,7 +235,7 @@ def employee_update(req, emp_id=0):
             # employee = Employees.objects.get(id=emp_id, school=sch_id)
             form = EmployeeForm(req.POST or None, instance=employee)
             checkboxval = req.POST.get('is_user')
-            #for c_val in checkboxval:
+            # for c_val in checkboxval:
             print('----- Check Box Value:')
             print(checkboxval)
 
@@ -238,7 +243,7 @@ def employee_update(req, emp_id=0):
                 emp = form.save(commit=False)
                 emp.save()
                 msg1 = ''
-                if next_kin: # If successful query of next of kin,
+                if next_kin:  # If successful query of next of kin,
                     nextofkin('update', req, sch_id, emp)  # Update
                     msg1 = ' and Next of Kin'
                 else:

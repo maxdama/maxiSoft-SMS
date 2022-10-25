@@ -493,7 +493,7 @@
                                             <div class="col col-sm-4  pb-0 mb-0">
                                                 <div class="form-group ">
                                                     <label for="password" class="placeholder  pb-0 mb-0 ">Password ( Default )</label>
-                                                    <input  id="password" type="text" value="{% if emp.user.is_staff %}  * * * * * * * * * {% else %}  {% endif %}" name="password" readonly style="font-weight:bolder; font-size: 14px;" class="pb-0 pt-0 mb-0 form-control  " >
+                                                    <input  id="password" type="text" value="{% if header == 'Employee Update' and emp.user_id %}  * * * * * * {% else %}  {% endif %}" name="password" readonly style="font-weight:bolder; font-size: 14px;" class="pb-0 pt-0 mb-0 form-control  " >
 
                                                 </div>
                                             </div>
@@ -666,26 +666,44 @@
          $('#is_user').click(function() {
              let checked = $(this).is(':checked');  // Get the boolean value of cheeckbox (true of false)
              let header = '{{header}}'  // Assign django template variable to header (jquery variable)
+             let user_id = '{{emp.user_id}}'
+             // alert(user_id)
+             // if (user_id === 'None'){alert('No user ID')}
+             if (header === "Employee Entry"){
+                if ( checked === true){
+                    username_password ('generate')
+                 } else {
+                    username_password ('undo')
+                 }
+             } else if (header === "Employee Update" && user_id === 'None'){
+                 if ( checked === true){
+                     username_password ('generate')
+                 } else {
+                     username_password ('undo')
+                 }
+             }
+        });
 
-             if (header == "Employee Entry"){
+         function username_password (action) {
+             if (action == 'generate'){
+
                  let s = $('#surname').val().slice(0,1)
                  let o = $('#other_names').val().slice(0,1)
                  pwd = s+o + $('#staff_no').val().slice(2)  // Concatenate to get the default password
                  uid = $('#staff_no').val()  // Get the staff_no to be use as User Id
 
-                if ( checked == true){
-                    $('#username').val(uid)
-                    $('#password').val(pwd)
-                    $( "#is_active" ).prop( "checked", true );
-                 } else {
-                    $('#username').val("")
-                    $('#password').val("")
-                    $("#is_active").prop( "checked", false );
-                 }
-             }
+                 $('#username').val(uid)
+                 $('#password').val(pwd)
+                 $( "#is_active" ).prop( "checked", true );
+                 // alert('Generating Employee User name andd Password')
 
-            // alert(xstate + '\n ' + header)
-        });
+             } else if (action == 'undo'){
+                 $('#username').val("")
+                 $('#password').val("")
+                 $("#is_active").prop( "checked", false );
+                 // alert('Undoing Employee User name andd Password')
+             }
+         }
 
          // This function is being Used
          $("#close").click(function(){
