@@ -1,3 +1,5 @@
+import os
+
 from django.contrib import messages
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.hashers import make_password, check_password
@@ -100,7 +102,7 @@ def nextofkin(action, req, sch_id, emp):
 
 def user(action, req, sch_id, emp):
     print('Function: user')
-    if action == 'save':
+    if action == 'save' and req.POST.get('is_active'):
         user_form = UserForm(req.POST or None)
         if user_form.is_valid():
             print('----- User Form is valid')
@@ -169,7 +171,10 @@ def new_employee_entry(req):
             emp = emp_form.save(commit=False)
             emp.staff_no = req.POST['staff_no']
             emp.school_id = sch_id
-            # emp.staff_no = new_staff_no(sch_id)
+            if req.FILES:
+                emp.emp_pic = req.FILES['emp_pic']
+
+
             try:
                 emp.save()
                 # if req.POST.get('surname_k') != '':
@@ -241,7 +246,13 @@ def employee_update(req, emp_id=0):
 
             if form.is_valid():
                 emp = form.save(commit=False)
+                if req.FILES:
+                    if len(emp.emp_pic) > 0 and emp.emp_pic != 'images/static/default.png':
+                        os.remove(emp.emp_pic.path)
+                    emp.emp_pic = req.FILES['emp_pic']
+
                 emp.save()
+
                 msg1 = ''
                 if next_kin:  # If successful query of next of kin,
                     nextofkin('update', req, sch_id, emp)  # Update

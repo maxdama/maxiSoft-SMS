@@ -45,6 +45,7 @@ class Employees(models.Model):
     other_names = models.CharField(max_length=60, unique=False, null=True, blank=True)
     gender = models.CharField(max_length=10, blank=True, db_index=True)
     dob = models.DateField(null=True, blank=True)
+    emp_pic = models.ImageField(upload_to='images', default='images/static/default.png', null=True, blank=True)
     marital_status = models.CharField(max_length=10, null=True, blank=True)
     has_nextkin = models.CharField(max_length=5, null=False, blank=True)
     mobile_no1 = models.CharField(max_length=30, null=True, blank=True)

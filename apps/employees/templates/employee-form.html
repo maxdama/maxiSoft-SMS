@@ -19,8 +19,8 @@
 
     .div-btn:hover{
         color: #333;
-        background-color: #e6e6e6;
-        border-color: #adadad;
+        background-color: rgba(236, 234, 234, 0.99);
+        border-color: rgba(173, 173, 173, 0.98);
     }
 
     .swal-title {
@@ -92,14 +92,24 @@
                                                 <input id="staff_no" name="staff_no" readonly  type="text" value="{{emp.staff_no}}" class="fw-extrabold  input-border-bottom pb-0">
 
                                             </div>
+                                            <input id="open_but" type="file" name="emp_pic" class="file" accept="image/*" >
 
-                                            <div class="col-4 border m-0 p-0">
-                                                <div class="avatar avatar-xxl ml-5">
-                                                    {% if student.stud_pic %}
-                                                        <img src="{{student.stud_pic.url}}" alt="..." class="avatar-img rounded-circle ">
-                                                    {% else %}
-                                                        <img src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
-                                                    {% endif %}
+                                            <div class="col-4  m-0 p-0  ">
+                                                <div class="row justify-content-center">
+                                                    <div class="browse col justify-content-center border div-btn">
+                                                        <div class="avatar avatar-xxl ml-5 ">
+                                                            {% if emp.emp_pic %}
+                                                                <img id="preview_edit" src="{{emp.emp_pic.url}}" alt="..." class="avatar-img rounded-circle ">
+                                                            {% else %}
+                                                                <img id="preview" src="/static/assets/img/default.png" alt="..." class="avatar-img rounded-circle">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row border">
+                                                    <div class="col text-sm-center disp">
+                                                        <span class="text-small"> Clear Picture </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -466,8 +476,8 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col nav-tabs pl-5 ml-4 mb-3">
-                                            <input id="is_user" name="is_staff" type="checkbox" class="form-check-input" {% if emp.user.is_staff %} checked {% else %}  {% endif %} >
-                                            <label for="is_user" class="font-weight-bold font-italic ">Employee is a User</label>
+                                            <input id="is_active" name="is_active" type="checkbox" class="form-check-input" {% if emp.user.is_active %} checked {% else %}  {% endif %} >
+                                            <label for="is_active" class="font-weight-bold font-italic ">Employee is a User</label>
                                             </div>
                                         </div>
                                         <div class="row justify-content-center ">
@@ -501,8 +511,8 @@
 
                                         <div class="row justify-content-center">
                                             <div class="col col-sm-4  pb-0 mb-0 ">
-                                                <input id="is_active" name="is_active" type="checkbox" class="pt-3" {% if emp.user.is_active %} checked {% else %}  {% endif %}>
-                                                <label for="is_active" class="form-group  pt-3">Is Active</label>
+                                                <input id="is_staff" name="is_staff" type="checkbox" class="pt-3" {% if emp.user.is_staff %} checked {% else %}  {% endif %}>
+                                                <label for="is_staff" class="form-group  pt-3">Is a Staff</label>
                                             </div>
                                         </div>
 
@@ -660,10 +670,45 @@
 	<!-- Atlantis DEMO methods, don't include it in your project! -->
 	<script src="/static/assets/js/setting-demo2.js"></script>  <!-- Script that controlls the settings by the right side -->
 
-    <script>
+<script>
 
      $(document).ready(function(){
-         $('#is_user').click(function() {
+         let header = '{{header}}'  // Assign django template variable to header (jquery variable)
+         if ('{{header}}' === 'Employee Entry'){
+             $('.disp span').text('')
+         } else {
+             $('.disp span').text('Remove')
+         }
+
+
+         $( ".browse" ).click(function() {
+            $( "#open_but" ).click();
+         });
+
+         $('input[type="file"]').change(function(e) {
+             var fileName = e.target.files[0].name;
+             // $(".browse").val(fileName);
+             //$('.browse').html('Testing')
+             let header = '{{header}}'  // Assign django template variable to header (jquery variable)
+             let reader = new FileReader();
+
+             reader.onload = function(e) {
+                // get loaded data and render thumbnail.
+                if (header === "Employee Entry"){
+                    document.getElementById("preview").src = e.target.result;
+                    $('.disp span').html('Clear Picture')
+                } else if (header === "Employee Update" ){
+                    document.getElementById("preview_edit").src = e.target.result;
+                    $('.disp span').html('Remove')
+                }
+             };
+             // read the image file as a data URL.
+             reader.readAsDataURL(this.files[0]);
+        });
+
+
+
+         $('#is_active').click(function() {
              let checked = $(this).is(':checked');  // Get the boolean value of cheeckbox (true of false)
              let header = '{{header}}'  // Assign django template variable to header (jquery variable)
              let user_id = '{{emp.user_id}}'
@@ -694,13 +739,13 @@
 
                  $('#username').val(uid)
                  $('#password').val(pwd)
-                 $( "#is_active" ).prop( "checked", true );
+                 $( "#is_staff" ).prop( "checked", true );
                  // alert('Generating Employee User name andd Password')
 
              } else if (action == 'undo'){
                  $('#username').val("")
                  $('#password').val("")
-                 $("#is_active").prop( "checked", false );
+                 $("#is_staff").prop( "checked", false );
                  // alert('Undoing Employee User name andd Password')
              }
          }
@@ -1008,6 +1053,6 @@
      });
 
 
-    </script>
+</script>
 
 {% endblock javascripts %}

@@ -116,79 +116,6 @@ def delete_student(request, reg_id):
 
     return redirect(student_list)
 
-# TODO: This function form_register should be deleted. It has been replaced
-@login_required
-def form_register(request):
-    print('Runing: form_register')
-    gad_id = 0
-    school = schools(request)
-    sch_id = school['sch_id']
-    if sch_id == 0:
-        return redirect("logout")
-
-    print(f'----- School ID Number:  {sch_id}')
-    if request.method == 'POST':
-        print('----- Checking if Form is Valid')
-        form = RegistrationForm(request.POST or None, request.FILES or None)
-
-        if form.is_valid():
-            print('----- Form is Valid')
-            if request.POST['reg_id']:
-                stud_obj = update_student_register(request.POST['reg_id'], request)
-                opr = 'update'
-                print('   Update Student Registration . . . ')
-
-                gad_id = stud_obj.g_id_id
-                if gad_id is None:
-                    gad_id = 0
-            else:
-                # form.instance.reg_no = increment_reg_no()
-                form.instance.reg_steps = 1
-                form.instance.middle_name = request.POST['middle_name']
-                form.instance.gender = request.POST['gender']
-                form.instance.bloodgroup = request.POST['bloodgroup']
-                form.instance.religion = request.POST['religion']
-                form.instance.email = request.POST['email']
-                form.instance.phone_no = request.POST['phoneno']
-                form.instance.lga_origin = request.POST['lga']
-                form.instance.state_origin = request.POST['state']
-                form.instance.nationality = request.POST['nationality']
-                form.instance.reg_status = 'pending'
-                stud_obj = form.save()
-                opr = 'new'
-                print('   New Student Registration . . . ')
-
-            if request.POST.get("save_pause"):
-                if stud_obj:
-                    if opr == 'new':
-                        messages.success(request, 'The registration is not Complete yet, it is pending  ')
-                        messages.success(request, 'Student registration Saved. ')
-                    else:
-                        messages.success(request, 'Student register Updated ')
-                else:
-                    messages.warning(request, 'Save operation failed')
-
-                return redirect(student_list)
-
-            elif request.POST.get("save_continue"):
-                if opr == 'new':
-                    messages.success(request, 'Assign Guardian to the Student')
-                    messages.success(request, 'Student registration Saved. ')
-                else:
-                    messages.success(request, 'Student register Updated ')
-
-                return redirect('guardian', gad_id=gad_id, reg_id=stud_obj.pk)
-        else:
-            print('----- The Form is NOT Valid')
-            messages.warning(request, 'The Student registration was NOT Saved or Updated.')
-            messages.warning(request, 'The Form is NOT Valid !!! ')
-            return render(request, "student/reg-student-biodata.html", {'sch_id': sch_id, 'form': form})
-            return redirect(student_list)
-    else:
-        default_image_restore(request)
-        context = {'sch_id': sch_id}
-        return render(request, "student/reg-student-biodata.html", context)
-
 
 @login_required
 def new_student_registration(request):
@@ -210,6 +137,7 @@ def new_student_registration(request):
     if request.method == "POST":
         print('----- Post Request method')
         if request.POST['reg_id']:
+            # Edit Student Registered
             print('----- Get Student Record for Update ')
             stud_id = request.POST['reg_id']
             stud_data = Students.objects.get(id=stud_id)
@@ -222,6 +150,7 @@ def new_student_registration(request):
                 gad_id = 0
                 print(f'----- Guardian ID NOT Retrieved: {gad_id}')
         else:
+            # New Student Registration
             student = StudentsRegistrationNewForm(request.POST, request.FILES)
             mode = 'new'
 
