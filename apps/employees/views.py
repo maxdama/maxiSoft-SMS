@@ -250,6 +250,11 @@ def employee_update(req, emp_id=0):
                     if len(emp.emp_pic) > 0 and emp.emp_pic != 'images/static/default.png':
                         os.remove(emp.emp_pic.path)
                     emp.emp_pic = req.FILES['emp_pic']
+                else:
+                    if req.POST.get('emp_pic_default'):
+                        os.remove(emp.emp_pic.path)
+                        emp.emp_pic = req.POST["emp_pic_default"]
+                        print('Employee Pic Updated to Default')
 
                 emp.save()
 

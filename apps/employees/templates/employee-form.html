@@ -92,7 +92,7 @@
                                                 <input id="staff_no" name="staff_no" readonly  type="text" value="{{emp.staff_no}}" class="fw-extrabold  input-border-bottom pb-0">
 
                                             </div>
-                                            <input id="open_but" type="file" name="emp_pic" class="file" accept="image/*" >
+                                            <input id="emp-pic" type="file" name="emp_pic" class="file" accept="image/*" >
 
                                             <div class="col-4  m-0 p-0  ">
                                                 <div class="row justify-content-center">
@@ -106,11 +106,12 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="row border">
-                                                    <div class="col text-sm-center disp">
-                                                        <span class="text-small"> Clear Picture </span>
+                                                <div class="row">
+                                                    <div class="col text-sm-center clear-img div-btn">
+                                                        <span class="text-small font-italic"> Clear Picture </span>
                                                     </div>
                                                 </div>
+                                                <input id="emp_pic_default" hidden type="text" class="" name="emp_pic_default" value="">
                                             </div>
                                         </div>
 
@@ -132,7 +133,6 @@
                                     <div class="card-header pt-1 pb-1 ">
                                         <div class="card-title card-success ">
                                             <h4>Bio Data and Contact</h4>
-                                            <div class="text-small float-md-right ">{% if student.reg_status|lower != 'enrolled' %} NEW {% endif %} Registration Form-2</div>
                                         </div>
                                     </div>
                                      <!-- Card Body Employee Details -->
@@ -675,20 +675,19 @@
      $(document).ready(function(){
          let header = '{{header}}'  // Assign django template variable to header (jquery variable)
          if ('{{header}}' === 'Employee Entry'){
-             $('.disp span').text('')
-         } else {
-             $('.disp span').text('Remove')
+             $('.clear-img span').text('')
+         } else if ('{{emp.emp_pic}}' != 'images/static/default.png') {
+             $('.clear-img span').text('Remove')
          }
 
-
+        // When the browse div (picture) is clicked it trigger the emp-pic click event
          $( ".browse" ).click(function() {
-            $( "#open_but" ).click();
+            $( "#emp-pic" ).click();
          });
 
+        // When the picture is change after the emp-pic is triggered by the  browse click event above
          $('input[type="file"]').change(function(e) {
-             var fileName = e.target.files[0].name;
-             // $(".browse").val(fileName);
-             //$('.browse').html('Testing')
+             let fileName = e.target.files[0].name;
              let header = '{{header}}'  // Assign django template variable to header (jquery variable)
              let reader = new FileReader();
 
@@ -696,15 +695,31 @@
                 // get loaded data and render thumbnail.
                 if (header === "Employee Entry"){
                     document.getElementById("preview").src = e.target.result;
-                    $('.disp span').html('Clear Picture')
+                    $('.clear-img span').html('Clear Picture')
                 } else if (header === "Employee Update" ){
                     document.getElementById("preview_edit").src = e.target.result;
-                    $('.disp span').html('Remove')
+                    $('.clear-img span').html('Remove')
                 }
              };
              // read the image file as a data URL.
              reader.readAsDataURL(this.files[0]);
         });
+
+            // Set the picture to default when the clear-img div is clicked
+         $( ".clear-img" ).click(function() {
+             let fileInput = $('#emp-pic');
+
+             if (header === "Employee Entry"){
+                document.getElementById("preview").src = "/static/assets/img/default.png";
+                $('#emp_pic_default').val("")
+             } else if (header === "Employee Update" ){
+                 document.getElementById("preview_edit").src = "/static/assets/img/default.png";
+                 $('#emp_pic_default').val("images/static/default.png")
+             }
+             // Assign new files
+             //fileInput[0].files = "/static/assets/img/default.png";
+             $('.clear-img span').text('')
+         });
 
 
 
