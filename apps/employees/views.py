@@ -1,6 +1,7 @@
 import os
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.hashers import make_password, check_password
 from django.db import transaction
@@ -13,6 +14,8 @@ from apps.settings.models import SchoolProfiles
 from apps.utils import schools
 
 
+@login_required
+@permission_required("employees.view_employees", login_url="logout")
 def list_employees(request):
     """
     List Employees base on the supplied criteria
@@ -208,6 +211,7 @@ def new_employee_entry(req):
         return render(req, 'employee-form.html', context)
 
 
+@permission_required("employees.view_employees")
 @transaction.atomic()
 def employee_update(req, emp_id=0):
     """ Function to Update Employee Details:"""
@@ -239,11 +243,9 @@ def employee_update(req, emp_id=0):
         else:
             # employee = Employees.objects.get(id=emp_id, school=sch_id)
             form = EmployeeForm(req.POST or None, instance=employee)
-            checkboxval = req.POST.get('is_user')
-            # for c_val in checkboxval:
-            print('----- Check Box Value:')
-            print(checkboxval)
-
+            # checkboxval = req.POST.get('is_user')
+            # print('----- Check Box Value:')
+            # print(checkboxval)
             if form.is_valid():
                 emp = form.save(commit=False)
                 if req.FILES:
@@ -254,7 +256,7 @@ def employee_update(req, emp_id=0):
                     if req.POST.get('emp_pic_default'):
                         os.remove(emp.emp_pic.path)
                         emp.emp_pic = req.POST["emp_pic_default"]
-                        print('Employee Pic Updated to Default')
+                        # print('Employee Pic Updated to Default')
 
                 emp.save()
 

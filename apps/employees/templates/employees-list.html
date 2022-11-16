@@ -83,22 +83,22 @@
 
                                     <tbody class="">
                                         {% for emp in employees %}
-                                          <tr class="row-sel text-small m-0 p-0 ">
+                                          <tr class="row-sel m-0 p-0 ">
                                               <!-- <td>{{forloop.counter}}</td> -->
-                                              <td class="staff-id text small ">{{emp.staff_no}}</td>
+                                              <td class="staff-id text "><span class="small"> {{emp.staff_no}} </span> </td>
                                               <td><span class="staff-name text text-md-left   font-weight-bold small ">
                                                   {{emp.surname}} {{emp.other_names}} </span>
                                                   {% if emp.group %}
-                                                    <br> <span class="text-small text-secondary  ">{{emp.group.name|default_if_none:''}}</span>
+                                                    <br> <span class="text-small text-secondary">{{emp.group.name|default_if_none:''}}</span>
                                                   {% endif %} </td>
                                               <td>{{emp.gender|first}}
                                                   {% if emp.marital_status %} <br> <span class="text-small text-primary">{{emp.marital_status|default_if_none:''}}</span>  {% endif %}</td>
                                               <td>{{emp.age}}</td>
                                               <!-- <td>{{emp.marital_status|default_if_none:''}}</td> -->
-                                              <td>{{emp.mobile_no1}}
-                                                  {% if emp.mobile_no2 %} <br> {{emp.mobile_no2}} {% endif %}
+                                              <td><span class="small"> {{emp.mobile_no1}}
+                                                  {% if emp.mobile_no2 %} <br> {{emp.mobile_no2}} {% endif %} </span>
                                                   {% if emp.email_addr %} <br> <span class="small"> {{emp.email_addr}} </span>  {% endif %} </td>
-                                              <td>{{emp.department.name|default_if_none:'Not Assigned'}}</td>
+                                              <td><span class="small"> {{emp.department.name|default_if_none:'Not Assigned'}} </span> </td>
                                               <td>{{emp.years_worked|default_if_none:''}}</td>
 
                                               <td class="text-small">{{emp.status}}</td>

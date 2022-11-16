@@ -7,53 +7,52 @@ Copyright (c) 2019 - present AppSeed.us
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm
+from ..decorators import unauthenticated_user
 from ..settings.models import SchoolProfiles
 
 
+@unauthenticated_user
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    else:
-        form = LoginForm(request.POST or None)
+    form = LoginForm(request.POST or None)
 
-        msg = None
-        prof = {"sch_name": "School Managment Software", "sch_logo": ""}
+    msg = None
+    prof = {"sch_name": "School Managment Software", "sch_logo": ""}
 
-        if request.method == "POST":
+    if request.method == "POST":
 
-            if form.is_valid():
-                username = form.cleaned_data.get("username")
-                password = form.cleaned_data.get("password")
-                user = authenticate(username=username, password=password)
-                if user is not None:
-                    login(request, user)
-                    sch_id = form.cleaned_data.get("sch_id")
-                    request.session['school_id'] = sch_id
-                    request.session['user_name'] = username
-                    """
-                    if first_login_today:
-                        if end_of_term:
-                            ap_do_end_of_term
-                    """
-                    return redirect("/")
-                else:
-                    msg = 'Invalid credentials'
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            password = form.cleaned_data.get("password")
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                sch_id = form.cleaned_data.get("sch_id")
+                request.session['school_id'] = sch_id
+                request.session['user_name'] = username
+                """
+                if first_login_today:
+                    if end_of_term:
+                        ap_do_end_of_term
+                """
+                return redirect("/")
             else:
-                msg = 'Error validating the form'
-
+                msg = 'Invalid credentials'
         else:
-            username = 'dama'
-            sch_id = 1
-            #username = request.session['user_name']
-            try:
-                prof = SchoolProfiles.objects.get(sch_id=sch_id)
+            msg = 'Error validating the form'
 
-            except:
-               pass
+    else:
+        username = 'dama'
+        sch_id = 1
+        #username = request.session['user_name']
+        try:
+            prof = SchoolProfiles.objects.get(sch_id=sch_id)
 
-            form = LoginForm(initial={'username': username, 'sch_id':sch_id})
+        except:
+           pass
 
-        return render(request, "accounts/login.html", {"form": form, "msg": msg, "prof": prof})
+        form = LoginForm(initial={'username': username, 'sch_id':sch_id})
+
+    return render(request, "accounts/login.html", {"form": form, "msg": msg, "prof": prof})
 
 
 def register_user(request):
