@@ -8,6 +8,8 @@ from django.db import transaction
 from django.db.utils import IntegrityError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
+
+from apps.decorators import custom_permission_required
 from apps.employees.forms import EmployeeForm, NextofkinForm, UserForm, UserFormUpdate
 from apps.employees.models import Employees, Departments, Workgroup, Nextofkin
 from apps.settings.models import SchoolProfiles
@@ -150,6 +152,8 @@ def user(action, req, sch_id, emp):
                 print('----- New User Form is NOT Valid')
 
 
+@login_required
+@custom_permission_required("employees.add_employees")
 @transaction.atomic()
 def new_employee_entry(req):
     """ New Employee Entry"""
@@ -211,7 +215,7 @@ def new_employee_entry(req):
         return render(req, 'employee-form.html', context)
 
 
-@permission_required("employees.view_employees")
+@custom_permission_required("employees.change_employees")
 @transaction.atomic()
 def employee_update(req, emp_id=0):
     """ Function to Update Employee Details:"""
