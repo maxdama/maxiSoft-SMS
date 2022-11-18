@@ -67,17 +67,17 @@
                                     <thead>
                                         <tr class="text-secondary text-md-left">
                                             <!-- <th>S/n</th> -->
-                                            <th>Staff ID</th>
-                                            <th class="">Staff Names <br> <span class="text-small">Position</span></th>
+                                            <th class="text-nowrap">Staff ID</th>
+                                            <th class="text-nowrap">Staff Names <br> <span class="text-small">Position</span></th>
                                             <th>Sex <br><span class="text-small">Marital</span> </th>
                                             <th>Age</th>
                                             <!-- <th>Marital Status</th> -->
                                             <th class="text">Phone No <br> <span class="text-small">Email</span></th>
-                                            <th>Department </th>
-                                            <th>Years Hired</th>
+                                            <!-- <th>Department </th> -->
 
-                                            <th class="">Status</th>
+                                            <th class="text">Status <br><span class="text-small text-nowrap">Years Hired</span></th>
                                             <th class="" hidden></th>
+                                            <th style="width: 10%" class="border-gray-200">Action</th>
                                         </tr>
                                     </thead>
 
@@ -86,7 +86,7 @@
                                           <tr class="row-sel m-0 p-0 ">
                                               <!-- <td>{{forloop.counter}}</td> -->
                                               <td class="staff-id text "><span class="small"> {{emp.staff_no}} </span> </td>
-                                              <td><span class="staff-name text text-md-left   font-weight-bold small ">
+                                              <td><span class="staff-name text text-md-left font-weight-bold small ">
                                                   {{emp.surname}} {{emp.other_names}} </span>
                                                   {% if emp.group %}
                                                     <br> <span class="text-small text-secondary">{{emp.group.name|default_if_none:''}}</span>
@@ -98,11 +98,28 @@
                                               <td><span class="small"> {{emp.mobile_no1}}
                                                   {% if emp.mobile_no2 %} <br> {{emp.mobile_no2}} {% endif %} </span>
                                                   {% if emp.email_addr %} <br> <span class="small"> {{emp.email_addr}} </span>  {% endif %} </td>
-                                              <td><span class="small"> {{emp.department.name|default_if_none:'Not Assigned'}} </span> </td>
-                                              <td>{{emp.years_worked|default_if_none:''}}</td>
+                                              <!-- <td><span class="small"> {{emp.department.name|default_if_none:'Not Assigned'}} </span> </td> -->
 
-                                              <td class="text-small">{{emp.status}}</td>
+                                              <td class="small text-center">{{emp.status}}
+                                                   {% if emp.years_worked %} <br><span class="text-small text-secondary"> {{emp.years_worked}} </span> {% endif %}
+                                              </td>
                                               <td class="emp-id" hidden>{{emp.id}}</td>
+
+                                              <td class="">
+                                                  <div class="btn-group form-button-action">
+													  <button class="btn btn-secondary btn-sm dropdown-toggle btn-border btn-round" type="button" data-toggle="dropdown" aria-expanded="false">
+														<b class="">..  ..  ..</b>
+													  </button>
+													  <div class="dropdown-menu">
+														  <a class="dropdown-item" href="#">Employee Profile</a>
+
+														  <div class="dropdown-divider"></div>
+														  <a class="dropdown-item" href="/employees/update-entry/{{emp.id}}">Update Employee</a>
+														  <a class="dropdown-item delete"  href="">Delete </a>
+													  </div>
+                                                  </div>
+                                              </td>
+
                                           </tr>
                                         {% endfor %}
                                     </tbody>
@@ -145,85 +162,6 @@
             let table = $('#staff-list').DataTable({
                 "pageLength": 25,
 
-                dom: 'Bfrtip',
-                buttons: [
-                    {
-                      extend: 'excel',
-                      text: 'Export excel',
-                      className: 'exportExcel',
-                      filename: 'Export excel',
-                      exportOptions: {
-                        modifier: {
-                          page: 'all'
-                        }
-                      }
-                    },
-                    {
-                      extend: 'copy',
-                      text: '<u>C</u>opie presse papier',
-                      className: 'exportExcel',
-                      key: {
-                        key: 'c',
-                        altKey: true
-                      }
-                    },
-                    {
-                      text: 'Alert Js',
-                      className: 'exportExcel',
-                      action: function(e, dt, node, config) {
-                        alert('Activated!');
-                        // console.log(table);
-
-                        // new $.fn.dataTable.Buttons(table, {
-                        //   buttons: [{
-                        //     text: 'gfdsgfsd',
-                        //     action: function(e, dt, node, config) {
-                        //       alert('ok!');
-                        //     }
-                        //   }]
-                        // });
-                      }
-                    }
-                ]
-              });
-
-            $("tbody tr").click(function () {
-                // alert('The Row is Clicked')
-                  let currentRow=$(this).closest("tr");
-
-                    let staff_id = currentRow.find("td:eq(1)").text(); // get current row 1st TD value
-                    let staff_name = currentRow.find(".staff-name").html(); // get current row cell TD value for staff-name
-                    let emp_id = currentRow.find(".emp-id").html(); // get current row cell TD value for staff-name
-                    let msg = "What would you like to do with \n the selected Staff record?"
-
-                  swal({
-                      title: staff_name,
-                      text: msg,
-                      buttons: {
-                          eidt: {
-                            text : 'Edit Staff Profile!',
-                            className : 'btn btn-outline-success btn-rounded btn-full btn-sm'
-                        },
-                        cancel: {
-                            visible: true,
-                            text : 'Do nothing !',
-                            className: 'btn btn-outline-danger btn-rounded btn-sm'
-                        }
-                      }
-                  }).then((action) => {
-                    if (action) {
-                        // location.href = self.attr('href');
-                        location.href="/employees/update-entry/" + emp_id
-
-                    } else {
-                        swal({
-                            icon: 'error', timer: 1200,
-                            buttons : {
-                                 visible: false,
-                            }
-                        });
-                    }
-                });
               });
 
             $('.new-employee').click(function(){

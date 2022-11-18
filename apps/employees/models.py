@@ -22,10 +22,10 @@ class Departments(models.Model):
 
 class Workgroup(models.Model):
     """The Position model is used in conjunction with the Django Group model. The Employee Position is store in
-        Group, and it's related to the Position model that has the specific school id. The is so that the
+        Group, and it's related to the Workgroup model that has the specific school id. The is so that the
         Staff Position of specified school can be filtered """
     objects = None
-    group = models.OneToOneField(Group, on_delete=models.SET_NULL,  null=True, blank=True, unique=True)
+    group = models.OneToOneField(Group, on_delete=models.CASCADE,  null=True, blank=True, unique=True)
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
 
     class Meta:
@@ -68,6 +68,7 @@ class Employees(models.Model):
     class Meta:
         db_table = "apps_Employees"
         constraints = [models.UniqueConstraint(fields=['school', 'staff_no'], name='unq_school_staff')]
+        permissions = [("update_employees", "can update or make changes to Employees")]
 
     @property
     def age(self):

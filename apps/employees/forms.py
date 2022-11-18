@@ -5,15 +5,6 @@ from .models import Employees, Nextofkin
 
 
 class EmployeeForm(forms.ModelForm):
-    '''
-    dob = forms.DateField(label='Date of Birth', input_formats=('%d/%m/%Y',), required=False,
-                                 widget=forms.DateInput(format='%Y/%m/%d',
-                                                        attrs={'id': 'inputDate', "placeholder": "dd/mm/yyyy",
-                                                               'class': 'datepicker form-control form-control-sm'}
-                                                        )
-
-                                 )
-    '''
     class Meta:
         model = Employees
         fields = '__all__'

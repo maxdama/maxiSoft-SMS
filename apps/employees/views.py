@@ -17,7 +17,7 @@ from apps.utils import schools
 
 
 @login_required
-@permission_required("employees.view_employees", login_url="logout")
+@custom_permission_required("employees.view_employees")
 def list_employees(request):
     """
     List Employees base on the supplied criteria
@@ -152,6 +152,35 @@ def user(action, req, sch_id, emp):
                 print('----- New User Form is NOT Valid')
 
 
+def group_user(action, request, sch_id, emp, prv_group=0):
+    try:
+        user_inst = User.objects.get(id=emp.user.id)
+    except:
+        # If there is an error with user instance stop grouping and return
+        return group_user
+
+    if action == 'new' and request.POST.get('is_active'):
+        group_id = request.POST.get('group')
+        # add user to the specified Group
+        if group_id:
+            group = Group.objects.get(id=group_id)
+            group.user_set.add(user_inst) # Add specific User to the specified Group
+
+    elif action == 'update':
+        # Remove and add user to the specified Group
+        group = Group.objects.get(id=prv_group)
+        print('Group to Remove ID: ' + str(prv_group))
+        print(group)
+        group.user_set.remove(user_inst) # Remove user from the group specified
+
+        group_id = request.POST.get('group')  # Get the group id
+        print('Group to Add ID:  ' + str(group_id))
+        group = Group.objects.get(id=group_id)  # Get the group instance
+        print(group)
+        group.user_set.add(user_inst)  # Add specific User to the specified Group
+
+    return group_user
+
 @login_required
 @custom_permission_required("employees.add_employees")
 @transaction.atomic()
@@ -180,13 +209,12 @@ def new_employee_entry(req):
             emp.school_id = sch_id
             if req.FILES:
                 emp.emp_pic = req.FILES['emp_pic']
-
-
             try:
                 emp.save()
-                # if req.POST.get('surname_k') != '':
+
                 nextofkin('save', req, sch_id, emp)
                 user('save', req, sch_id, emp)  # Update
+                group_user('new', req, sch_id, emp)
 
             except IntegrityError as e:
                 err_msg = getattr(e, 'message', repr(e))
@@ -215,7 +243,8 @@ def new_employee_entry(req):
         return render(req, 'employee-form.html', context)
 
 
-@custom_permission_required("employees.change_employees")
+@login_required
+@custom_permission_required("employees.update_employees")
 @transaction.atomic()
 def employee_update(req, emp_id=0):
     """ Function to Update Employee Details:"""
@@ -245,11 +274,9 @@ def employee_update(req, emp_id=0):
         if emp_id == 0:
             return HttpResponse('Employee for Update is not given . . . ')
         else:
-            # employee = Employees.objects.get(id=emp_id, school=sch_id)
+            prv_group_id = employee.group_id
+
             form = EmployeeForm(req.POST or None, instance=employee)
-            # checkboxval = req.POST.get('is_user')
-            # print('----- Check Box Value:')
-            # print(checkboxval)
             if form.is_valid():
                 emp = form.save(commit=False)
                 if req.FILES:
@@ -275,6 +302,7 @@ def employee_update(req, emp_id=0):
                         msg1 = ' and Next of Kin'
 
                 user('update', req, sch_id, emp)  # Update
+                group_user('update', req, sch_id, emp, prv_group_id)
 
                 msg = 'Employee ' + msg1 + ' Updated successfully.'
                 messages.success(req, msg)
