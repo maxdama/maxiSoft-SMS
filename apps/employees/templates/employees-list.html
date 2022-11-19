@@ -89,7 +89,7 @@
                                               <td><span class="staff-name text text-md-left font-weight-bold small ">
                                                   {{emp.surname}} {{emp.other_names}} </span>
                                                   {% if emp.group %}
-                                                    <br> <span class="text-small text-secondary">{{emp.group.name|default_if_none:''}}</span>
+                                                    <br> <span class="text-small posix text-secondary">{{emp.group.name|default_if_none:''}}</span>
                                                   {% endif %} </td>
                                               <td>{{emp.gender|first}}
                                                   {% if emp.marital_status %} <br> <span class="text-small text-primary">{{emp.marital_status|default_if_none:''}}</span>  {% endif %}</td>
@@ -99,7 +99,6 @@
                                                   {% if emp.mobile_no2 %} <br> {{emp.mobile_no2}} {% endif %} </span>
                                                   {% if emp.email_addr %} <br> <span class="small"> {{emp.email_addr}} </span>  {% endif %} </td>
                                               <!-- <td><span class="small"> {{emp.department.name|default_if_none:'Not Assigned'}} </span> </td> -->
-
                                               <td class="small text-center">{{emp.status}}
                                                    {% if emp.years_worked %} <br><span class="text-small text-secondary"> {{emp.years_worked}} </span> {% endif %}
                                               </td>
@@ -115,7 +114,7 @@
 
 														  <div class="dropdown-divider"></div>
 														  <a class="dropdown-item" href="/employees/update-entry/{{emp.id}}">Update Employee</a>
-														  <a class="dropdown-item delete"  href="">Delete </a>
+														  <a class="dropdown-item delete" type="button" href="/employees/delete-entry/{{emp.id}}">Delete </a>
 													  </div>
                                                   </div>
                                               </td>
@@ -166,6 +165,47 @@
 
             $('.new-employee').click(function(){
                 location.href=("{% url 'new-employee' %}")
+            });
+
+
+            $('.delete').click(function(e){
+			    var self = $(this);
+
+                let currentRow=$(this).closest("tr");
+                // let emp_id = currentRow.find(".emp-id").html(); // get current row cell TD value for employee id
+                let staff_name = currentRow.find(".staff-name").html(); // get current row cell TD value for staff-name
+                // let msg = "You selected the above Employee record to be DELETED !!"
+                let msg = "The above Employee record selected shall be DELETED !!"
+
+			    e.preventDefault();
+
+                swal({
+                    title: staff_name,
+                    text: msg,
+                    buttons:{
+                        confirm: {
+                            text : 'YES, Continue!',
+                            className : 'btn btn-outline-success btn-rounded'
+                        },
+                        cancel: {
+                            text : 'NO, Cancel!',
+                            visible: true,
+                            className: 'btn btn-outline-danger btn-rounded'
+                        }
+                    }
+                }).then((YesContinue) => {
+                    if (YesContinue) {
+                        location.href = self.attr('href');
+                    } else {
+                        swal({
+                            icon: 'error', timer: 1200,
+                            button:{
+                                visible: false
+                            }
+                        })
+                    }
+                });
+
             });
 
         });

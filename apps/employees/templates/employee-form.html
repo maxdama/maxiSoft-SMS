@@ -469,7 +469,8 @@
                                         </div>
                                     </div>
 
-                                    <!-- Sub Header _________________________________________________________ -->
+                                    {% if perms.auth.add_user %}
+                                    <!-- Staff Login Details _________________________________________________________ -->
                                     <div class="card-sub mb-0 pb-0">
                                         <div class="row pb-0"><div class="col card-success">Staff Login Details</div></div>
                                     </div>
@@ -517,7 +518,7 @@
                                         </div>
 
                                     </div>
-
+                                    {% endif %}
                                     <!-- Card Action Guardian Details-->
                                     <div class="card-action pt-3 pb-2">
                                          <div class="row d-flex justify-content-center text-center">

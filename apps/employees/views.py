@@ -152,16 +152,16 @@ def user(action, req, sch_id, emp):
                 print('----- New User Form is NOT Valid')
 
 
-def group_user(action, request, sch_id, emp, prv_group=0):
+def user_grouping(action, request, sch_id, emp, prv_group=0):
     try:
         user_inst = User.objects.get(id=emp.user.id)
     except:
         # If there is an error with user instance stop grouping and return
-        return group_user
+        return user_grouping
 
-    if action == 'new' and request.POST.get('is_active'):
+    if action == 'add' and request.POST.get('is_active'):
         group_id = request.POST.get('group')
-        # add user to the specified Group
+        # Add user to the specified Group
         if group_id:
             group = Group.objects.get(id=group_id)
             group.user_set.add(user_inst) # Add specific User to the specified Group
@@ -179,7 +179,10 @@ def group_user(action, request, sch_id, emp, prv_group=0):
         print(group)
         group.user_set.add(user_inst)  # Add specific User to the specified Group
 
-    return group_user
+    elif action == 'clear':
+        user_inst.groups.clear()
+
+    return user_grouping
 
 @login_required
 @custom_permission_required("employees.add_employees")
@@ -214,7 +217,7 @@ def new_employee_entry(req):
 
                 nextofkin('save', req, sch_id, emp)
                 user('save', req, sch_id, emp)  # Update
-                group_user('new', req, sch_id, emp)
+                user_grouping('add', req, sch_id, emp)
 
             except IntegrityError as e:
                 err_msg = getattr(e, 'message', repr(e))
@@ -302,7 +305,7 @@ def employee_update(req, emp_id=0):
                         msg1 = ' and Next of Kin'
 
                 user('update', req, sch_id, emp)  # Update
-                group_user('update', req, sch_id, emp, prv_group_id)
+                user_grouping('update', req, sch_id, emp, prv_group_id)
 
                 msg = 'Employee ' + msg1 + ' Updated successfully.'
                 messages.success(req, msg)
@@ -320,6 +323,39 @@ def employee_update(req, emp_id=0):
         context = {'header': header, 'emp_id': emp_id, 'emp': employee, 'positions': emp_posix,
                    'departments': emp_dept}
         return render(req, 'employee-form.html', context)
+
+
+@login_required
+@custom_permission_required("employees.delete_employees")
+@transaction.atomic()
+def delete_employee(request, emp_id=0):
+    school = schools(request)
+    sch_id = school['sch_id']
+    if sch_id == 0:
+        return redirect("logout")
+
+    try:
+        emp = Employees.objects.get(id=emp_id, school=sch_id)
+        user_grouping('clear', request, sch_id, emp)
+
+        try:
+            if request.user.id == emp.user.id:
+                messages.error(request, 'You are currently login and active. You cannot delete your own record.')
+            else:
+                # Delete User, Cascaded Employee and Cascaded NextOfKine records except for any error
+                # if there is any error do the exception
+                user = User.objects.get(id=emp.user.id)
+                user.delete()
+                messages.success(request, 'User and Employee Records successfully Deleted')
+        except:
+            # Delete Employee and Cascaded NextOfKin
+            emp.delete()
+            messages.success(request, 'Employee Record successfully Deleted')
+
+    except Employees.DoesNotExist or User.DoesNotExist:
+        messages.error(request, 'Employee Record searched for Deleting does NOT Exist')
+    # Going back to previous URL
+    return redirect(request.META['HTTP_REFERER'])
 
 
 def modalform_save(request):
