@@ -6,22 +6,47 @@ Copyright (c) 2019 - present AppSeed.us
 from django import template
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
+
+from apps.students.models import Students
+
+
+def students_statistics(sch_id):
+    tot_student = Students.objects.filter(school_id=sch_id).count()
+    tot_pending = Students.objects.filter(school_id=sch_id, reg_status='pending').count()
+    tot_enrolled = Students.objects.filter(school_id=sch_id, reg_status='enrolled').count()
+    tot_active = Students.objects.filter(school_id=sch_id, reg_status='active').count()
+
+    reg_statistics = {'tot_pending': tot_pending, 'tot_student': tot_student, 'tot_enrolled': tot_enrolled, 'tot_active': tot_active}
+    return reg_statistics
 
 
 @login_required(login_url="/login/")
 def index(request):
     context = {'segment': 'index'}
+    context = {}
 
     if request.session.has_key('user_name'):
         username = request.session['user_name']
         sch_id = request.session['school_id']
-        # print(f'The Last User: {username}. The School ID is: {sch_id}')
+    else:
+        username = request.POST.get('username')
 
-    html_template = loader.get_template('home/index.html')
-    return HttpResponse(html_template.render(context, request))
+    # html_template = loader.get_template('home/index.html')
+    # return HttpResponse(html_template.render(context, request))
+
+    stud_stat = students_statistics(sch_id)
+    print(stud_stat)
+    context = {'stud': stud_stat}
+
+    days_expire = 30
+    max_age = days_expire * 24 * 60 * 60
+    response = render(request, 'dashboard1.html', context)
+    response.set_cookie('last-user', username, max_age=max_age)  # Set the cookies
+
+    return response
 
 
 @login_required(login_url="/login/")

@@ -20,12 +20,12 @@
                     <div class="card">
 
                         <div class="card-header">
-                            <div class="card-title lead">Class Setup</div>
+                            <div class="card-title lead">Batch Setup</div>
 
                             <div class="row">
                                 <div class="col-6 float-right " style="width:auto">
-                                   <label for="prf_id" >Profile ID: </label>
-                                    <input id="prf_id" type="text" value="{{profile.sch_id}}" class="border-0  " name="profile" required readonly>
+                                   <label for="sch_id" >School ID: </label>
+                                    <input id="sch_id" type="text" value="{{sch_id}}" class="border-0  " name="profile" required readonly>
                                 </div>
 
                             </div>
@@ -149,15 +149,16 @@
 
         {% for message in messages %}
             {% if message.tags == 'success'%}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+                <script type=text/javascript>toastr.success('{{ message }}', 'Very Good . . . ')</script>
             {% elif message.tags == 'info' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+                <script type=text/javascript>toastr.info('{{ message }}')</script>
             {% elif message.tags == 'warning' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+                <script type=text/javascript>toastr.warning('{{ message }}')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
+
     {% endif %}
 
      <script type="text/javascript"  >

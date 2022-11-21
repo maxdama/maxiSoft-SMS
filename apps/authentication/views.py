@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 # Create your views here.
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from .forms import LoginForm, SignUpForm
@@ -24,29 +25,38 @@ def login_view(request):
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
+
             if user is not None:
+                print('User is Authenticated')
                 login(request, user)
                 sch_id = form.cleaned_data.get("sch_id")
                 request.session['school_id'] = sch_id
                 request.session['user_name'] = username
+
                 """
                 if first_login_today:
                     if end_of_term:
                         ap_do_end_of_term
                 """
+
                 return redirect("/")
             else:
-                msg = 'Invalid credentials'
+                msg = 'Invalid Username or Password'
         else:
             msg = 'Error validating the form'
 
     else:
-        username = 'dama'
+        username = ''
+        try:
+            username = request.COOKIES['last-user']
+        except KeyError:
+            print('This is your first login')
+            pass
+
         sch_id = 1
-        #username = request.session['user_name']
+
         try:
             prof = SchoolProfiles.objects.get(sch_id=sch_id)
-
         except:
            pass
 

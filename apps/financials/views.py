@@ -209,7 +209,7 @@ def new_student_enrollment(request, reg_id):
 
 @transaction.atomic
 def cancel_enrollment(request, enr_id, inv_no):
-    sch_id = schools(request)
+    sch_id = schools(request)['sch_id']
     # print(f'==== = Sch_ID: {sch_id} Cancelling Enrollment ID: {enr_id} and Invoice No: {inv_no} =  =====') , inv_no
 
     inv = Invoice.objects.filter(school=sch_id, enrolled=enr_id, invoice_no=inv_no).first()
@@ -244,14 +244,14 @@ def cancel_enrollment(request, enr_id, inv_no):
 
 @transaction.atomic
 def student_enrolled_update(request, enr_id, inv_no):
-    sch_id = schools(request)
+    sch_id = schools(request)['sch_id']
 
     if request.method == 'POST':
         enrolled = Enrollments.objects.get(school=sch_id, id=enr_id)
         enrlmt_frm = EnrollmentForm(request.POST, instance=enrolled)
 
         if enrlmt_frm.is_valid():
-            status = 'Enrolled'
+            status = 'enrolled'
             enrolled = enrlmt_frm.save(commit=False)
             enrolled.status = status
             enrolled.save()
@@ -291,7 +291,7 @@ def student_enrolled_update(request, enr_id, inv_no):
 
 
 def student_re_enrollment(request, stud_id):
-    sch_id = schools(request)
+    sch_id = schools(request)['sch_id']
 
     if request.method == 'POST':
 
@@ -338,7 +338,7 @@ def student_re_enrollment(request, stud_id):
         # return HttpResponse(f'Student Re-Enrollment: ID-No:- {stud_id}')
 
 def financial_transactions(request, action, enr_id, inv_no):
-    sch_id = schools(request)
+    sch_id = schools(request)['sch_id']
 
     # with transaction.set_autocommit():
     # -- Save / Update Financial Transactions
@@ -374,7 +374,7 @@ def financial_transactions(request, action, enr_id, inv_no):
 def ap_due_date(request):
     date_now = datetime.date.today()
 
-    sch_id = request.POST['school']
+    sch_id = request.POST['school']['sch_id']
     timeline = request.POST['timeline']
     session_id = request.POST['session']
 
@@ -383,7 +383,7 @@ def ap_due_date(request):
         # print('Term: ', term['term_id'])
         term_id = term['term_id']
 
-        date = AcademicCalender.objects.values('cs_start_dt').filter(school=sch_id, tl_id=timeline, term_id=term_id)[0]
+        date = AcademicCalender.objects.values('cs_start_dt').filter(school=sch_id, timeline=timeline, term_id=term_id)[0]
         if date:
             due_date = date['cs_start_dt']
             if date_now > due_date:
@@ -398,15 +398,15 @@ def ap_due_date(request):
 
 
 def list_enrollments(request):
-    school = schools(request)
-    sch_id = school['sch_id']
+    sch_id = schools(request)['sch_id']
+
     if sch_id == 0:
         return redirect("logout")
 
     context = {}
 
     # students_enrolled = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
-    criteria1 = (Q(status='Enrolled') | Q(status = 'active') | Q(status = 'returned')) & Q(school_id=sch_id)
+    criteria1 = (Q(status='enrolled') | Q(status = 'active') | Q(status = 'returned')) & Q(school_id=sch_id)
     students_enrolled = Enrollments.objects.filter(criteria1).order_by('school_id', 'classroom_id', 'student__surname')
     # print(students_enrolled)
 
@@ -416,7 +416,7 @@ def list_enrollments(request):
 
 @transaction.atomic
 def student_payment(request, stud_id):
-    sch_id = schools(request)
+    sch_id = schools(request)['sch_id']
     enrolled = Enrollments.objects.filter(school=sch_id, student_id=stud_id).order_by('id').last()
     # enrolled = Enrollments.objects.filter(school=sch_id, id=enr_id).first()
     # stud_id = enrolled.student_id

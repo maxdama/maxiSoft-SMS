@@ -124,7 +124,10 @@ def user(action, req, sch_id, emp):
             print('----- User Form is NOT valid')
             messages.warning(req, user_form.errors)
 
-    elif action == 'update':
+    elif action == 'update' and req.user.has_perm("auth.change_user"):
+        tt = req.user.has_perm("auth.change_user")
+        print("User Permitted: ")
+        print(tt)
         print('----- User Update: ' + emp.staff_no)
         if emp.user_id:
             print('----- User ID: ' + str(emp.user_id))
@@ -150,6 +153,8 @@ def user(action, req, sch_id, emp):
                 emp.save()
             else:
                 print('----- New User Form is NOT Valid')
+
+    return
 
 
 def user_grouping(action, request, sch_id, emp, prv_group=0):

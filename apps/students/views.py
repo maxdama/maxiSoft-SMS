@@ -388,10 +388,11 @@ def ap_invoice_no(sch_id):
 
 
 def invoice_amount(request, pkg_id):
-    sch_id = schools(request)
+    sch = schools(request)
+    print(sch['sch_id'])
 
-    inv_amt = ap_package_amount(pkg_id, sch_id)
-    inv_no = ap_invoice_no(sch_id)
+    inv_amt = ap_package_amount(pkg_id, sch['sch_id'])
+    inv_no = ap_invoice_no(sch['sch_id'])
     reg_no = generate_reg_no(request, jsonx=False)
 
     return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})

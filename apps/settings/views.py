@@ -538,26 +538,26 @@ def setup_class_rooms(request):
 
     context = {}
     if request.method == 'POST':
-        prf = request.POST['profile']
+        sch_id = request.POST['profile']
         abr = request.POST['class_abr']
         arm = request.POST['arm']
 
         if request.POST['save_btn'] == 'delete':
             clsroom = 0
             try:
-                clsroom = ClassRooms.objects.get(profile=prf, class_abr=abr, arm=arm)
+                clsroom = ClassRooms.objects.get(profile=sch_id, class_abr=abr, arm=arm)
                 clsroom.delete()
-                messages.success(request, 'The selected Class setup has been DELETED')
+                messages.success(request, 'The selected Batch has been DELETED')
 
             except:
                 if clsroom:
-                    messages.warning(request, 'The selected Class can not be deleted now. It is being used at the moment')
+                    messages.warning(request, 'The selected Batch can not be deleted now. It is being used at the moment')
                 else:
                     messages.error(request, clsroom.errors)
         else:
 
             try:
-                clsroom = ClassRooms.objects.get(profile=prf, class_abr=abr, arm=arm)
+                clsroom = ClassRooms.objects.get(profile=sch_id, class_abr=abr, arm=arm)
                 classes = ClassRoomsForm(request.POST, instance=clsroom)
 
             except ClassRooms.DoesNotExist:
@@ -568,11 +568,11 @@ def setup_class_rooms(request):
                 classes.status = classes.status.lower()
 
                 classes.save()
-                messages.success(request, 'The Class Setup is SAVED')
+                messages.success(request, 'The Batch is SAVED')
             else:
                 messages.error(request, classes.errors)
 
     classes = ClassRooms.objects.filter(profile__sch_id=sch_id).order_by('levels') # Query upward to the parent from the child in criteria school__sch_id=sch_id
 
-    context = {'profile': prf_id, 'classes': classes}
+    context = {'sch_id': sch_id, 'classes': classes}
     return render(request, 'setup/class-rooms.html', context)
