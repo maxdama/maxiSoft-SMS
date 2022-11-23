@@ -13,7 +13,7 @@ from django.http import HttpResponse, JsonResponse
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
 from apps.students.forms import EnrollmentForm
 from apps.students.models import Enrollments, Students
-from apps.utils import schools, get_cur_session
+from apps.utils import schools, get_cur_session, generate_reg_no
 from django.db.models import Sum, Q, F
 
 
@@ -215,7 +215,7 @@ def cancel_enrollment(request, enr_id, inv_no):
     inv = Invoice.objects.filter(school=sch_id, enrolled=enr_id, invoice_no=inv_no).first()
     stud_id = inv.student_id
     trans = FinancialTransactions.objects.filter(school=sch_id, enrolled=enr_id, invoice_no=inv_no).first()
-    enrlmt = Enrollments.objects.filter(school=sch_id, id=enr_id, status='Enrolled').first()
+    enrlmt = Enrollments.objects.filter(school=sch_id, id=enr_id, status='enrolled').first()
 
     todays_dt = date.today()
     if todays_dt.isoformat() <= inv.trans_date.isoformat():
@@ -228,13 +228,12 @@ def cancel_enrollment(request, enr_id, inv_no):
                 trans.delete()
                 enrlmt.delete()
 
+                messages.success(request,  'The Student Enrollment is Cancelled.  You may want to Enroll the candidate again')
+
         except:
             messages.error(request, 'The operation was not successful. ')
-        finally:
-            messages.success(request, 'The Student Enrollment is Cancelled.  You may want to Enroll the candidate again')
 
-        print(
-            f'Delete Transactions: \n {trans} \n {inv} \n {enrlmt} \n Student ID: {stud_id} \n Student Update: {update}')
+        print(f'Delete Transactions: \n {trans} \n {inv} \n {enrlmt} \n Student ID: {stud_id} \n Student Update: {update}')
     else:
         print('Date not Match: ')
         messages.info(request, 'The action carried was NOT successful.  Cancellation can be done only on the date of enrollment')
@@ -374,7 +373,7 @@ def financial_transactions(request, action, enr_id, inv_no):
 def ap_due_date(request):
     date_now = datetime.date.today()
 
-    sch_id = request.POST['school']['sch_id']
+    sch_id = request.POST['school']
     timeline = request.POST['timeline']
     session_id = request.POST['session']
 
@@ -457,6 +456,8 @@ def student_payment(request, stud_id):
 
                 update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
                 Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status='active')
+                Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
+
                 print('Form process is Successful.')
             else:
                 print('Error with Form process.')
@@ -531,5 +532,41 @@ def generate_receipt_no():
         recpt_no = int(p['receipt_no']) + 1
 
     return recpt_no
+
+
+def ap_package_amount(pkg_id, sch_id):
+    pkg_amt = FeesPackage.objects.filter(id=pkg_id, school=sch_id).first().total_fees
+    if not pkg_amt:
+        pkg_amt = 0
+
+    return pkg_amt
+
+
+def ap_invoice_no(sch_id):
+    inv_no = 0
+
+    try:
+        last_inv_no = Invoice.objects.filter(school=sch_id).order_by('invoice_no').last().invoice_no
+        print(f'===========  Last Invoice No : {last_inv_no}  retrieved =====================')
+    except AttributeError:
+        inv_no = 1
+        last_inv_no = 0
+        print(f' ----- Initial Invoice No: {last_inv_no}')
+
+    if last_inv_no:
+        inv_no = int(last_inv_no) + 1
+
+    return inv_no
+
+
+def invoice_amount(request, pkg_id):
+    sch = schools(request)
+    print(sch['sch_id'])
+
+    inv_amt = ap_package_amount(pkg_id, sch['sch_id'])
+    inv_no = ap_invoice_no(sch['sch_id'])
+    reg_no = generate_reg_no(request, jsonx=False)
+
+    return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})
 
 

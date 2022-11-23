@@ -70,6 +70,7 @@ class FinancialTransactions(models.Model):
 
 
 class Invoice(models.Model):
+    objects = None
     trans_date = models.DateField()
     school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
     student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False)

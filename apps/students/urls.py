@@ -5,6 +5,7 @@ Copyright (c) 2019 - present AppSeed.us
 
 from django.urls import path
 from . import views as sv
+from apps.utils import generate_reg_no
 
 
 urlpatterns = [
@@ -14,8 +15,8 @@ urlpatterns = [
     path('reg-contx/<int:reg_id>/<int:reg_step>', sv.continue_registration, name="continue"),
     path('update/<int:reg_id>', sv.view_student_for_update, name='view'),
     path('delete/<int:reg_id>', sv.delete_student, name='delete'),
-    path('generate/', sv.generate_reg_no, name='gen_reg_no'),
-    path('grab/<int:pkg_id>', sv.invoice_amount, name='get_inv_amt'),
+    path('generate/', generate_reg_no, name='gen_reg_no'),
+    # path('grab/<int:pkg_id>', sv.invoice_amount, name='get_inv_amt'),
 
     # path('returning', sv.returned_student_register, name="old_student_register"),
 

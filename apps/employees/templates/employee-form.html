@@ -766,7 +766,8 @@
              }
          }
 
-         // This function is being Used
+         // This function is being Used.
+         // It redirect the URL when the close button at the TOP Right corner is clicked
          $("#close").click(function(){
              location.href='/employees/staff-list'
          });
@@ -835,7 +836,7 @@
          })
 
 
-
+        // This function is being used
          function save_modalform_ajax(url, stud_data, x)
          {
              let csrftoken = getCookie('csrftoken'); // Get csrftoken from cookie ( function )

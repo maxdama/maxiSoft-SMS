@@ -16,7 +16,7 @@ from apps.guardians import views as g, models as gm
 from ..financials.forms import FinancialTransactionsForm, InvoiceForm
 from ..settings.models import AcademicTimeLine, ClassRooms, AcademicSessions, SchoolProfiles
 from django.db import transaction, IntegrityError
-from ..utils import schools, default_image_restore
+from ..utils import schools, default_image_restore, generate_reg_no
 
 
 # Create your views here.
@@ -338,61 +338,3 @@ def list_students_enrolled(request):
     return render(request, 'student/student-enrolled-list.html', context)
 
 
-def generate_reg_no(request, jsonx=True):
-    if request.method == 'GET':
-
-        try:
-            reg_id_str = Enrollments.objects.exclude(reg_no__isnull=True).last().reg_no
-
-        except AttributeError:
-            reg_id = 'NGS' + str(datetime.date.today().year) + str(datetime.date.today().month).zfill(2) + '000'
-            reg_id_str = False
-            print(f'=============== Checking out for Error: {reg_id} =========================')
-
-        if reg_id_str:
-            reg_no_int = int(reg_id_str[9:12])
-            new_reg_no = reg_no_int + 1
-            reg_id = 'NGS' + str(str(datetime.date.today().year)) + str(datetime.date.today().month).zfill(2) + str(
-                new_reg_no).zfill(3)
-
-        if jsonx:
-            return JsonResponse({"new_reg_no": reg_id})
-        else:
-            return reg_id
-    else:
-        return JsonResponse({'new_reg_no': ''})
-
-
-def ap_package_amount(pkg_id, sch_id):
-    pkg_amt = FeesPackage.objects.filter(id=pkg_id, school=sch_id).first().total_fees
-    if not pkg_amt:
-        pkg_amt = 0
-
-    return pkg_amt
-
-
-def ap_invoice_no(sch_id):
-    inv_no = 0
-
-    try:
-        last_inv_no = Invoice.objects.filter(school=sch_id).order_by('invoice_no').last().invoice_no
-        print(f'===========  Last Invoice No : {last_inv_no}  retrieved =====================')
-    except AttributeError:
-        inv_no = 1
-        last_inv_no = 0
-
-    if last_inv_no:
-        inv_no = int(last_inv_no) + 1
-
-    return inv_no
-
-
-def invoice_amount(request, pkg_id):
-    sch = schools(request)
-    print(sch['sch_id'])
-
-    inv_amt = ap_package_amount(pkg_id, sch['sch_id'])
-    inv_no = ap_invoice_no(sch['sch_id'])
-    reg_no = generate_reg_no(request, jsonx=False)
-
-    return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})

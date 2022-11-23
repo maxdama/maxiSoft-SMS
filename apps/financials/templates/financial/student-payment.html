@@ -53,8 +53,16 @@
                                 <input type="text" class="no-bd" id="sch_id" name="school" value="{{timeline.sch_id}}" hidden required>
 
                             </div>
-
-                            <h5 class=""><strong>Student Payment Entry: </strong><br> Session: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
+                            <div class="row">
+                                <div class="col-10">
+                                    <h5 class=""><strong>Student Payment Entry: </strong><br>
+                                    Session: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
+                                </div>
+                                <div class="col-2">
+                                    <!--  Close button at the TOP Right Corner. Closes the form to Employee List -->
+                                    <button id="close" class=" btn  btn-outline-dark  btn-rounded btn-sm float-lg-right alert-dark "  type="button" >X</button>
+                                </div>
+                            </div>
 
                             <hr>
 
@@ -67,17 +75,21 @@
                                     {% endif %}
                                 </div>
 
-                                <div class="no-bd col-md-5 form-floating-label ">
+                                <div class=" col-md-5 form-floating-label ">
+                                    <div class="">
                                     <input id="studnames" type="text" name="studentnames" value="{{enrolled.student.surname}} {{enrolled.student.first_name}} {{enrolled.student.middle_name}}" class="form-control no-bd" style="font-weight:bold; font-size: 18px;"  required>
                                     <label for="studnames" class="placeholder pl-3">Student Making Payment</label>
+                                    </div>
+                                    <div class="pl-3">
+                                        Account Bal: <input id="acct_bal" type="number" class="no-bd pl-2" readonly value="2000">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-3  " style="width:auto">
-                                    <!-- <button type="button" class="btn btn-outline-dark  btn-xs gen-id">Reg-No (Auto Gen)</button> -->
                                     <span class="gen-id ">Registration No:</span>
                                     <div class="row">
                                         <div class="col-md-12 form-group w_90 pl-3  p-0 m-0">
-                                            <input id="reg_no" name="reg_no" value="{{enrolled.reg_no}}" readonly="" type="text" class="no-bd form-control form-control-sm pt-0 mt-0"  required>
+                                            <input id="reg_no" name="reg_no" value="{{enrolled.reg_no}}" readonly type="text" class="no-bd  pt-0 mt-0" style="font-weight:bold;" required>
                                         </div>
                                     </div>
                                 </div>
@@ -88,11 +100,9 @@
 
                                         <select class="no-bd form-control input-border-bottom" id="class_id" name="classroom" style="font-weight:bold;" required >
                                             <option selected hidden value="{{enrolled.classroom.id}}">{{enrolled.classroom.class_abr}} - {{enrolled.classroom.arm}}</option>
-                                            {% for cls in classes %}
-                                                <option value={{cls.id}}>{{cls.class_abr}} - {{cls.arm}}  ({{timeline.descx}})</option>
-                                            {% endfor %}
+
                                         </select>
-                                        <label for="class_id" class="placeholder pl-1">Batch Placement:</label>
+                                        <label for="class_id" class="placeholder pl-1">Batch:</label>
                                     </div>
                                 </div>
 
@@ -109,7 +119,7 @@
                                     <span class="pl-2 ">Due Amount</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due}}" tabindex="10" type="number" readonly class="form-control form-control-sm no-bd " placeholder=""  >
+                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due}}" tabindex="10" type="number" readonly class="no-bd"  >
                                           </div>
                                       </div>
                                 </div>
@@ -179,7 +189,7 @@
                                                 <option value="{{pt.id}}">{{pt.bank_name}}</option>
                                             {% endfor %}
                                         </select>
-                                        <label for="bank" class="placeholder pl-0">* Bank Entry:</label>
+                                        <label for="bank" class="placeholder pl-0">* Payment To:</label>
                                     </div>
                                 </div>
 
@@ -236,6 +246,12 @@
 		$(document).ready(function() {
 
             document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
+
+
+            // It redirect the URL when the close button at the TOP Right corner is clicked
+             $("#close").click(function(){
+                 location.href='/financials/student-enrolled-list'
+             });
 
             $('#save').click(function(e){
                 e.preventDefault();

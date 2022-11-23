@@ -10,6 +10,7 @@ import datetime
 # Create your models here.
 
 class Students(models.Model):
+    objects = None
     school = models.ForeignKey(sm.SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
     reg_no = models.CharField(max_length=50, unique=True, db_index=True, null=True, blank=True)
     surname = models.CharField(max_length=40, db_index=True)
@@ -54,6 +55,7 @@ class Students(models.Model):
 
 
 class Enrollments(models.Model):
+    objects = None
     student = models.ForeignKey(Students, on_delete=models.RESTRICT, related_name='enrollment', null=False, blank=True, unique=False)
     school = models.ForeignKey(sm.SchoolProfiles, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
     timeline = models.ForeignKey(sm.AcademicTimeLine, on_delete=models.RESTRICT, blank=True, unique=False)
@@ -73,7 +75,7 @@ class Enrollments(models.Model):
         crit2 = Q(Invoice__enrolled_id=self.id)
         inv_amt = Enrollments.objects.filter(crit).aggregate(amt=Sum('invoice__amount'))
         if inv_amt['amt'] is None:
-            inv_amt = {'amount': 0.00}
+            inv_amt = {'amt': 0.00}
         # print(inv_amt)
         return inv_amt
 
@@ -164,7 +166,7 @@ class Enrollments(models.Model):
         return last_pmt_dt
 
     def __str__(self):
-        return self.reg_no + ' ' + str(self.trans_date) + ' ' + self.status + ' ' + str(self.amount['due']) + ' ' + str(self.due['date'])
+        return self.reg_no + ' ' + str(self.trans_date) + ' ' + self.status + ' ' + str(self.tot_amt['due']) + ' ' + str(self.due['date'])
 
     class Meta:
         db_table = "apps_Enrollments"

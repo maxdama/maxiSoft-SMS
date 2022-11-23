@@ -55,7 +55,17 @@
 
                             </div>
 
-                            <h5 class=""><strong>Enrollment and Invoicing: </strong><br> Academic Year: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
+                            <!-- <h5 class=""><strong>Enrollment and Invoicing: </strong><br> Academic Year: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5> -->
+                            <div class="row">
+                                <div class="col-10">
+                                    <h5 class=""><strong>Batch Placement and Invoicing: </strong><br>
+                                        Academic Year: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
+                                </div>
+                                <div class="col-2">
+                                    <!--  Close button at the TOP Right Corner. Closes the form to Employee List -->
+                                    <button id="close" class=" btn  btn-outline-dark  btn-rounded btn-sm float-lg-right alert-dark "  type="button" >X</button>
+                                </div>
+                            </div>
 
                             <hr>
 
@@ -227,6 +237,10 @@
 		});
 
 		$(document).ready(function() {
+            // It redirect the URL when the close button at the TOP Right corner is clicked
+             $("#close").click(function(){
+                 location.href='/financials/student-enrolled-list'
+             });
 
             // document.getElementById('trans_date').valueAsDate = new Date(); // Get the current Date and assigned
 

@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth import logout
+from django.http import JsonResponse
 from django.shortcuts import redirect
 import shutil
 import os.path
 from os import path
 import datetime
 from apps.settings.models import AcademicSessions, AcademicCalender, SchoolProfiles
+from apps.students.models import Enrollments
 
 
 def schools(request):
@@ -81,3 +83,28 @@ def get_cur_session(sch_id):
     context = {'sesx_id': sesx_id, }
 
     return context
+
+
+def generate_reg_no(request, jsonx=True):
+    if request.method == 'GET':
+
+        try:
+            reg_id_str = Enrollments.objects.exclude(reg_no__isnull=True).last().reg_no
+
+        except AttributeError:
+            reg_id = 'NGS' + str(datetime.date.today().year) + str(datetime.date.today().month).zfill(2) + '000'
+            reg_id_str = False
+            print(f'=============== Checking out for Error: {reg_id} =========================')
+
+        if reg_id_str:
+            reg_no_int = int(reg_id_str[9:12])
+            new_reg_no = reg_no_int + 1
+            reg_id = 'NGS' + str(str(datetime.date.today().year)) + str(datetime.date.today().month).zfill(2) + str(
+                new_reg_no).zfill(3)
+
+        if jsonx:
+            return JsonResponse({"new_reg_no": reg_id})
+        else:
+            return reg_id
+    else:
+        return JsonResponse({'new_reg_no': ''})
