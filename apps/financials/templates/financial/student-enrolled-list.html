@@ -101,7 +101,7 @@
 												  </button>
 												  <div class="dropdown-menu">
 													  <input type="text" class="trans_date"  value="{{enrolled.trans_date}}" hidden>
-													  <a class="dropdown-item" href="{% url 'payment-entry' enrolled.student_id %}">Payment</a>
+													  <a class="dropdown-item" href="{% url 'payment-entry' enrolled.student_id %}">Receive Payment</a>
 													  {% if enrolled.status|lower == 'enrolled' %}
 													  	<div class="dropdown-divider"></div>
 													  	<a class="dropdown-item" href="{% url 'update-enrollment' enrolled.id enrolled.first_inv_no %}">Update Enrollment</a>

@@ -14,7 +14,7 @@
     <div class="page-inner">
 
         <div class="page-header">
-            <h3 class=" font-weight-bold ">{{header}}</h3>
+            <h3 class="font-weight-bold" >{{header}}</h3>
             <ul class="breadcrumbs">
                 <li class="nav-home">
                     <a href="#">
@@ -81,7 +81,7 @@
                                     <label for="studnames" class="placeholder pl-3">Student Making Payment</label>
                                     </div>
                                     <div class="pl-3">
-                                        Account Bal: <input id="acct_bal" type="number" class="no-bd pl-2" readonly value="2000">
+                                        Wallet Bal: <input id="wallet_bal" type="text" class="no-bd pl-2"  value="{{2000|floatformat:2|intcomma}}">
                                     </div>
                                 </div>
 
@@ -119,7 +119,7 @@
                                     <span class="pl-2 ">Due Amount</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due}}" tabindex="10" type="number" readonly class="no-bd"  >
+                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due|floatformat:2|intcomma}}" tabindex="10" type="text" readonly class="no-bd"  >
                                           </div>
                                       </div>
                                 </div>
@@ -174,7 +174,7 @@
                                     <span class="pl-1 ">* Amount Paying</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4 text-right ">
-                                              <input  name="amt_paid" id="amount" value="{{inv.amount}}" tabindex="10" type="number"  class="form-control form-control-sm  " placeholder="" required >
+                                              <input  name="amt_paid" id="amount_paying" value="{{inv.amount}}" tabindex="10" type="text"  class="form-control form-control-sm  " placeholder="" required >
                                           </div>
                                       </div>
                                 </div>
@@ -247,6 +247,18 @@
 
             document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
 
+            // Function that format number from the input to the specified country format
+            // It uses the JQueryNumberFormat plugin that was downloaded and placed in
+            // the static/assets/js/plugin/number-format folder
+            $("#amount_paying").blur(function(){
+                //var number = $(this).val()
+                //number = $.formatNumber(number, {format:"#,###.00", locale:"us"});
+                //$(this).val(number);
+
+                $(this).parseNumber({format:"#,###.00", locale:"us"});
+                $(this).formatNumber({format:"#,###.00", locale:"us"})
+            });
+
 
             // It redirect the URL when the close button at the TOP Right corner is clicked
              $("#close").click(function(){
@@ -264,7 +276,7 @@
                 let docno = $("#doc_no").val();  // Get the Document No from doc_no object text box
                 let studname = $("#studnames").val();  // Get the Student Name from studnames object text box
                 let classid = $("#class_id option:selected").text(); //Get the select class text from class_id dropdown
-                let amtpaid = $("#amount").val();  // Get the Amount Paid from amount object text box
+                let amtpaid = $("#amount_paying").val();  // Get the Amount Paid from amount object text box
                 let bank = $("#bank option:selected").text(); //Get the selected text from bank dropdown
                 let pmt_date = $("#trans_date").val();  // Get the Payment Date from trans_date object text box
                 let descx = $("#descx").val();  // Get the Payment Description from pmt_descx object text box

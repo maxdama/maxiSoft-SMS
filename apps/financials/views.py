@@ -405,9 +405,8 @@ def list_enrollments(request):
     context = {}
 
     # students_enrolled = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
-    criteria1 = (Q(status='enrolled') | Q(status = 'active') | Q(status = 'returned')) & Q(school_id=sch_id)
+    criteria1 = (Q(status='enrolled') | Q(status = 'paid') | Q(status = 'paying') | Q(status = 'returned')) & Q(school_id=sch_id)
     students_enrolled = Enrollments.objects.filter(criteria1).order_by('school_id', 'classroom_id', 'student__surname')
-    # print(students_enrolled)
 
     context = {'enrollments': students_enrolled}
     return render(request, 'financial/student-enrolled-list.html', context)
@@ -425,11 +424,11 @@ def student_payment(request, stud_id):
     inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(qc1).order_by('invoice_no')
 
     if request.method == 'POST':
-        amt_paying = float(request.POST['amt_paid'])
+        # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaot else error
+        amt_paying = float(request.POST['amt_paid'].replace(',', ''))
 
         recpt_no = generate_receipt_no()
         cur_sesx_id = get_cur_session(sch_id)
-        #print(cur_session)
 
         for i in inv:
             if amt_paying <= 0:
@@ -454,8 +453,13 @@ def student_payment(request, stud_id):
                 pmt.amt_paid = p_inv['amt_paid']
                 pmt.save()
 
+                if status == 'pp':
+                    enr_status = 'paying'
+                elif status == 'pf':
+                    enr_status = 'paid'
+
                 update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
-                Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status='active')
+                Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
                 Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
 
                 print('Form process is Successful.')
@@ -465,7 +469,7 @@ def student_payment(request, stud_id):
         return redirect(list_enrollments)
 
     else:
-        header = 'Payment'
+        header = 'Receive Payment'
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         paymethod = PaymentMethods.objects.all()
         bank = Banks.objects.filter(status='active')
