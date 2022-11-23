@@ -22,14 +22,14 @@ class FinancialTransactionsForm(forms.ModelForm):
     class Meta:
         model = FinancialTransactions
         fields = '__all__'
-        exclude = ['enrolled',  'receipt_no',  'run_bal', 'tr_type']
+        exclude = ['enrolled',  'receipt_no',  'run_bal', 'tr_type', 'amount']
 
 
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = '__all__'
-        exclude = ['package', 'due_date', 'balance', 'status']
+        exclude = ['package', 'due_date', 'balance', 'status', 'amount']
 
 
 class PaymentForm(forms.ModelForm):

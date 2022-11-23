@@ -122,6 +122,7 @@ class Banks(models.Model):
 
 
 class Payments(models.Model):
+    objects = None
     # pmt_id = models.BigIntegerField(unique=True, primary_key=True)
     receipt_no = models.CharField(max_length=65)
     invoice_no = models.IntegerField(null=True, blank=True)
@@ -147,3 +148,38 @@ class Payments(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['school', 'receipt_no', 'invoice_no'], name="unq_school_receipt"),
         ]
+
+
+class Wallets(models.Model):
+    objects = None
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
+    student = models.OneToOneField(Students, on_delete=models.CASCADE, unique=True, null=True, blank=True)
+    trans_date = models.DateField()
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    def __str__(self):
+        return str(self.trans_date) + str(self.balance)
+
+    class Meta:
+        db_table = "apps_Wallets"
+        ordering = ['school', 'student']
+
+
+class WalletDetails(models.Model):
+    objects = None
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
+    student = models.ForeignKey(Students, on_delete=models.CASCADE, unique=False)
+    trans_date = models.DateField()
+    doc_type = models.CharField(max_length=15, null=True, blank=True)
+    doc_no = models.CharField(max_length=55, null=True, blank=True)
+    descx = models.CharField(max_length=250)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
+    tr_type = models.CharField(max_length=10)
+
+    def __str__(self):
+        return str(self.trans_date) + ' ' + self.descx + ' ' + str(self.tr_type) + ' ' + str(self.amount)
+
+    class Meta:
+        db_table = "apps_WalletsDetails"
+        ordering = ['school', 'trans_date', 'id']

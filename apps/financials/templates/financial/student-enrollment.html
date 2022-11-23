@@ -86,7 +86,7 @@
                                     <span class="gen-id ">Registration No:</span>
                                     <div class="row">
                                         <div class="col-md-12 form-group w_90 pl-3  p-0 m-0">
-                                            <input id="reg_no" name="reg_no" value="{{student.student.reg_no}}" readonly="" type="text" class="no-bd form-control form-control-sm pt-0 mt-0"  required>
+                                            <input id="reg_no" name="reg_no" value="{{student.student.reg_no}}" readonly="" type="text" class="no-bd pt-0 mt-0" style="font-weight:bold;" required>
                                         </div>
                                     </div>
                                 </div>
@@ -149,20 +149,19 @@
 
                             </div>
                             <hr class=" mb-0">
-                            <span class="text-small fw-extrabold font-italic">Auto Invoice </span> <p>
-                            <div class="row row-demo-grid">
+                            <span class="text-small fw-extrabold font-italic pl-4">Auto </span> <span class="pl-2 fw-bold">Invoice No: </span>
+                            <span class="pl-1">
+                                <input  size="11" name="invoice_no" id="invoice_no" value="" tabindex="10" type="text" readonly class="no-bd" placeholder="" required >
+                            </span>
 
-                                <div class="col-md-2 font-weight-bold text-left">
-                                    <span class="pl-2 ">Invoice No</span>
-                                      <div class="row">
-                                          <div class="col-md-12 pl-4">
-                                              <input  name="invoice_no" id="invoice_no" value="" tabindex="10" type="text" readonly class="form-control form-control-sm" placeholder="" required >
-                                          </div>
-                                      </div>
+                            <p>
+                            <div class="row ">
+
+                                <div class="col-md-1 font-weight-bold text-left">
+
                                 </div>
-
                                 <div class="col-md-7 font-weight-bold text-left">
-                                    <span class="label pl-2">Transaction Description:</span>
+                                    <span class="label pl-2">Description:</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
                                               <input  name="descx" id="descx" value="" tabindex="10" type="text" class="form-control form-control-sm" placeholder="Admission into JSS 1 2021/2022 - 1st Term" required >
@@ -174,7 +173,7 @@
                                     <span class="pl-2 ">Amount</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="amount" id="amount" value="" tabindex="10" type="number" readonly class="form-control form-control-sm no-bd " placeholder=""  >
+                                              <input  name="amount" id="amount" value="" tabindex="10" type="text" readonly class="" placeholder="0.00" size="18" >
                                           </div>
                                       </div>
                                 </div>
@@ -336,6 +335,9 @@
                             let  inv_amt = response.inv_amount;
                             let inv_no = response.inv_no;
                             let reg_no = response.reg_no;
+
+                            // format the inv_amt to US locale:
+                            inv_amt = $.formatNumber(inv_amt, {format:"#,###.00", locale:"us"});
 
                             $( '#amount' ).val(inv_amt);
                             $( '#invoice_no' ).val(inv_no);

@@ -155,8 +155,8 @@ def edit_package(request, pkg_id):
 @transaction.atomic()
 def new_student_enrollment(request, reg_id):
     context = {}
-    school = schools(request)
-    sch_id = school['sch_id']
+    sch_id = schools(request)['sch_id']
+    # sch_id = school['sch_id']
     if sch_id == 0:
         return redirect("logout")
 
@@ -173,7 +173,7 @@ def new_student_enrollment(request, reg_id):
             enrolled.save()
             # print(enrolled.id)
             financial_transactions(request, 'save', enrolled.id, inv_no)
-            # Update Student Status to Enrolled
+            # Update Student Status to enrolled
             stud = Students.objects.filter(id=reg_id).update(reg_status=status, reg_steps=3)
 
             context = {"enrolled": enrolled}
@@ -348,6 +348,8 @@ def financial_transactions(request, action, enr_id, inv_no):
         trans_form = FinancialTransactionsForm(request.POST or None)
     if trans_form.is_valid():
         trans = trans_form.save(commit=False)
+        # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaot else error
+        trans.amount = float(request.POST['amount'].replace(',', ''))
         trans.enrolled_id = enr_id
         trans.tr_type = 'Dr'
         trans.save()
@@ -360,6 +362,8 @@ def financial_transactions(request, action, enr_id, inv_no):
         invoice_form = InvoiceForm(request.POST or None)
     if invoice_form.is_valid():
         inv = invoice_form.save(commit=False)
+        # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaot else error
+        inv.amount = float(request.POST['amount'].replace(',', ''))
         inv.due_date = ap_due_date(request)
         inv.balance = inv.amount
         inv.enrolled_id = enr_id
