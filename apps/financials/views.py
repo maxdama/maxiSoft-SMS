@@ -7,7 +7,8 @@ from django.db import transaction
 from django.shortcuts import render, redirect
 
 from apps.financials.forms import *
-from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, Banks
+from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, \
+    Banks, Wallets
 from django.http import HttpResponse, JsonResponse
 
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
@@ -353,6 +354,8 @@ def financial_transactions(request, action, enr_id, inv_no):
         trans.enrolled_id = enr_id
         trans.tr_type = 'Dr'
         trans.save()
+    else:
+        messages.warning(request, trans_form.errors)
 
     #  --- Save / Update Invoice
     if action == 'update':
@@ -370,6 +373,8 @@ def financial_transactions(request, action, enr_id, inv_no):
         inv.package_id = request.POST['fee_pkg']
         inv.status = 'np'
         inv.save()
+    else:
+        messages.warning(request, invoice_form.errors)
 
     return None
 
@@ -416,13 +421,74 @@ def list_enrollments(request):
     return render(request, 'financial/student-enrolled-list.html', context)
 
 
+def credit_student_wallet(request, sch_id, stud_id):
+    """ Credit Student-Wallets and Finacial-transactions a student """
+
+    if Wallets.objects.filter(school=sch_id, student=stud_id).exists():
+        print(' ----- Student Wallet Already Created')
+        wallet = Wallets.objects.get(school=sch_id, student=stud_id)
+    else:
+        print(' ----- Student Wallet Does not exists. Creating a new Wallet for Student')
+        date_now = date.today()
+        wallet = Wallets.objects.get_or_create(school_id=sch_id, student_id=stud_id, trans_date=date_now)
+
+    print(wallet.id)
+
+    form = WalletDetailsForm(request.POST or None)
+    if form.is_valid():
+        frm = form.save(commit=False)
+        frm.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+        frm.tr_type = 'cr'
+        frm.wallet_id = wallet.id
+
+        frm.save()
+        wallet_bal = WalletDetails.objects.filter(school=sch_id, student=stud_id).sum('amt_pad')
+
+    else:
+        print('Wallet Details Form is Not Valid.')
+        messages.warning(request, form.errors)
+
+    return
+
+
+def get_or_create_bank_accounts(sch_id, status):
+    """ Create Student Account (Wallet) and some major banks drop-down for the specified school
+        Also, get the bank account drop-down for the specified school.
+    """
+    # Create Initial Bank Account drop-down list for the specified school if no account exists.
+    if Banks.objects.filter(school=sch_id).count() <= 0:
+        print(' ----- Creating Some Bank Account Drop-down list')
+        Banks.objects.create(srl_no=1, bank_name='First Bank Account', status='active', school_id=sch_id)
+        Banks.objects.create(srl_no=2, bank_name='Zenith Account', status='active', school_id=sch_id)
+        Banks.objects.create(srl_no=3, bank_name='FCMB Account', status='active', school_id=sch_id)
+        Banks.objects.create(srl_no=4, bank_name='GTB Account', status='active', school_id=sch_id)
+
+    # Create Student Wallet drop-down for listing for the specified school if it has not been created.
+    if not Banks.objects.filter(school=sch_id, bank_name='Student Wallet').exists():
+        print(' ----- Creating Student Wallet (Account for Drop-Down list')
+        accounts = Banks.objects.get_or_create(srl_no=5, bank_name='Student Wallet', status='active', school_id=sch_id)
+        print(accounts)
+
+    # Get Bank Accounts for drop-down list
+    bank = Banks.objects.filter(status=status)
+
+    return bank
+
+
 @transaction.atomic
 def student_payment(request, stud_id):
     sch_id = schools(request)['sch_id']
     enrolled = Enrollments.objects.filter(school=sch_id, student_id=stud_id).order_by('id').last()
-    # enrolled = Enrollments.objects.filter(school=sch_id, id=enr_id).first()
     # stud_id = enrolled.student_id
     enr_id = enrolled.id
+
+    bank_id = request.POST.get('bank')
+    if bank_id is None: bank_id = 0
+
+    try:
+        pay_into = Banks.objects.values('bank_name').get(id=bank_id)
+    except:
+        pay_into = {'bank_name': ''}
 
     qc1 = Q(student_id=stud_id) & Q(school_id=sch_id) & (Q(status='np') | Q(status='pp'))
     inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(qc1).order_by('invoice_no')
@@ -434,61 +500,73 @@ def student_payment(request, stud_id):
         recpt_no = generate_receipt_no()
         cur_sesx_id = get_cur_session(sch_id)
 
-        for i in inv:
-            if amt_paying <= 0:
-                break
-            else:
-                p_inv = process_invoice(amt_paying, i, sch_id, stud_id)
-                amt_paying = p_inv['pay_bal']
+        if pay_into['bank_name'] == 'Student Wallet':
+            credit_student_wallet(request, sch_id, stud_id)
+            print(' ----- Payment is to Student Wallet')
+        else:
 
-            inv_no = p_inv['invoice_no']
-            inv_bal = p_inv['inv_bal']
-            status = p_inv['status']
+            for i in inv:
+                if amt_paying <= 0:
+                    break
+                else:
+                    p_inv = process_invoice(amt_paying, i, sch_id, stud_id)
+                    amt_paying = p_inv['pay_bal']
 
-            payment = PaymentForm(request.POST or None)
-            if payment.is_valid():
-                pmt = payment.save(commit=False)
+                inv_no = p_inv['invoice_no']
+                inv_bal = p_inv['inv_bal']
+                status = p_inv['status']
 
-                pmt.session_id = cur_sesx_id['sesx_id']
-                pmt.invoice_no = inv_no
-                pmt.receipt_no = recpt_no
-                pmt.status = status
-                pmt.pmt_descx = p_inv['descx']
-                pmt.amt_paid = p_inv['amt_paid']
-                pmt.save()
+                payment = PaymentForm(request.POST or None)
+                if payment.is_valid():
+                    pmt = payment.save(commit=False)
 
-                if status == 'pp':
-                    enr_status = 'paying'
-                elif status == 'pf':
-                    enr_status = 'paid'
+                    pmt.session_id = cur_sesx_id['sesx_id']
+                    pmt.invoice_no = inv_no
+                    pmt.receipt_no = recpt_no
+                    pmt.status = status
+                    pmt.pmt_descx = p_inv['descx']
+                    pmt.amt_paid = p_inv['amt_paid']
+                    # pmt.save()
 
-                update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
-                Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
-                Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
+                    if status == 'pp':
+                        enr_status = 'paying'
+                    elif status == 'pf':
+                        enr_status = 'paid'
 
-                print('Form process is Successful.')
-            else:
-                print('Error with Form process.')
+                    #update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
+                    #Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
+                    #Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
+
+                    print('Form process is Successful.')
+                else:
+                    print('Error with Form process.')
 
         return redirect(list_enrollments)
 
     else:
         header = 'Receive Payment'
-        timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
+        wallet = {}
+        timeline = {}
+
         paymethod = PaymentMethods.objects.all()
-        bank = Banks.objects.filter(status='active')
+        bank = get_or_create_bank_accounts(sch_id, status='active')
+
+        try:
+            timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
+            wallet = Wallets.objects.get(school=sch_id, student=stud_id)
+            wallet = {'wallet_bal': wallet.balance}
+        except:
+            if not wallet:  wallet = {'wallet_bal': 0.00}
         '''
          Query Child object (Invoice) through Parent object (Enviroments)with selected columns
         inv_descx = Enrollments.objects.values('invoice__descx').distinct().filter(qc1).order_by('invoice__invoice_no')
-        
         '''
         pay_descx = ''
         for i in inv:
-            # print (i['descx'])
             pay_descx = pay_descx + i['descx'] + '; \n'
 
         context = {'header': header, 'enrolled': enrolled, 'timeline': timeline, 'paymethods': paymethod, 'banks': bank,
-                   'descx': pay_descx}
+                   'descx': pay_descx, 'student': wallet}
         return render(request, 'financial/student-payment.html', context)
 
 

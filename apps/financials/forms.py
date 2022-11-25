@@ -37,3 +37,10 @@ class PaymentForm(forms.ModelForm):
         model = Payments
         fields = '__all__'
         exclude = ['receipt_no', 'invoice_no', 'amt_paid', 'pmt_descx', 'status']
+
+
+class  WalletDetailsForm(forms.ModelForm):
+    class Meta:
+        model = WalletDetails
+        fields = '__all__'
+        exclude = ['doc_type', 'doc_no', 'amt_paid', 'status', 'run_bal', 'tr_type']

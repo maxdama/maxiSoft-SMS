@@ -81,7 +81,7 @@
                                     <label for="studnames" class="placeholder pl-3">Student Making Payment</label>
                                     </div>
                                     <div class="pl-3">
-                                        Wallet Bal: <input id="wallet_bal" type="text" class="no-bd pl-2"  value="{{2000|floatformat:2|intcomma}}">
+                                        Wallet Bal: <input id="wallet_bal" type="text" class="no-bd pl-2"  value="{{student.wallet_bal|floatformat:2|intcomma}}" readonly>
                                     </div>
                                 </div>
 
@@ -189,7 +189,7 @@
                                                 <option value="{{pt.id}}">{{pt.bank_name}}</option>
                                             {% endfor %}
                                         </select>
-                                        <label for="bank" class="placeholder pl-0">* Payment To:</label>
+                                        <label for="bank" class="placeholder pl-0">* Pay into:</label>
                                     </div>
                                 </div>
 
@@ -251,12 +251,11 @@
             // It uses the JQueryNumberFormat plugin that was downloaded and placed in
             // the static/assets/js/plugin/number-format folder
             $("#amount_paying").blur(function(){
+                $(this).parseNumber({format:"#,###.00", locale:"us"});
+                $(this).formatNumber({format:"#,###.00", locale:"us"})
                 //var number = $(this).val()
                 //number = $.formatNumber(number, {format:"#,###.00", locale:"us"});
                 //$(this).val(number);
-
-                $(this).parseNumber({format:"#,###.00", locale:"us"});
-                $(this).formatNumber({format:"#,###.00", locale:"us"})
             });
 
 
@@ -321,19 +320,6 @@
                         form.submit();
 
 					} else {
-					    /*
-						swal({
-							title: 'Operation Stopped!',
-							type: 'info',
-							buttons : {
-								confirm: {
-									className : 'btn btn-info',
-								}
-							}
-
-						});
-					     */
-						//location.href = url;
 						swal.close();
 					}
 				});
@@ -361,6 +347,51 @@
 				}
 				})
             };
+
+             $('#pay_method').change(function(){
+
+                let pay_id = $(this).val();
+                let pay_method = $( "#pay_method option:selected" ).text();
+                let pay_into = $( "#bank option:selected" ).text();
+
+                if (pay_method === 'Student Wallet'){
+                    let acct_bal = $('#wallet_bal').val()
+
+                    acct_bal = $.parseNumber(acct_bal, {format:"#,###.00", locale:"us"});
+                    if(acct_bal <= 0){
+                        alert('You can NOT Receive Payment from Student Wallet: \n Balance is not sufficient')
+
+                        $("#pay_method").val('0').change();
+                    } else {
+                        if (pay_method === pay_into) {
+                           alert('Payment To: \n It can not be ' + pay_into)
+                           $("#bank").val('0').change();
+                        }
+                        alert('You can go ahead to Receive Payment')
+                    }
+
+                }
+
+            });
+
+
+            $('#bank').change(function(){
+                let pay_method = $( "#pay_method option:selected" ).text();
+                let pay_into = $( "#bank option:selected" ).text();
+
+                if (pay_method === pay_into) {
+                    $("#bank").val('0').change();
+                    alert('Wrong Selection: \n You can NOT receive payment from ' + pay_method +
+                        '\n and Pay into Student Wallet. ')
+
+                } else if (pay_into === 'Student Wallet'){
+                    $('#descx').val('Credit Student Wallet')
+                } else {
+                    $('#descx').val("{{descx}}")
+
+                }
+
+            });
 
 		});
 	</script>
