@@ -442,7 +442,12 @@ def credit_student_wallet(request, sch_id, stud_id):
         frm.wallet_id = wallet.id
 
         frm.save()
-        wallet_bal = WalletDetails.objects.filter(school=sch_id, student=stud_id).sum('amt_pad')
+
+        # Get and Update Wallet Balance
+        wallet_bal = WalletDetails.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
+        wallet.balance = wallet_bal
+        wallet.trans_date = request.POST['pmt_date']
+        wallet.save()
 
     else:
         print('Wallet Details Form is Not Valid.')
@@ -553,8 +558,10 @@ def student_payment(request, stud_id):
 
         try:
             timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
-            wallet = Wallets.objects.get(school=sch_id, student=stud_id)
-            wallet = {'wallet_bal': wallet.balance}
+            # wallet_bal = Wallets.objects.get(school=sch_id, student=stud_id).balance
+            wallet_bal = WalletDetails.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
+            if wallet_bal is None: wallet_bal = 0.00
+            wallet = {'wallet_bal': wallet_bal}
         except:
             if not wallet:  wallet = {'wallet_bal': 0.00}
         '''
