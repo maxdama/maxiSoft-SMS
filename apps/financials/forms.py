@@ -9,7 +9,6 @@ class FeesPackageForm(forms.ModelForm):
         fields = '__all__'
 
 
-
 class FeesPackageDetailsForm(forms.ModelForm):
     class Meta:
         model = FeesPackageDetails
@@ -17,12 +16,11 @@ class FeesPackageDetailsForm(forms.ModelForm):
         exclude = ['package']
 
 
-
 class FinancialTransactionsForm(forms.ModelForm):
     class Meta:
         model = FinancialTransactions
         fields = '__all__'
-        exclude = ['enrolled',  'receipt_no',  'run_bal', 'tr_type', 'amount']
+        exclude = ['enrolled', 'receipt_no', 'run_bal', 'tr_type', 'amount']
 
 
 class InvoiceForm(forms.ModelForm):
@@ -39,8 +37,15 @@ class PaymentForm(forms.ModelForm):
         exclude = ['receipt_no', 'invoice_no', 'amt_paid', 'pmt_descx', 'status']
 
 
-class  WalletDetailsForm(forms.ModelForm):
+class WalletAccountsForm(forms.ModelForm):
     class Meta:
-        model = WalletDetails
+        model = WalletAccounts
         fields = '__all__'
         exclude = ['doc_type', 'doc_no', 'amt_paid', 'status', 'run_bal', 'tr_type']
+
+
+class WalletDepositForm(forms.ModelForm):
+    class Meta:
+        model = WalletDeposits
+        fields = '__all__'
+        exclude = ['amt_paid', 'status']

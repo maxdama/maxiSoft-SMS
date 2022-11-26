@@ -107,12 +107,10 @@ class Enrollments(models.Model):
     def due(self):
         due_dt = '20-03-2022'
         query_criteria = Q(reg_no=self.reg_no) & Q(school_id=self.school) & \
-                         ((Q(invoice__status='np') | Q(invoice__status='pp'))) & Q(timeline_id=self.timeline) & Q(session_id=self.session)
+                         (Q(invoice__status='np') | Q(invoice__status='pp')) & Q(timeline_id=self.timeline) & Q(session_id=self.session)
         due_dt = Enrollments.objects.filter(query_criteria).values(date=F('invoice__due_date')).order_by('invoice__due_date').first()
-
         if due_dt is None:
             due_dt = {'date': datetime.date.today()}
-        # print(due_dt)
         return due_dt
 
     @property

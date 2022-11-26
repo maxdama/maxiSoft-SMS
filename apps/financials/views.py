@@ -3,12 +3,12 @@ from datetime import date
 
 from django.contrib.auth import logout
 from django.contrib import messages
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.shortcuts import render, redirect
 
 from apps.financials.forms import *
 from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, \
-    Banks, Wallets
+    Banks, WalletDeposits
 from django.http import HttpResponse, JsonResponse
 
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
@@ -82,7 +82,8 @@ def new_package(request, *args, **kwargs):
                 except:
                     response = {'msg': 'The Fee Package is NOT SAVED. Something is not right', 'oprx': status}
             else:
-                response = {'msg': 'The Fee Package is NOT SAVED. You may have enter the same Package before.', 'oprx': status}
+                response = {'msg': 'The Fee Package is NOT SAVED. You may have enter the same Package before.',
+                            'oprx': status}
 
             if pkg:
                 response = fee_package_details(request, pkg, 'new')
@@ -97,7 +98,7 @@ def new_package(request, *args, **kwargs):
         timeline = 1
         package = {'sch_id': sch_id, 'timeline': timeline, 'mode': 'NEW'}
         context = {'package': package}
-        return render(request, 'financial/new-package.html', context )
+        return render(request, 'financial/new-package.html', context)
 
 
 def delete_package(request, pkg_id):
@@ -135,11 +136,13 @@ def edit_package(request, pkg_id):
             pkg = pkg_form.save()
 
             if pkg:
-                pkgdet = FeesPackageDetails.objects.filter(package=pkg.id, school=sch_id).delete() # Delete Package details
+                pkgdet = FeesPackageDetails.objects.filter(package=pkg.id,
+                                                           school=sch_id).delete()  # Delete Package details
                 response = fee_package_details(request, pkg, 'update')
         else:
             status = 'Failed'
-            response = {'msg': 'The Fee Package is NOT SAVED. You may have enter the same Package before.', 'oprx': status}
+            response = {'msg': 'The Fee Package is NOT SAVED. You may have enter the same Package before.',
+                        'oprx': status}
 
         return JsonResponse(response, safe=False)  # return response as JSON
 
@@ -150,7 +153,7 @@ def edit_package(request, pkg_id):
         packages = {'sch_id': sch_id, 'timeline': timeline, 'mode': 'UPDATE', 'main': package}
         context = {'package': packages}
 
-        return render(request, 'financial/new-package.html', context )
+        return render(request, 'financial/new-package.html', context)
 
 
 @transaction.atomic()
@@ -199,8 +202,10 @@ def new_student_enrollment(request, reg_id):
         # timeline = AcademicTimeLine.objects.values('id', 'sch_id', 'descx', 'status').get(status='active',sch_id=sch_id)
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
-        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
-        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
+        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id,
+                                                                                    pkg_type__icontains='new')
+        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id,
+                                                                                    status='Active').order_by('term_id')
 
         context = {
             'student': student, 'timeline': timeline, 'classes': classes, 'fees': fees, 'sessions': sessions
@@ -229,15 +234,18 @@ def cancel_enrollment(request, enr_id, inv_no):
                 trans.delete()
                 enrlmt.delete()
 
-                messages.success(request,  'The Student Enrollment is Cancelled.  You may want to Enroll the candidate again')
+                messages.success(request,
+                                 'The Student Enrollment is Cancelled.  You may want to Enroll the candidate again')
 
         except:
             messages.error(request, 'The operation was not successful. ')
 
-        print(f'Delete Transactions: \n {trans} \n {inv} \n {enrlmt} \n Student ID: {stud_id} \n Student Update: {update}')
+        print(
+            f'Delete Transactions: \n {trans} \n {inv} \n {enrlmt} \n Student ID: {stud_id} \n Student Update: {update}')
     else:
         print('Date not Match: ')
-        messages.info(request, 'The action carried was NOT successful.  Cancellation can be done only on the date of enrollment')
+        messages.info(request,
+                      'The action carried was NOT successful.  Cancellation can be done only on the date of enrollment')
 
     return redirect('list-enrollments')
 
@@ -280,13 +288,16 @@ def student_enrolled_update(request, enr_id, inv_no):
     else:
         header = 'Edit Student Enrolled'
         enrolled = Enrollments.objects.filter(school=sch_id, id=enr_id).first()
-        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
+        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id,
+                                                                                    status='Active').order_by('term_id')
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
-        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='new')
+        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id,
+                                                                                    pkg_type__icontains='new')
         invoice = Invoice.objects.get(school=sch_id, invoice_no=inv_no)
 
-        context = {'header': header, 'enrolled': enrolled, 'sessions': sessions, 'timeline': timeline, 'classes': classes, 'fees': fees, 'inv': invoice}
+        context = {'header': header, 'enrolled': enrolled, 'sessions': sessions, 'timeline': timeline,
+                   'classes': classes, 'fees': fees, 'inv': invoice}
         return render(request, 'financial/edit-student-enrolled.html', context)
 
 
@@ -308,7 +319,8 @@ def student_re_enrollment(request, stud_id):
             financial_transactions(request, 'save', enrolled.id, inv_no)
             # Update Student Status to Enrolled
             stud = Students.objects.filter(id=stud_id).update(reg_status='enrolled', reg_steps=3)
-            updated = Enrollments.objects.filter(status='active', school_id=sch_id, student_id=stud_id).update(status='closed')
+            updated = Enrollments.objects.filter(status='active', school_id=sch_id, student_id=stud_id).update(
+                status='closed')
 
             context = {"enrolled": enrolled}
         else:
@@ -328,14 +340,17 @@ def student_re_enrollment(request, stud_id):
         header = 'Student Re-Enrollment'
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
         enrolled = Enrollments.objects.filter(school=sch_id, student_id=stud_id).first()
-        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id, status='Active').order_by('term_id')
+        sessions = AcademicSessions.objects.values('id', 'term_id', 'descx').filter(sch_id=sch_id,
+                                                                                    status='Active').order_by('term_id')
         classes = ClassRooms.objects.filter(profile__sch_id=sch_id, status='active').order_by('levels')
-        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id, pkg_type__icontains='returning')
+        fees = FeesPackage.objects.values('id', 'description', 'total_fees').filter(status='Active', school=sch_id,
+                                                                                    pkg_type__icontains='returning')
 
-        context = {'header': header, 'timeline': timeline,'enrolled': enrolled,
+        context = {'header': header, 'timeline': timeline, 'enrolled': enrolled,
                    'sessions': sessions, 'classes': classes, 'fees': fees, 'stud_id': stud_id}
         return render(request, 'financial/student-re-enrollment.html', context)
         # return HttpResponse(f'Student Re-Enrollment: ID-No:- {stud_id}')
+
 
 def financial_transactions(request, action, enr_id, inv_no):
     sch_id = schools(request)['sch_id']
@@ -386,12 +401,14 @@ def ap_due_date(request):
     timeline = request.POST['timeline']
     session_id = request.POST['session']
 
-    term = AcademicSessions.objects.values('term_id').filter(id=session_id, status='Active', sch_id= sch_id).first()  # filter returns queryset
+    term = AcademicSessions.objects.values('term_id').filter(id=session_id, status='Active',
+                                                             sch_id=sch_id).first()  # filter returns queryset
     if term:
         # print('Term: ', term['term_id'])
         term_id = term['term_id']
 
-        date = AcademicCalender.objects.values('cs_start_dt').filter(school=sch_id, timeline=timeline, term_id=term_id)[0]
+        date = AcademicCalender.objects.values('cs_start_dt').filter(school=sch_id, timeline=timeline, term_id=term_id)[
+            0]
         if date:
             due_date = date['cs_start_dt']
             if date_now > due_date:
@@ -414,44 +431,79 @@ def list_enrollments(request):
     context = {}
 
     # students_enrolled = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
-    criteria1 = (Q(status='enrolled') | Q(status = 'paid') | Q(status = 'paying') | Q(status = 'returned')) & Q(school_id=sch_id)
+    criteria1 = (Q(status='enrolled') | Q(status='paid') | Q(status='paying') | Q(status='returned')) & Q(
+        school_id=sch_id)
     students_enrolled = Enrollments.objects.filter(criteria1).order_by('school_id', 'classroom_id', 'student__surname')
 
     context = {'enrollments': students_enrolled}
     return render(request, 'financial/student-enrolled-list.html', context)
 
 
-def credit_student_wallet(request, sch_id, stud_id):
-    """ Credit Student-Wallets and Finacial-transactions a student """
+def generate_no(param, sch_id):
+    """ Generate id Numbers for Wallet Deposits or Withdrawals"""
+    if param == 'deposit_id':
+        d = WalletDeposits.objects.values('deposit_id').order_by('school_id', 'deposit_id').last()
+        if d is None:
+            dep_id = 1
+        else:
+            dep_id = int(d['deposit_id']) + 1
 
-    if Wallets.objects.filter(school=sch_id, student=stud_id).exists():
-        print(' ----- Student Wallet Already Created')
-        wallet = Wallets.objects.get(school=sch_id, student=stud_id)
-    else:
-        print(' ----- Student Wallet Does not exists. Creating a new Wallet for Student')
-        date_now = date.today()
-        wallet = Wallets.objects.get_or_create(school_id=sch_id, student_id=stud_id, trans_date=date_now)
+        return dep_id
+    elif param == 'withdrawal_id':
+        return 0
 
-    print(wallet.id)
 
-    form = WalletDetailsForm(request.POST or None)
-    if form.is_valid():
-        frm = form.save(commit=False)
-        frm.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
-        frm.tr_type = 'cr'
-        frm.wallet_id = wallet.id
+def student_wallet(request, action, sch_id, stud_id):
+    """ Generate a Deposit ID Number from Wallet Deposit.
+        Save Amount Deposited into WalletDeposits and WalletAccounts
+        A Student Wallet comprises:
+            WalletDeposits
+            WalletWithdrawals
+            WalletAccounts
+     """
 
-        frm.save()
+    if action == 'credit':
+        deposit_id = generate_no('deposit_id', sch_id)
 
-        # Get and Update Wallet Balance
-        wallet_bal = WalletDetails.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
-        wallet.balance = wallet_bal
-        wallet.trans_date = request.POST['pmt_date']
-        wallet.save()
+        form = WalletDepositForm(request.POST or None)
+        if form.is_valid():
+            dep = form.save(commit=False)
+            dep.deposit_id = deposit_id
+            dep.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+            dep.status = 'deposit'
+            try:
+                # dep.save()
+                pass
+            except IntegrityError as e:
+                messages.error(request, e.args)
+                return {}
+        else:
+            messages.warning(request, form.errors)
 
-    else:
-        print('Wallet Details Form is Not Valid.')
-        messages.warning(request, form.errors)
+        form = WalletAccountsForm(request.POST or None)
+        if form.is_valid():
+            acct = form.save(commit=False)
+            acct.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+            acct.tr_type = 'cr'
+            acct.deposit_id = deposit_id
+
+            # acct.save()
+
+            # Update accounts_id in WalletsDeposits
+            dep.accounts_id = acct.id
+            # dep.save()
+            print('Runing Balance: ')
+            print(acct.runing['balance'])
+
+        else:
+            print('Wallet Details Form is Not Valid.')
+            messages.warning(request, form.errors)
+
+        student_accounts = WalletAccounts.objects.filter(school_id=sch_id, student_id=stud_id)
+        return student_accounts
+
+    elif action == 'debit':
+        pass
 
     return
 
@@ -499,16 +551,19 @@ def student_payment(request, stud_id):
     inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(qc1).order_by('invoice_no')
 
     if request.method == 'POST':
-        # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaot else error
-        amt_paying = float(request.POST['amt_paid'].replace(',', ''))
-
-        recpt_no = generate_receipt_no()
         cur_sesx_id = get_cur_session(sch_id)
 
         if pay_into['bank_name'] == 'Student Wallet':
-            credit_student_wallet(request, sch_id, stud_id)
-            print(' ----- Payment is to Student Wallet')
+            accounts = student_wallet(request, 'credit', sch_id, stud_id)
+            # print(accounts.first().student)
+            stud_name = accounts.first().student
+            context = {'accounts': accounts, 'stud_name': stud_name}
+            return render(request, 'student-accounts.html', context)
+
         else:
+            recpt_no = generate_receipt_no()
+            # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaat else error
+            amt_paying = float(request.POST['amt_paid'].replace(',', ''))
 
             for i in inv:
                 if amt_paying <= 0:
@@ -530,7 +585,7 @@ def student_payment(request, stud_id):
                     pmt.receipt_no = recpt_no
                     pmt.status = status
                     pmt.pmt_descx = p_inv['descx']
-                    pmt.amt_paid = p_inv['amt_paid']
+                    pmt.amt_paid = amt_paying
                     # pmt.save()
 
                     if status == 'pp':
@@ -538,9 +593,9 @@ def student_payment(request, stud_id):
                     elif status == 'pf':
                         enr_status = 'paid'
 
-                    #update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
-                    #Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
-                    #Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
+                    # update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
+                    # Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
+                    # Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
 
                     print('Form process is Successful.')
                 else:
@@ -559,7 +614,7 @@ def student_payment(request, stud_id):
         try:
             timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
             # wallet_bal = Wallets.objects.get(school=sch_id, student=stud_id).balance
-            wallet_bal = WalletDetails.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
+            wallet_bal = WalletAccounts.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
             if wallet_bal is None: wallet_bal = 0.00
             wallet = {'wallet_bal': wallet_bal}
         except:
@@ -661,5 +716,3 @@ def invoice_amount(request, pkg_id):
     reg_no = generate_reg_no(request, jsonx=False)
 
     return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})
-
-

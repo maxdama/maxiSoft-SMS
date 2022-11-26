@@ -142,7 +142,7 @@
                                     <span class="pl-2 ">Doc No</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="doc_no" id="doc_no" value="{{inv.amount}}" tabindex="10" type="text"  class="form-control form-control-sm  no-bd" placeholder=""  >
+                                              <input  name="doc_no" id="doc_no" value="" tabindex="10" type="text"  class="form-control form-control-sm  no-bd" placeholder=""  >
                                           </div>
                                       </div>
                                 </div>
@@ -385,7 +385,10 @@
                         '\n and Pay into Student Wallet. ')
 
                 } else if (pay_into === 'Student Wallet'){
-                    $('#descx').val('Credit Student Wallet')
+                    let pay_meth = $("#pay_method option:selected").text()
+                    let descx = 'Deposit - ' + pay_meth + ': ( Credit Student Wallet  )'
+                    $('#descx').val(descx)
+
                 } else {
                     $('#descx').val("{{descx}}")
 
