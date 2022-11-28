@@ -44,8 +44,8 @@ class WalletAccountsForm(forms.ModelForm):
         exclude = ['doc_type', 'doc_no', 'amt_paid', 'status', 'run_bal', 'tr_type']
 
 
-class WalletDepositForm(forms.ModelForm):
+class WalletPaymentForm(forms.ModelForm):
     class Meta:
-        model = WalletDeposits
+        model = WalletPayments
         fields = '__all__'
-        exclude = ['amt_paid', 'status']
+        exclude = ['amt_paid', 'status', 'balance', 'payment_id']

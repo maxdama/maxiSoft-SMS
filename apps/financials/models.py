@@ -1,12 +1,11 @@
+from datetime import date
 from django.db import models
-
-# Create your models here.
 from django.db.models import Q, Count, Sum
-
 from apps.settings.models import SchoolProfiles, ClassRooms, AcademicSessions
 from apps.students.models import Enrollments, Students
 
 
+# Create your models here.
 class FeesPackage(models.Model):
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
     description = models.CharField(max_length=200)
@@ -157,14 +156,15 @@ class Payments(models.Model):
         ]
 
 
-class WalletDeposits(models.Model):
+class WalletPayments(models.Model):
     objects = None
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, unique=False, blank=True)
-    deposit_id = models.BigIntegerField(blank=True, unique=True, db_index=True)
+    payment_id = models.BigIntegerField(blank=True, unique=True, primary_key=True)
     accounts = models.OneToOneField('WalletAccounts', on_delete=models.CASCADE, null=True, blank=True)
     pmt_date = models.DateField()
     amt_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     pmt_descx = models.CharField(max_length=200, null=True, blank=True)
     pay_method = models.ForeignKey(PaymentMethods, on_delete=models.RESTRICT, related_name='wallets', unique=False,
                                    null=False, blank=True)
@@ -178,27 +178,61 @@ class WalletDeposits(models.Model):
                 + ' ' + str(self.amt_paid)
 
     class Meta:
-        db_table = "apps_WalletDeposits"
-        ordering = ['school', 'pmt_date', 'deposit_id']
+        db_table = "apps_WalletPayments"
+        ordering = ['school', 'pmt_date', 'payment_id']
+
+
+class Wallets(models.Model):
+    objects = None
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
+    student = models.OneToOneField(Students, on_delete=models.CASCADE, unique=True)
+    # created = models.DateField(auto_created=True)
+    # wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    class Meta:
+        db_table = "apps_Wallets"
+        ordering = ['school', 'id']
+
+    @property
+    def wallet(self):  # Sum the Wallet Balance for the specified Client
+        f1 = Q(school_id=self.school) & Q(student_id=self.student)
+        bal = WalletAccounts.objects.filter(f1).aggregate(balance=Sum('amt_paid'))
+        if bal is None:
+            bal = {'balance': 0.00}
+        return bal
+
+    @property
+    def last_pmt_date(self): # Get the Accounts last Payment Date for the specified Student
+        f1 = Q(school_id=self.school) & Q(student_id=self.student)
+        lst_date = WalletAccounts.objects.values('pmt_date').filter(f1).order_by('pmt_date').last()
+        if lst_date is None:
+            pmt_date = {'pmt_date': date.today()}
+        else:
+            pmt_date = lst_date
+        return pmt_date
+
+    def __str__(self):
+        return  str(self.student) + ' ' + str(self.wallet['balance']) + ' ' + str(self.last_pmt_date)
 
 
 class WalletAccounts(models.Model):
     objects = None
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
     student = models.ForeignKey(Students, on_delete=models.CASCADE, unique=False, related_name='walletaccounts')
-    deposit_id = models.BigIntegerField(unique=False, blank=True, null=True)
+    # payment_id = models.BigIntegerField(unique=False, blank=True, null=True)
+    wallet = models.ForeignKey(Wallets, on_delete=models.CASCADE, blank=True, related_name='accounts')
+    payment = models.OneToOneField(WalletPayments, on_delete=models.CASCADE, null=True, blank=True)
     withdrawal_id = models.BigIntegerField(unique=False, blank=True, null=True)
     pay_method = models.ForeignKey(PaymentMethods, on_delete=models.RESTRICT, related_name='walletaccounts',
                                    unique=False, null=False, blank=True)
     pmt_date = models.DateField()
     amt_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    # run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
     tr_type = models.CharField(max_length=10)
 
     @property
     def runing(self):  # Calculate Runing Balance for the specified Client
         f1 = Q(school_id=self.school) & Q(student_id=self.student)
-        f2 = Q(deposit_id__lte=self.deposit_id)
+        f2 = Q(payment_id__lte=self.payment_id)
         bal = WalletAccounts.objects.filter(f1).order_by('pmt_date', 'id').aggregate(balance=Sum('amt_paid', filter=f2))
 
         if bal is None:

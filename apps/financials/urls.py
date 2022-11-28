@@ -14,5 +14,6 @@ urlpatterns = [
     path('student-enrolled-update/<int:enr_id>/<int:inv_no>', views.student_enrolled_update, name='update-enrollment'),
     path('student-re-enrollment/<int:stud_id>', views.student_re_enrollment, name="re-enrollment"),
     path('student-payment/<int:stud_id>', views.student_payment, name='payment-entry'),
+    path('wallet-account/<int:stud_id>', views.wallet_account, name='wallet_account'),
 
 ]

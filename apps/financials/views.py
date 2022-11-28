@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 
 from apps.financials.forms import *
 from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, \
-    Banks, WalletDeposits
+    Banks, WalletPayments, Wallets
 from django.http import HttpResponse, JsonResponse
 
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
@@ -439,73 +439,75 @@ def list_enrollments(request):
     return render(request, 'financial/student-enrolled-list.html', context)
 
 
-def generate_no(param, sch_id):
-    """ Generate id Numbers for Wallet Deposits or Withdrawals"""
-    if param == 'deposit_id':
-        d = WalletDeposits.objects.values('deposit_id').order_by('school_id', 'deposit_id').last()
-        if d is None:
-            dep_id = 1
-        else:
-            dep_id = int(d['deposit_id']) + 1
+def next_payment_number(sch_id):
+    """ Generate next wallet ID number"""
+    pay = WalletPayments.objects.values('payment_id').order_by('school_id', 'payment_id').last()
+    if pay is None:
+        payment_id = 1
+    else:
+        payment_id = int(pay['payment_id']) + 1
 
-        return dep_id
-    elif param == 'withdrawal_id':
-        return 0
+    return payment_id
 
 
 def student_wallet(request, action, sch_id, stud_id):
     """ Generate a Deposit ID Number from Wallet Deposit.
         Save Amount Deposited into WalletDeposits and WalletAccounts
         A Student Wallet comprises:
-            WalletDeposits
-            WalletWithdrawals
+            Wallets
+            WalletPayments
             WalletAccounts
      """
 
     if action == 'credit':
-        deposit_id = generate_no('deposit_id', sch_id)
-
-        form = WalletDepositForm(request.POST or None)
-        if form.is_valid():
-            dep = form.save(commit=False)
-            dep.deposit_id = deposit_id
-            dep.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
-            dep.status = 'deposit'
-            try:
-                # dep.save()
-                pass
-            except IntegrityError as e:
-                messages.error(request, e.args)
-                return {}
-        else:
-            messages.warning(request, form.errors)
-
-        form = WalletAccountsForm(request.POST or None)
-        if form.is_valid():
-            acct = form.save(commit=False)
-            acct.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
-            acct.tr_type = 'cr'
-            acct.deposit_id = deposit_id
-
-            # acct.save()
-
-            # Update accounts_id in WalletsDeposits
-            dep.accounts_id = acct.id
-            # dep.save()
-            print('Runing Balance: ')
-            print(acct.runing['balance'])
-
-        else:
-            print('Wallet Details Form is Not Valid.')
-            messages.warning(request, form.errors)
-
-        student_accounts = WalletAccounts.objects.filter(school_id=sch_id, student_id=stud_id)
-        return student_accounts
-
+        status = 'deposit'
+        tr_type = 'cr'
     elif action == 'debit':
-        pass
+        status = 'withdrawal'
+        tr_type = 'dr'
 
-    return
+    payment_id = next_payment_number(sch_id)
+
+    form = WalletPaymentForm(request.POST or None)
+    if form.is_valid():
+        dep = form.save(commit=False)
+        dep.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+        dep.payment_id = payment_id
+        dep.status = status
+        try:
+            dep.save()
+        except IntegrityError as e:
+            messages.error(request, e.args)
+            return {}
+    else:
+        messages.warning(request, form.errors)
+
+    """ Create Wallet if it has not been created 
+        and Get the Wallet instance for the specified Student  """
+    if not Wallets.objects.filter(school_id=sch_id, student_id=stud_id).exists(): # If Wallet does not exists
+        wallet = Wallets.objects.create(school_id=sch_id, student_id=stud_id)
+    else:
+        wallet = Wallets.objects.get(school_id=sch_id, student_id=stud_id)
+
+    form = WalletAccountsForm(request.POST or None)
+    if form.is_valid():
+        acct = form.save(commit=False)
+        acct.wallet_id = wallet.id
+        acct.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+        acct.tr_type = tr_type
+        acct.payment_id = payment_id
+        acct.save()
+
+        # Update accounts_id in WalletsDeposits
+        dep.accounts_id = acct.id
+        dep.balance = acct.runing['balance']
+        dep.save()
+    else:
+        print('Wallet Details Form is Not Valid.')
+        messages.warning(request, form.errors)
+
+    student_accounts = WalletAccounts.objects.filter(school_id=sch_id, student_id=stud_id)
+    return student_accounts
 
 
 def get_or_create_bank_accounts(sch_id, status):
@@ -558,7 +560,8 @@ def student_payment(request, stud_id):
             # print(accounts.first().student)
             stud_name = accounts.first().student
             context = {'accounts': accounts, 'stud_name': stud_name}
-            return render(request, 'student-accounts.html', context)
+            # return render(request, 'wallet-accounts.html', context)
+            return redirect(wallet_account, stud_id=stud_id)
 
         else:
             recpt_no = generate_receipt_no()
@@ -716,3 +719,20 @@ def invoice_amount(request, pkg_id):
     reg_no = generate_reg_no(request, jsonx=False)
 
     return JsonResponse({"inv_amount": inv_amt, 'inv_no': inv_no, 'reg_no': reg_no})
+
+
+def wallet_account(request, stud_id, **kwargs):
+    sch_id = schools(request)['sch_id']
+
+    if request.method == 'GET':
+        if kwargs:
+            print('Key-Word Argument is entered')
+        try:
+            wallet = Wallets.objects.get(school_id=sch_id, student_id=stud_id)
+            enrolled = Enrollments.objects.get(school_id=sch_id, student_id=stud_id)
+            class_room = enrolled.classroom.class_abr
+            context = {'wallet': wallet, 'class_room': class_room}
+        except:
+            context = {}
+        # print(wallet.accounts.all())
+        return render(request, 'wallet-accounts.html', context)
