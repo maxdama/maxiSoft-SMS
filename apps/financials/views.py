@@ -7,8 +7,9 @@ from django.db import transaction, IntegrityError
 from django.shortcuts import render, redirect
 
 from apps.financials.forms import *
-from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, \
-    Banks, WalletPayments, Wallets
+# from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, \
+#    Banks, WalletPayments, Wallets
+from apps.financials.models import *
 from django.http import HttpResponse, JsonResponse
 
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
@@ -358,19 +359,19 @@ def financial_transactions(request, action, enr_id, inv_no):
     # with transaction.set_autocommit():
     # -- Save / Update Financial Transactions
     if action == 'update':
-        f_trans = FinancialTransactions.objects.get(school=sch_id, invoice_no=inv_no)
-        trans_form = FinancialTransactionsForm(request.POST, instance=f_trans)
+        fee_acct = FeesAccounts.objects.get(school=sch_id, invoice_no=inv_no)
+        accts_form = FeesAccountsForm(request.POST, instance=fee_acct)
     else:
-        trans_form = FinancialTransactionsForm(request.POST or None)
-    if trans_form.is_valid():
-        trans = trans_form.save(commit=False)
+        accts_form = FeesAccountsForm(request.POST or None)
+    if accts_form.is_valid():
+        trans = accts_form.save(commit=False)
         # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaot else error
         trans.amount = float(request.POST['amount'].replace(',', ''))
         trans.enrolled_id = enr_id
         trans.tr_type = 'Dr'
         trans.save()
     else:
-        messages.warning(request, trans_form.errors)
+        messages.warning(request, accts_form.errors)
 
     #  --- Save / Update Invoice
     if action == 'update':
@@ -450,7 +451,7 @@ def next_payment_number(sch_id):
     return payment_id
 
 
-def student_wallet(request, action, sch_id, stud_id):
+def student_wallet(request, action, deposit_amt, sch_id, stud_id ):
     """ Generate a Deposit ID Number from Wallet Deposit.
         Save Amount Deposited into WalletDeposits and WalletAccounts
         A Student Wallet comprises:
@@ -458,7 +459,6 @@ def student_wallet(request, action, sch_id, stud_id):
             WalletPayments
             WalletAccounts
      """
-
     if action == 'credit':
         status = 'deposit'
         tr_type = 'cr'
@@ -466,12 +466,14 @@ def student_wallet(request, action, sch_id, stud_id):
         status = 'withdrawal'
         tr_type = 'dr'
 
+    amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+
     payment_id = next_payment_number(sch_id)
 
     form = WalletPaymentForm(request.POST or None)
     if form.is_valid():
         dep = form.save(commit=False)
-        dep.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+        dep.amt_paid = deposit_amt
         dep.payment_id = payment_id
         dep.status = status
         try:
@@ -493,7 +495,7 @@ def student_wallet(request, action, sch_id, stud_id):
     if form.is_valid():
         acct = form.save(commit=False)
         acct.wallet_id = wallet.id
-        acct.amt_paid = float(request.POST['amt_paid'].replace(',', ''))
+        acct.amt_paid = deposit_amt
         acct.tr_type = tr_type
         acct.payment_id = payment_id
         acct.save()
@@ -506,8 +508,7 @@ def student_wallet(request, action, sch_id, stud_id):
         print('Wallet Details Form is Not Valid.')
         messages.warning(request, form.errors)
 
-    student_accounts = WalletAccounts.objects.filter(school_id=sch_id, student_id=stud_id)
-    return student_accounts
+    return
 
 
 def get_or_create_bank_accounts(sch_id, status):
@@ -549,35 +550,46 @@ def student_payment(request, stud_id):
     except:
         pay_into = {'bank_name': ''}
 
-    qc1 = Q(student_id=stud_id) & Q(school_id=sch_id) & (Q(status='np') | Q(status='pp'))
-    inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(qc1).order_by('invoice_no')
+    f1 = Q(student_id=stud_id) & Q(school_id=sch_id) & (Q(status='np') | Q(status='pp'))
+    inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
 
     if request.method == 'POST':
         cur_sesx_id = get_cur_session(sch_id)
+        # NOTE: The 'replace' is used to remove any comma in the amt_paid text before converting to flaat else error
+        amt_paying = float(request.POST['amt_paid'].replace(',', ''))
 
         if pay_into['bank_name'] == 'Student Wallet':
-            accounts = student_wallet(request, 'credit', sch_id, stud_id)
-            # print(accounts.first().student)
-            stud_name = accounts.first().student
-            context = {'accounts': accounts, 'stud_name': stud_name}
-            # return render(request, 'wallet-accounts.html', context)
+            student_wallet(request, 'credit', amt_paying,  sch_id, stud_id)
             return redirect(wallet_account, stud_id=stud_id)
-
         else:
             recpt_no = generate_receipt_no()
-            # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaat else error
-            amt_paying = float(request.POST['amt_paid'].replace(',', ''))
-
-            for i in inv:
+            inv_count = inv.count()
+            # for i in inv:
+            for x, i in enumerate(inv, start=1):
                 if amt_paying <= 0:
                     break
                 else:
-                    p_inv = process_invoice(amt_paying, i, sch_id, stud_id)
-                    amt_paying = p_inv['pay_bal']
+                    inv_p = process_invoice(amt_paying, i, sch_id, stud_id)
+                    amt_paying = inv_p['pay_bal']
 
-                inv_no = p_inv['invoice_no']
-                inv_bal = p_inv['inv_bal']
-                status = p_inv['status']
+                inv_no = inv_p['invoice_no']
+                inv_bal = inv_p['inv_bal']
+                status = inv_p['status']
+
+                form = FeesAccountsForm(request.POST or None)
+                if form.is_valid():
+                    fee_acct = form.save(commit=False)
+                    fee_acct.trans_date = request.POST.get('pmt_date')
+                    fee_acct.receipt_no = recpt_no
+                    fee_acct.descx = inv_p['descx']
+                    fee_acct.amount = inv_p['amt_paid'] * -1
+                    fee_acct.tr_type = 'cr'
+                    fee_acct.save()
+
+                    print('FeesAccounts Form is Valid')
+                else:
+                    print('FeesAccounts Form IS NOT Valid')
+                    messages.error(request, form.errors)
 
                 payment = PaymentForm(request.POST or None)
                 if payment.is_valid():
@@ -587,22 +599,35 @@ def student_payment(request, stud_id):
                     pmt.invoice_no = inv_no
                     pmt.receipt_no = recpt_no
                     pmt.status = status
-                    pmt.pmt_descx = p_inv['descx']
-                    pmt.amt_paid = amt_paying
-                    # pmt.save()
+                    pmt.pmt_descx = inv_p['descx']
+                    pmt.amt_paid = inv_p['amt_paid']
+                    pmt.save()
 
                     if status == 'pp':
                         enr_status = 'paying'
                     elif status == 'pf':
                         enr_status = 'paid'
 
-                    # update = Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
-                    # Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
-                    # Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
+                    Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
+                    Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
+                    Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
 
-                    print('Form process is Successful.')
+                    msg1 = 'Student Fee Payment is successful. '
+                    msg2 = ''
+
+                    # Credit student Wallet with excess balance
+                    if amt_paying > 0 and inv_count == x and status == 'pf':
+                        msg2 = 'Also, The student Wallet is Credited with the Balance of ' + str(amt_paying)
+                        student_wallet(request, 'credit', amt_paying, sch_id, stud_id)
+                        amt_paying = 0
+
+                    msg = msg1
+                    if msg2: msg = msg + msg2
+                    messages.success(request, msg)
+
                 else:
-                    print('Error with Form process.')
+                    print(payment.errors)
+                    messages.warning(request, payment.errors)
 
         return redirect(list_enrollments)
 
@@ -613,22 +638,21 @@ def student_payment(request, stud_id):
 
         paymethod = PaymentMethods.objects.all()
         bank = get_or_create_bank_accounts(sch_id, status='active')
-
         try:
             timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
-            # wallet_bal = Wallets.objects.get(school=sch_id, student=stud_id).balance
-            wallet_bal = WalletAccounts.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
+            wallet_bal = Wallets.objects.get(school=sch_id, student=stud_id).wallet['balance']
+            # wallet_bal = WalletAccounts.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
             if wallet_bal is None: wallet_bal = 0.00
             wallet = {'wallet_bal': wallet_bal}
         except:
             if not wallet:  wallet = {'wallet_bal': 0.00}
-        '''
-         Query Child object (Invoice) through Parent object (Enviroments)with selected columns
-        inv_descx = Enrollments.objects.values('invoice__descx').distinct().filter(qc1).order_by('invoice__invoice_no')
-        '''
+
         pay_descx = ''
-        for i in inv:
-            pay_descx = pay_descx + i['descx'] + '; \n'
+        for index, invoice in enumerate(inv, start=1):
+            pay_descx = pay_descx + invoice['descx']
+            if inv.count() > 1 and index < inv.count():
+                pay_descx = pay_descx + '; \n'
+            # print(index, pay_descx)
 
         context = {'header': header, 'enrolled': enrolled, 'timeline': timeline, 'paymethods': paymethod, 'banks': bank,
                    'descx': pay_descx, 'student': wallet}

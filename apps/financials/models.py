@@ -48,7 +48,7 @@ class FeesPackageDetails(models.Model):
         db_table = "apps_FeesPackageDetails"
         ordering = ['school', 'id']
 
-
+"""
 class FinancialTransactions(models.Model):
     trans_date = models.DateField()
     school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
@@ -67,7 +67,7 @@ class FinancialTransactions(models.Model):
     class Meta:
         db_table = "apps_FinancialTransactions"
         ordering = ['school', 'id']
-
+"""
 
 class Invoice(models.Model):
     objects = None
@@ -94,6 +94,26 @@ class Invoice(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['school', 'invoice_no'], name="school_Invoice_unq"),
         ]
+
+
+class FeesAccounts(models.Model):
+    trans_date = models.DateField()
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
+    enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='enrollment', unique=False,
+                                 null=True, blank=True)
+    invoice_no = models.IntegerField(null=True, blank=True)
+    receipt_no = models.CharField(max_length=60, null=True, blank=True)
+    descx = models.CharField(max_length=250)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
+    tr_type = models.CharField(max_length=10)
+
+    def __str__(self):
+        return str(self.trans_date) + ' ' + self.descx + ' ' + str(self.tr_type) + ' ' + str(self.amount)
+
+    class Meta:
+        db_table = "apps_FeesAccounts"
+        ordering = ['school', 'id']
 
 
 class PaymentMethods(models.Model):

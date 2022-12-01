@@ -150,7 +150,7 @@
                                 <div class="col-xs-4">
                                  <!-- Date of Payment -->
                                      <div class="form-group form-floating-label">
-                                         <input  type="date" id="trans_date" class="no-bd form-control" name="pmt_date"   required >
+                                         <input  type="date" id="trans_date" class="no-bd form-control" name="pmt_date" required >
                                          <label for="trans_date" class="placeholder pl-3">* Date</label>
                                      </div>
                                 </div>
@@ -230,13 +230,13 @@
     {% if messages %}
         {% for message in messages %}
             {% if message.tags == 'success'%}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+                <script type=text/javascript>toastr.success('{{ message }}', 'Very Good . . . ')</script>
             {% elif message.tags == 'info' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+                <script type=text/javascript>toastr.info('{{ message }}')</script>
             {% elif message.tags == 'warning' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+                <script type=text/javascript>toastr.warning('{{ message }}')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
     {% endif %}
@@ -257,7 +257,6 @@
                 //number = $.formatNumber(number, {format:"#,###.00", locale:"us"});
                 //$(this).val(number);
             });
-
 
             // It redirect the URL when the close button at the TOP Right corner is clicked
              $("#close").click(function(){
@@ -343,7 +342,6 @@
 						text : 'OK, Understood!',
 						className : 'btn btn-success'
 					}
-
 				}
 				})
             };
@@ -369,15 +367,13 @@
                         }
                         alert('You can go ahead to Receive Payment')
                     }
-
                 }
-
             });
-
 
             $('#bank').change(function(){
                 let pay_method = $( "#pay_method option:selected" ).text();
                 let pay_into = $( "#bank option:selected" ).text();
+                let descx = ""
 
                 if (pay_method === pay_into) {
                     $("#bank").val('0').change();
@@ -386,12 +382,36 @@
 
                 } else if (pay_into === 'Student Wallet'){
                     let pay_meth = $("#pay_method option:selected").text()
-                    let descx = 'Deposit - ' + pay_meth + ': ( Credit Student Wallet  )'
+                    descx = 'Deposit - ' + pay_meth + ': ( Credit Student Wallet  )'
                     $('#descx').val(descx)
 
                 } else {
                     $('#descx').val("{{descx}}")
 
+                    let amt_paying = $('#amount_paying').val()
+                    let due_amt = $('#due_amount').val()
+                    let msg = ''
+
+                    amt_paying = $.parseNumber(amt_paying, {format:"#,###.00", locale:"us"});
+                    due_amt = $.parseNumber(due_amt, {format:"#,###.00", locale:"us"});
+
+                    if (amt_paying > due_amt && due_amt > 0){
+                        // Info the user
+                        let balance = amt_paying - due_amt
+                        balance = $.formatNumber(balance, {format:"#,###.00", locale:"us"});
+                        due_amt = $.formatNumber(due_amt, {format:"#,###.00", locale:"us"});
+
+                        msg = 'The Amount being Paid is more than the Due Amount for the Student.\n' +
+                            'The Balance of ' + balance + ' shall be Credited to the Student Wallet.\n' +
+                            '\n' +
+                            'Do you want continue with the Payment'
+
+                        alert(msg)
+                    } else if (amt_paying > due_amt && due_amt == 0 && msg===''){
+                        msg = 'The student is not owing.\n Pay the money into the student Wallet'
+                        alert(msg)
+                        // $("#bank").val('5').change();
+                    }
                 }
 
             });
