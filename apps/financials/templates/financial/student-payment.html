@@ -139,10 +139,10 @@
                                 </div>
 
                                 <div class="col-md-3 font-weight-bold text-left">
-                                    <span class="pl-2 ">Doc No</span>
+                                    <span class="pl-2 ">Instrument No</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="doc_no" id="doc_no" value="" tabindex="10" type="text"  class="form-control form-control-sm  no-bd" placeholder=""  >
+                                              <input name="instrument_no" id="instr_no" value="" tabindex="10" type="text" class="form-control form-control-sm  no-bd" placeholder=""  >
                                           </div>
                                       </div>
                                 </div>
@@ -271,7 +271,7 @@
 
                 // Get values from Inputs text-box and selected controls
                 let pmtd = $("#pay_method option:selected").text(); //Get the selected text from pay_method dropdown
-                let docno = $("#doc_no").val();  // Get the Document No from doc_no object text box
+                let instr_no = $("#instr_no").val();  // Get the Document No from instr_no object text box
                 let studname = $("#studnames").val();  // Get the Student Name from studnames object text box
                 let classid = $("#class_id option:selected").text(); //Get the select class text from class_id dropdown
                 let amtpaid = $("#amount_paying").val();  // Get the Amount Paid from amount object text box
@@ -280,12 +280,12 @@
                 let descx = $("#descx").val();  // Get the Payment Description from pmt_descx object text box
 
 
-                if(docno != ""){
-                    docno = ' ( ' + docno + " ) ";
+                if(instr_no != ""){
+                    instr_no = ' ( ' + instr_no + " ) ";
                 };
 
                 let title = 'Payment Confirmation! . . ';
-                let msg = "Receiving: \n" + pmtd + " Payment " + docno +
+                let msg = "Receiving: \n" + pmtd + " Payment " + instr_no +
                     "\n For: \n    " + studname + " (" + classid + ") " + " \n Amount Paying: N" + amtpaid + " \n      Paid To:  " + bank;
 
                 if(pmtd == "" | amtpaid == "" | bank == "" | pmt_date == "" | descx == ""){

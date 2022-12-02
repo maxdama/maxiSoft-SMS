@@ -48,26 +48,21 @@ class FeesPackageDetails(models.Model):
         db_table = "apps_FeesPackageDetails"
         ordering = ['school', 'id']
 
-"""
+
 class FinancialTransactions(models.Model):
     trans_date = models.DateField()
-    school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
-    enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='enrollment', unique=False,
-                                 null=True, blank=True)
-    invoice_no = models.IntegerField(null=True, blank=True)
-    receipt_no = models.CharField(max_length=60, null=True, blank=True)
-    descx = models.CharField(max_length=250)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
-    tr_type = models.CharField(max_length=10)
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
+    transaction = models.BigIntegerField(blank=True, primary_key=True)
+    descx = models.CharField(max_length=50)
 
     def __str__(self):
-        return str(self.trans_date) + ' ' + self.descx + ' ' + str(self.tr_type) + ' ' + str(self.amount)
+        return str(self.trans_date) + ' ' + self.descx  + ' ' + str(self.transaction)
 
     class Meta:
         db_table = "apps_FinancialTransactions"
-        ordering = ['school', 'id']
-"""
+        ordering = ['transaction']
+
+
 
 class Invoice(models.Model):
     objects = None
@@ -156,7 +151,7 @@ class Banks(models.Model):
         ordering = ['srl_no']
 
 
-class Payments(models.Model):
+class FeesPayments(models.Model):
     objects = None
     # pmt_id = models.BigIntegerField(unique=True, primary_key=True)
     receipt_no = models.CharField(max_length=65)
@@ -173,20 +168,21 @@ class Payments(models.Model):
     amt_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     pay_method = models.ForeignKey(PaymentMethods, on_delete=models.RESTRICT, related_name='payments', unique=False,
                                    null=False, blank=True)
-    doc_no = models.CharField(max_length=55, null=True, blank=True)
+    instrument_no = models.CharField(max_length=55, null=True, blank=True)
     bank = models.ForeignKey(Banks, on_delete=models.RESTRICT, related_name='payments', unique=False)
     status = models.CharField(max_length=15, null=True, blank=True)
 
     def __str__(self):
         return str(self.pmt_date) + ' ' + str(self.receipt_no) + ' ' + str(self.invoice_no) + ' ' + str(self.pmt_descx) \
-               + ' ' + str(self.amt_paid) + ' ' + str(self.doc_no) + ' ' + str(self.bank)
+               + ' ' + str(self.amt_paid) + ' ' + str(self.instrument_no) + ' ' + str(self.bank)
 
     class Meta:
-        db_table = "apps_Payments"
+        db_table = "apps_FeesPayments"
         ordering = ['school', 'pmt_date', 'receipt_no']
         constraints = [
             models.UniqueConstraint(fields=['school', 'receipt_no', 'invoice_no'], name="unq_school_receipt"),
         ]
+
 
 
 class WalletPayments(models.Model):

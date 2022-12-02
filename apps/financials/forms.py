@@ -28,7 +28,7 @@ class FeesAccountsForm(forms.ModelForm):
     class Meta:
         model = FeesAccounts
         fields = '__all__'
-        exclude = ['receipt_no', 'run_bal', 'tr_type', 'amount', 'trans_date', 'descx']
+        exclude = ['doc_no', 'run_bal', 'tr_type', 'amount', 'trans_date', 'descx']
 
 
 class InvoiceForm(forms.ModelForm):
@@ -38,9 +38,9 @@ class InvoiceForm(forms.ModelForm):
         exclude = ['package', 'due_date', 'balance', 'status', 'amount']
 
 
-class PaymentForm(forms.ModelForm):
+class FeePaymentForm(forms.ModelForm):
     class Meta:
-        model = Payments
+        model = FeesPayments
         fields = '__all__'
         exclude = ['receipt_no', 'invoice_no', 'amt_paid', 'pmt_descx', 'status']
 

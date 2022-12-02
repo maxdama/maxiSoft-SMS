@@ -1,22 +1,19 @@
 import datetime
 from datetime import date
 
-from django.contrib.auth import logout
 from django.contrib import messages
 from django.db import transaction, IntegrityError
 from django.shortcuts import render, redirect
 
 from apps.financials.forms import *
-# from apps.financials.models import FeesPackage, FeesPackageDetails, FinancialTransactions, Invoice, PaymentMethods, \
-#    Banks, WalletPayments, Wallets
 from apps.financials.models import *
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
 from apps.students.forms import EnrollmentForm
 from apps.students.models import Enrollments, Students
 from apps.utils import schools, get_cur_session, generate_reg_no
-from django.db.models import Sum, Q, F
+from django.db.models import Q
 
 
 # Create your views here.
@@ -584,9 +581,8 @@ def student_payment(request, stud_id):
                 if form.is_valid():
                     fee_acct = form.save(commit=False)
                     fee_acct.trans_date = request.POST.get('pmt_date')
-                    fee_acct.receipt_no = recpt_no
                     fee_acct.descx = inv_p['descx']
-                    fee_acct.amount = inv_p['amt_paid'] * -1
+                    fee_acct.amount = -abs(inv_p['amt_paid'])
                     fee_acct.tr_type = 'cr'
                     fee_acct.doc_type = 'receipt'
                     fee_acct.doc_no = recpt_no
@@ -597,7 +593,7 @@ def student_payment(request, stud_id):
                     print('FeesAccounts Form IS NOT Valid')
                     messages.error(request, form.errors)
 
-                payment = PaymentForm(request.POST or None)
+                payment = FeePaymentForm(request.POST or None)
                 if payment.is_valid():
                     pmt = payment.save(commit=False)
 
@@ -694,7 +690,7 @@ def process_invoice(amt_paying, inv, sch_id, stud_id):
     elif inv_bal <= 0:
         # Generate Payment Description by Concatenating string and also set payment status to either Full Payment or Partial payment
         status = 'pf'
-        pay_count = Payments.objects.filter(invoice_no=inv_no, school_id=sch_id, student_id=stud_id).count()
+        pay_count = FeesPayments.objects.filter(invoice_no=inv_no, school_id=sch_id, student_id=stud_id).count()
         if pay_count == 0:
             inv_descx = 'Full Payment: - ' + inv_descx
         else:
@@ -706,7 +702,7 @@ def process_invoice(amt_paying, inv, sch_id, stud_id):
 
 
 def generate_receipt_no():
-    p = Payments.objects.values('receipt_no').order_by('school_id', 'id').last()
+    p = FeesPayments.objects.values('receipt_no').order_by('school_id', 'id').last()
     if p is None:
         recpt_no = 1
     else:
