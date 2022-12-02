@@ -316,7 +316,7 @@ def student_re_enrollment(request, stud_id):
             enrolled.first_inv_no = inv_no
             enrolled.status = status
             enrolled.save()
-            # print(enrolled.id)
+
             financial_transactions(request, 'save', enrolled.id, inv_no)
             # Update Student Status to Enrolled
             stud = Students.objects.filter(id=stud_id).update(reg_status='enrolled', reg_steps=3)
@@ -369,6 +369,10 @@ def financial_transactions(request, action, enr_id, inv_no):
         trans.amount = float(request.POST['amount'].replace(',', ''))
         trans.enrolled_id = enr_id
         trans.tr_type = 'Dr'
+        trans.trans_date = request.POST.get('trans_date')
+        trans.descx = request.POST.get('descx')
+        trans.doc_type = 'invoice'
+        trans.doc_no = request.POST['invoice_no']
         trans.save()
     else:
         messages.warning(request, accts_form.errors)
@@ -390,7 +394,7 @@ def financial_transactions(request, action, enr_id, inv_no):
         inv.status = 'np'
         inv.save()
     else:
-        messages.warning(request, invoice_form.errors)
+        messages.error(request, invoice_form.errors)
 
     return None
 
@@ -584,6 +588,8 @@ def student_payment(request, stud_id):
                     fee_acct.descx = inv_p['descx']
                     fee_acct.amount = inv_p['amt_paid'] * -1
                     fee_acct.tr_type = 'cr'
+                    fee_acct.doc_type = 'receipt'
+                    fee_acct.doc_no = recpt_no
                     fee_acct.save()
 
                     print('FeesAccounts Form is Valid')

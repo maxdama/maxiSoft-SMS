@@ -99,17 +99,30 @@ class Invoice(models.Model):
 class FeesAccounts(models.Model):
     trans_date = models.DateField()
     school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
+    student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False)
+    enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='invoice', unique=False,
+                                 null=True, blank=True)
     enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='enrollment', unique=False,
                                  null=True, blank=True)
-    invoice_no = models.IntegerField(null=True, blank=True)
-    receipt_no = models.CharField(max_length=60, null=True, blank=True)
+    doc_type = models.CharField(max_length=25, null=True, blank=True)
+    doc_no = models.BigIntegerField(null=True, blank=True)
     descx = models.CharField(max_length=250)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
     tr_type = models.CharField(max_length=10)
 
+    @property
+    def runing(self):  # Calculate Runing Balance for the specified Client
+        f1 = Q(school_id=self.school) & Q(student_id=self.student)
+        f2 = Q(id__lte=self.id)
+        bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2))
+        if bal is None:
+            bal = {'balance': 0.00}
+        return bal
+
     def __str__(self):
-        return str(self.trans_date) + ' ' + self.descx + ' ' + str(self.tr_type) + ' ' + str(self.amount)
+        return str(self.trans_date) + ', ' + self.descx  + ', ' + str(self.amount) + ', ' + str(self.runing['balance'])  + ',  ' + str(self.tr_type) \
+                + ', ' + str(self.doc_type) + ', ' + str(self.doc_no)
 
     class Meta:
         db_table = "apps_FeesAccounts"
