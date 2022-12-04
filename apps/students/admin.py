@@ -3,4 +3,3 @@ from . models import  Students #, Enrollments
 # Register your models here.
 
 admin.site.register(Students)
-# admin.site.register(Enrollments)
