@@ -1,8 +1,9 @@
 from datetime import date
 from django.db import models
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, F, Count, Sum
 from apps.settings.models import SchoolProfiles, ClassRooms, AcademicSessions
-from apps.students.models import Enrollments, Students
+from apps.students.models import Students
+from apps.settings import models as sm
 
 
 # Create your models here.
@@ -22,7 +23,8 @@ class FeesPackage(models.Model):
         return i_count
 
     def __str__(self):
-        return self.description + ' ' + str(self.total_fees) + ' ' + self.status + ' ' + str(self.inv['counter'])
+        return str(self.description) + ' ' + str(self.total_fees) + ' ' + str(self.status) + ' ' + str(
+            self.inv['counter'])
 
     class Meta:
         db_table = "apps_FeesPackage"
@@ -42,7 +44,7 @@ class FeesPackageDetails(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return str(self.item_no) + ' ' + self.item_descx + ' ' + str(self.qty) + ' ' + str(self.amount)
+        return str(self.item_no) + ' ' + str(self.item_descx) + ' ' + str(self.qty) + ' ' + str(self.amount)
 
     class Meta:
         db_table = "apps_FeesPackageDetails"
@@ -56,12 +58,141 @@ class FinancialTransactions(models.Model):
     descx = models.CharField(max_length=50)
 
     def __str__(self):
-        return str(self.trans_date) + ' ' + self.descx  + ' ' + str(self.transaction)
+        return str(self.trans_date) + ' ' + self.descx + ' ' + str(self.transaction)
 
     class Meta:
         db_table = "apps_FinancialTransactions"
         ordering = ['transaction']
 
+
+class Enrollments(models.Model):
+    objects = None
+    student = models.ForeignKey(Students, on_delete=models.RESTRICT, related_name='enrollment', null=False, blank=True,
+                                unique=False)
+    school = models.ForeignKey(sm.SchoolProfiles, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
+    timeline = models.ForeignKey(sm.AcademicTimeLine, on_delete=models.RESTRICT, blank=True, unique=False)
+    session = models.ForeignKey(sm.AcademicSessions, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
+    reg_no = models.CharField(max_length=50, unique=False, null=False)
+    classroom = models.ForeignKey(sm.ClassRooms, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
+    trans_date = models.DateField(default=None, null=False, blank=True, db_index=True)
+    fee_pkg = models.BigIntegerField(default=0)
+    status = models.CharField(max_length=50, null=True, db_index=True)
+    first_inv_no = models.BigIntegerField(null=True, blank=True, unique=True, default=None)
+    last_rcpt_no = models.CharField(max_length=65, null=True, blank=True, unique=True, default=None)
+
+    @property
+    def inv(self):  # Invoice Amount (Cumulative Sum)
+        # Get the Total Invoice Amount for the specified student and Class
+        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        crit2 = Q(Invoice__enrolled_id=self.id)
+        inv_amt = Enrollments.objects.filter(crit).aggregate(amt=Sum('invoice__amount'))
+        if inv_amt['amt'] is None:
+            inv_amt = {'amt': 0.00}
+        # print(inv_amt)
+        return inv_amt
+
+    @property
+    def paid(self):  # Cumulative Amount Paid
+        # paid_amt = 25000
+        # Calculate Total Amount Due of the Student in the current row
+        qf1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        qf2 = (Q(payments__status='pp') | Q(payments__status='pf')) & Q(payments__enrolled_id__lte=self.id)
+        paid_amt = Enrollments.objects.filter(qf1).aggregate(amt=Sum('payments__amt_paid', filter=qf2))
+        # print(paid_amt['due'])
+        if paid_amt['amt'] is None:
+            paid_amt = {'amt': 0.00}
+        return paid_amt
+
+    @property  # Total Amount Due
+    def tot_amt(self):
+        # tot_amt = 25000
+        # Calculate Total Amount Due of the Student in the current row
+        qf1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        qf2 = (Q(invoice__status='np') | Q(invoice__status='pp'))
+        due_amt = Enrollments.objects.filter(qf1).aggregate(due=Sum('invoice__balance', filter=qf2))
+        # print(due_amt['due'])
+        if due_amt['due'] is None:
+            due_amt = {'due': 0.00}
+        return due_amt
+
+    @property  # Due Date
+    def due(self):
+        due_dt = '20-03-2022'
+        query_criteria = Q(reg_no=self.reg_no) & Q(school_id=self.school) & \
+                         (Q(invoice__status='np') | Q(invoice__status='pp')) & Q(timeline_id=self.timeline) & Q(
+            session_id=self.session)
+        due_dt = Enrollments.objects.filter(query_criteria).values(date=F('invoice__due_date')).order_by(
+            'invoice__due_date').first()
+        if due_dt is None:
+            due_dt = {'date': date.today()}
+        return due_dt
+
+    @property
+    def last_inv(self):  # Last Invoice Amount
+        # Get the Last Invoice Amount issued to Student in Invoice Table
+        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id=self.timeline) & Q(
+            session_id=self.session)
+        last_paid = Enrollments.objects.filter(crit).values(amt=F('invoice__amount')).order_by(
+            'invoice__invoice_no').last()
+        if last_paid['amt'] is None:
+            last_paid = {'amt': 0.00}
+        # print(last_paid)
+        return last_paid
+
+    @property  # Term Cumulative payment
+    def term_pmt(self):  # Get the Cumulative payment of the term for the specified Student
+        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        crit1 = Q(payments__session_id=self.session_id) & Q(payments__student_id=self.student_id) & Q(
+            payments__school_id=self.school_id)
+        last_paid = Enrollments.objects.filter(crit).aggregate(amt=Sum('payments__amt_paid', filter=crit1))
+        if last_paid['amt'] is None:
+            last_paid = {'amt': 0.00}
+        # print(last_paid)
+        return last_paid
+
+    @property  # Last Payment Amount
+    def last_pmt(self):
+        # Get the Last Amount Paid in Payments Table for the specified Student and Class
+        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        crit1 = Q(payments__receipt_no=self.last_rcpt_no) & Q(payments__student_id=self.student_id) & Q(
+            payments__school_id=self.school_id)
+        last_paid = Enrollments.objects.filter(crit).aggregate(amt=Sum('payments__amt_paid', filter=crit1))
+        if last_paid['amt'] is None:
+            last_paid = {'amt': 0.00}
+        # print(last_paid)
+        return last_paid
+
+    @property  # Last Payment Date
+    def last_paymt(self):
+        # Get the last payment date of every student of the current academic year
+        # last_pmt_dt = '20-03-2022'
+        criteria = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        # last_pmt_dt = Enrollments.objects.filter(criteria).values(date=F('payments__pmt_date')).order_by('payments__pmt_date').last()
+        try:
+            last_pmt_dt = Enrollments.objects.filter(criteria).values(date=F('payments__pmt_date')) \
+                .exclude(payments__pmt_date__isnull=True).order_by('payments__pmt_date').last()
+
+            # print(last_pmt_dt)
+            if last_pmt_dt['date'] is None:
+                last_pmt_dt = {'date': date.today()}
+        except:
+            last_pmt_dt = {'date': date.today()}
+
+        return last_pmt_dt
+
+    def __str__(self):
+        return str(self.reg_no) + ' ' + str(self.trans_date) + ' ' + str(self.status) + ' ' + str(
+            self.tot_amt['due']) + ' ' + str(self.due['date'])
+
+    class Meta:
+        db_table = "apps_Enrollments"
+        ordering = ['school_id', 'reg_no']
+        # unique_together = ('school_id', 'session', 'reg_no', 'classroom')
+        constraints = [
+            models.UniqueConstraint(fields=['school_id', 'timeline', 'session', 'reg_no'], name="unq_regno_class"),
+            models.UniqueConstraint(fields=['school_id', 'timeline', 'session', 'student'], name="unq_stud_class"),
+        ]
 
 
 class Invoice(models.Model):
@@ -79,9 +210,10 @@ class Invoice(models.Model):
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, null=True, blank=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, related_name='invoice', blank=True)
 
     def __str__(self):
-        return str(self.invoice_no) + ' ' + self.descx + ' ' + str(self.amount) + ' ' + self.status
+        return str(self.invoice_no) + ' ' + str(self.descx) + ' ' + str(self.amount) + ' ' + str(self.status)
 
     class Meta:
         db_table = "apps_Invoice"
@@ -89,39 +221,6 @@ class Invoice(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['school', 'invoice_no'], name="school_Invoice_unq"),
         ]
-
-
-class FeesAccounts(models.Model):
-    trans_date = models.DateField()
-    school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
-    student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False)
-    enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='invoice', unique=False,
-                                 null=True, blank=True)
-    enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='enrollment', unique=False,
-                                 null=True, blank=True)
-    doc_type = models.CharField(max_length=25, null=True, blank=True)
-    doc_no = models.BigIntegerField(null=True, blank=True)
-    descx = models.CharField(max_length=250)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
-    tr_type = models.CharField(max_length=10)
-
-    @property
-    def runing(self):  # Calculate Runing Balance for the specified Client
-        f1 = Q(school_id=self.school) & Q(student_id=self.student)
-        f2 = Q(id__lte=self.id)
-        bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2))
-        if bal is None:
-            bal = {'balance': 0.00}
-        return bal
-
-    def __str__(self):
-        return str(self.trans_date) + ', ' + self.descx  + ', ' + str(self.amount) + ', ' + str(self.runing['balance'])  + ',  ' + str(self.tr_type) \
-                + ', ' + str(self.doc_type) + ', ' + str(self.doc_no)
-
-    class Meta:
-        db_table = "apps_FeesAccounts"
-        ordering = ['school', 'id']
 
 
 class PaymentMethods(models.Model):
@@ -171,6 +270,7 @@ class FeesPayments(models.Model):
     instrument_no = models.CharField(max_length=55, null=True, blank=True)
     bank = models.ForeignKey(Banks, on_delete=models.RESTRICT, related_name='payments', unique=False)
     status = models.CharField(max_length=15, null=True, blank=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE,  blank=True)
 
     def __str__(self):
         return str(self.pmt_date) + ' ' + str(self.receipt_no) + ' ' + str(self.invoice_no) + ' ' + str(self.pmt_descx) \
@@ -183,6 +283,37 @@ class FeesPayments(models.Model):
             models.UniqueConstraint(fields=['school', 'receipt_no', 'invoice_no'], name="unq_school_receipt"),
         ]
 
+
+class FeesAccounts(models.Model):
+    trans_date = models.DateField()
+    school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
+    student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False)
+    enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='accounts', unique=False,
+                                null=True, blank=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
+    doc_type = models.CharField(max_length=25, null=True, blank=True)
+    doc_no = models.BigIntegerField(null=True, blank=True)
+    descx = models.CharField(max_length=250)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    run_bal = models.DecimalField(max_digits=11, decimal_places=2, default=0)
+    tr_type = models.CharField(max_length=10)
+
+    @property
+    def runing(self):  # Calculate Runing Balance for the specified Client
+        f1 = Q(school_id=self.school) & Q(student_id=self.student)
+        f2 = Q(id__lte=self.id)
+        bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2))
+        if bal is None:
+            bal = {'balance': 0.00}
+        return bal
+
+    def __str__(self):
+        return str(self.trans_date) + ', ' + self.descx + ', ' + str(self.amount) + ', ' \
+            + str(self.runing['balance']) + ',  ' + str(self.tr_type) + ', ' + str(self.doc_type) + ', ' + str(self.doc_no)
+
+    class Meta:
+        db_table = "apps_FeesAccounts"
+        ordering = ['school', 'id']
 
 
 class WalletPayments(models.Model):
@@ -201,10 +332,11 @@ class WalletPayments(models.Model):
     classroom = models.ForeignKey(ClassRooms, on_delete=models.RESTRICT, related_name='wallets', unique=False,
                                   null=True, blank=True)
     status = models.CharField(max_length=15, null=True, blank=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
 
     def __str__(self):
         return str(self.id) + ' ' + str(self.student) + ' ' + str(self.pmt_date) + ' ' + str(self.pay_method) \
-                + ' ' + str(self.amt_paid)
+               + ' ' + str(self.amt_paid)
 
     class Meta:
         db_table = "apps_WalletPayments"
@@ -215,6 +347,7 @@ class Wallets(models.Model):
     objects = None
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
     student = models.OneToOneField(Students, on_delete=models.CASCADE, unique=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
     # created = models.DateField(auto_created=True)
     # wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
@@ -231,7 +364,7 @@ class Wallets(models.Model):
         return bal
 
     @property
-    def last_pmt_date(self): # Get the Accounts last Payment Date for the specified Student
+    def last_pmt_date(self):  # Get the Accounts last Payment Date for the specified Student
         f1 = Q(school_id=self.school) & Q(student_id=self.student)
         lst_date = WalletAccounts.objects.values('pmt_date').filter(f1).order_by('pmt_date').last()
         if lst_date is None:
@@ -241,7 +374,7 @@ class Wallets(models.Model):
         return pmt_date
 
     def __str__(self):
-        return  str(self.student) + ' ' + str(self.wallet['balance']) + ' ' + str(self.last_pmt_date)
+        return str(self.student) + ' ' + str(self.wallet['balance']) + ' ' + str(self.last_pmt_date)
 
 
 class WalletAccounts(models.Model):
@@ -257,6 +390,7 @@ class WalletAccounts(models.Model):
     pmt_date = models.DateField()
     amt_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     tr_type = models.CharField(max_length=10)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
 
     @property
     def runing(self):  # Calculate Runing Balance for the specified Client
@@ -269,10 +403,9 @@ class WalletAccounts(models.Model):
         return bal
 
     def __str__(self):
-        return str(self.pmt_date) + ' ' + str(self.tr_type) + ' ' + str(self.amt_paid) + ' ' +  str(self.runing['balance'])
+        return str(self.pmt_date) + ' ' + str(self.tr_type) + ' ' + str(self.amt_paid) + ' ' + str(
+            self.runing['balance'])
 
     class Meta:
         db_table = "apps_WalletAccounts"
         ordering = ['school', 'pmt_date', 'id']
-
-

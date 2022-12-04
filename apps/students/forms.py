@@ -1,5 +1,5 @@
 from django import forms
-from .models import Students, Enrollments
+from .models import Students
 
 
 class RegistrationForm(forms.ModelForm):
@@ -18,13 +18,4 @@ class StudentsRegistrationNewForm(forms.ModelForm):
             "reg_no", "surname", "first_name", "middle_name", "dob",  "gender", "stud_pic", "reg_steps"
         ]
         exclude = ['reg_no', 'reg_steps', 'middle_name']
-
-
-class EnrollmentForm(forms.ModelForm):
-    class Meta:
-        model = Enrollments
-        # fields = [ "student", "school", "timeline", "session", "reg_no", "classroom", "trans_date", "status", "fee_pkg"]
-        fields = '__all__'
-        exclude = ['status', 'first_inv_no']
-
 

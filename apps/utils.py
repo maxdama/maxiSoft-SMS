@@ -6,8 +6,9 @@ import shutil
 import os.path
 from os import path
 import datetime
+
+from apps.financials.models import Enrollments
 from apps.settings.models import AcademicSessions, AcademicCalender, SchoolProfiles
-from apps.students.models import Enrollments
 
 
 def schools(request):

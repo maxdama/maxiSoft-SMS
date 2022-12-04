@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .models import SchoolProfiles, AcademicSessions, AcademicTimeLine, AcademicCalender, ClassRooms
 from .forms import SchoolProfilesForm, AcademicTimelineForm, AcademicCalenderForm, ClassRoomsForm
-from ..students.models import Enrollments
+# from ..students.models import Enrollments
 from ..utils import schools
 # Create your views here.
 

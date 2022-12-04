@@ -15,20 +15,19 @@ class FeesPackageDetailsForm(forms.ModelForm):
         fields = '__all__'
         exclude = ['package']
 
-"""
-class FinancialTransactionsForm(forms.ModelForm):
+
+class EnrollmentForm(forms.ModelForm):
     class Meta:
-        model = FinancialTransactions
+        model = Enrollments
         fields = '__all__'
-        exclude = ['enrolled', 'receipt_no', 'run_bal', 'tr_type', 'amount']
-"""
+        exclude = ['status', 'first_inv_no']
 
 
 class FeesAccountsForm(forms.ModelForm):
     class Meta:
         model = FeesAccounts
         fields = '__all__'
-        exclude = ['doc_no', 'run_bal', 'tr_type', 'amount', 'trans_date', 'descx']
+        exclude = ['doc_no', 'transaction_id', 'run_bal', 'tr_type', 'amount', 'trans_date', 'descx']
 
 
 class InvoiceForm(forms.ModelForm):

@@ -4,9 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Q, F
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect
-from .models import Students, Enrollments
+from .models import Students #, Enrollments
 from apps.financials.models import FeesPackage, Invoice
-from .forms import RegistrationForm, StudentsRegistrationNewForm, EnrollmentForm
+from .forms import RegistrationForm, StudentsRegistrationNewForm #, EnrollmentForm
 from django.http import HttpResponse, JsonResponse
 import datetime
 import os

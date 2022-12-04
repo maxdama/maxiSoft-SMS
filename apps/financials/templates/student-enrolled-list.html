@@ -105,7 +105,7 @@
 													  {% if enrolled.status|lower == 'enrolled' %}
 													  	<div class="dropdown-divider"></div>
 													  	<a class="dropdown-item" href="{% url 'update-enrollment' enrolled.id enrolled.first_inv_no %}">Update Enrollment</a>
-													  	<a class="dropdown-item  cancel"  href="{% url 'cancel-enrollment' enrolled.id enrolled.first_inv_no  %}">Cancel Enrolled</a>
+													  	<a class="dropdown-item  cancel"  href="{% url 'cancel-enrollment' enrolled.id enrolled.first_inv_no enrolled.transaction_id  %}">Cancel Enrolled</a>
 													  {% endif %}
 												  </div>
 												</div>
