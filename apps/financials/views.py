@@ -163,7 +163,7 @@ def new_student_enrollment(request, reg_id):
         return redirect("logout")
 
     if request.method == 'POST':
-        trans_id = create_next_tranaction(request, desc='enrollment', sch_id=sch_id)
+        trans_id = create_tranaction(request, desc='enrollment', sch_id=sch_id, stud_id=reg_id)
 
         status = 'enrolled'
         inv_no = request.POST['invoice_no']
@@ -348,7 +348,7 @@ def student_re_enrollment(request, stud_id):
         # return HttpResponse(f'Student Re-Enrollment: ID-No:- {stud_id}')
 
 
-def create_next_tranaction(request, desc, sch_id):
+def create_tranaction(request, desc, sch_id, stud_id=0):
     """ Generate next Transaction  number"""
     financial = FinancialTransactions.objects.values('transaction').order_by('school_id', 'transaction').last()
     if financial is None:
@@ -360,26 +360,25 @@ def create_next_tranaction(request, desc, sch_id):
     tr_date = date.today()
     print(tr_date)
 
-    FinancialTransactions.objects.create(school_id=sch_id, trans_date=tr_date, transaction=trans_id, descx=desc)
+    FinancialTransactions.objects.create(school_id=sch_id, trans_date=tr_date, transaction=trans_id, descx=desc, student_id=stud_id)
 
     return trans_id
 
 
-def cancel_financial_Transaction(request, sch_id, trans_id):
+@transaction.atomic
+def cancel_financial_transaction(request, sch_id, trans_id):
     print(f'school_id: {sch_id}')
-    print(f'Transaction: {trans_id}')
+
     trans = FinancialTransactions.objects.get(school_id=sch_id, transaction=trans_id)
     if trans:
-        for tr in trans.enrollment.all():
-            print(tr.status)
-            status = tr.status
-            recipt_no = tr.last_rcpt_no
-            stud_id = tr.student_id
-            break
-
-        print(trans.descx)
         descx = trans.descx
         if descx == 'enrollment':
+            for tr in trans.enrollment.all():
+                print(tr.status)
+                status = tr.status
+                recipt_no = tr.last_rcpt_no
+                stud_id = tr.student_id
+                break
 
             if recipt_no is None:
                 #  Cancel Enrollment, If no payment has been made for Enrolled Student.
@@ -395,8 +394,41 @@ def cancel_financial_Transaction(request, sch_id, trans_id):
                 return redirect(list_enrollments)
 
         elif descx == 'fee payment':
-            pass
-            # trans.delete()
+            stud_id = trans.student_id
+            trans.delete()
+
+            f1 = Q(school_id=sch_id) & Q(student_id=stud_id)
+            pmt_counts = FeesPayments.objects.filter(f1).count()
+            due = FeesAccounts.objects.filter(school_id=sch_id, student_id=stud_id).aggregate(balance=Sum('amount'))
+            last = FeesPayments.objects.filter(f1).values('receipt_no').order_by('receipt_no').last()
+            print(last)
+            if last is None:
+                last = {'receipt_no': None}
+
+            if pmt_counts > 0 and due['balance'] > 0:
+                status = 'paying'
+                status_inv = 'pp'
+            elif pmt_counts > 0:
+                status = 'paid'
+                status_inv = 'pf'
+            else:
+                status = 'enrolled'
+                status_inv = 'np'
+                Students.objects.filter(school_id=sch_id, id=stud_id).update(reg_status=status)
+
+            enrlmt = Enrollments.objects.filter(f1 & ~Q(status='close'))
+            print(enrlmt)
+            trans_id_enrlmt = enrlmt[0].transaction_id
+            enrlmt.update(status=status, last_rcpt_no=last["receipt_no"])
+            print('Enrollment')
+            print(enrlmt)
+
+            inv = Invoice.objects.filter(f1 & Q(transaction_id=trans_id_enrlmt))
+            inv.update(balance=due['balance'], status=status_inv)
+
+            print(f'Fees Payment Counts: {pmt_counts};  Status: {status}; Last Receipt No: {last["receipt_no"]}')
+
+            return HttpResponse(f'Fees Payment Counts: {pmt_counts}')
         else:
             return HttpResponse(trans.descx)
             # return redirect(list_enrollments)
@@ -409,7 +441,7 @@ def financial_transactions(request, action, enr_id, inv_no, trans_id=0):
     sch_id = schools(request)['sch_id']
 
     if action == 'delete':
-        cancel_financial_Transaction(request, sch_id, trans_id)
+        cancel_financial_transaction(request, sch_id, trans_id)
 
     # -- Debit Student with the Fee Amount
     if action == 'update':
@@ -622,7 +654,7 @@ def student_payment(request, stud_id):
     inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
 
     if request.method == 'POST':
-        trans_id = create_next_tranaction(request, desc='fee payment', sch_id=sch_id)
+        trans_id = create_tranaction(request, desc='fee payment', sch_id=sch_id, stud_id=stud_id)
         cur_sesx_id = get_cur_session(sch_id)
         # NOTE: The 'replace' is used to remove any comma in the amt_paid text before converting to flaat else error
         amt_paying = float(request.POST['amt_paid'].replace(',', ''))

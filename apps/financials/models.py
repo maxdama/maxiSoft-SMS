@@ -56,6 +56,8 @@ class FinancialTransactions(models.Model):
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, unique=False)
     transaction = models.BigIntegerField(blank=True, primary_key=True)
     descx = models.CharField(max_length=50)
+    student = models.ForeignKey(Students, on_delete=models.RESTRICT, related_name='transactions', null=False, blank=True,
+                                unique=False)
 
     def __str__(self):
         return str(self.trans_date) + ' ' + self.descx + ' ' + str(self.transaction)
@@ -258,7 +260,7 @@ class FeesPayments(models.Model):
     invoice_no = models.IntegerField(null=True, blank=True)
     pmt_date = models.DateField()
     school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
-    student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False)
+    student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False,  related_name='payments')
     enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='payments', unique=False,
                                  null=False, blank=True)
     classroom = models.ForeignKey(ClassRooms, on_delete=models.RESTRICT, related_name='payments', unique=False,
@@ -271,7 +273,7 @@ class FeesPayments(models.Model):
     instrument_no = models.CharField(max_length=55, null=True, blank=True)
     bank = models.ForeignKey(Banks, on_delete=models.RESTRICT, related_name='payments', unique=False)
     status = models.CharField(max_length=15, null=True, blank=True)
-    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE,  blank=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE,  blank=True, related_name='payments')
 
     def __str__(self):
         return str(self.pmt_date) + ' ' + str(self.receipt_no) + ' ' + str(self.invoice_no) + ' ' + str(self.pmt_descx) \
