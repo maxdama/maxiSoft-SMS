@@ -63,6 +63,7 @@ class FinancialTransactions(models.Model):
     class Meta:
         db_table = "apps_FinancialTransactions"
         ordering = ['transaction']
+        constraints = [models.UniqueConstraint(fields=['school', 'transaction'], name="unq_school_trans"),]
 
 
 class Enrollments(models.Model):
@@ -72,7 +73,7 @@ class Enrollments(models.Model):
     school = models.ForeignKey(sm.SchoolProfiles, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
     timeline = models.ForeignKey(sm.AcademicTimeLine, on_delete=models.RESTRICT, blank=True, unique=False)
     session = models.ForeignKey(sm.AcademicSessions, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
-    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
+    transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True, related_name='enrollment')
     reg_no = models.CharField(max_length=50, unique=False, null=False)
     classroom = models.ForeignKey(sm.ClassRooms, on_delete=models.RESTRICT, null=False, blank=True, unique=False)
     trans_date = models.DateField(default=None, null=False, blank=True, db_index=True)

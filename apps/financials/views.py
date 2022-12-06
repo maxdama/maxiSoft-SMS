@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 
 from apps.financials.forms import *
 from apps.financials.models import *
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms, AcademicCalender
 # from apps.students.forms import EnrollmentForm
@@ -365,20 +365,51 @@ def create_next_tranaction(request, desc, sch_id):
     return trans_id
 
 
-def delete_financial_Transaction(request, sch_id, trans_id):
+def cancel_financial_Transaction(request, sch_id, trans_id):
     print(f'school_id: {sch_id}')
     print(f'Transaction: {trans_id}')
-    trans = FinancialTransactions.objects.filter(school_id=sch_id, transaction=trans_id)
-    trans.delete()
+    trans = FinancialTransactions.objects.get(school_id=sch_id, transaction=trans_id)
+    if trans:
+        for tr in trans.enrollment.all():
+            print(tr.status)
+            status = tr.status
+            recipt_no = tr.last_rcpt_no
+            stud_id = tr.student_id
+            break
 
-    return redirect(list_enrollments)
+        print(trans.descx)
+        descx = trans.descx
+        if descx == 'enrollment':
+
+            if recipt_no is None:
+                #  Cancel Enrollment, If no payment has been made for Enrolled Student.
+                updated = Students.objects.filter(school_id=sch_id, id=stud_id).update(reg_steps=2, reg_status='pending')
+                if updated:
+                    trans.delete()
+                    messages.success(request, 'Student Enrolled Cancelled Successfully.')
+                else:
+                    messages.error(request, 'Cancellation of Student Enrolled Failed.')
+                return redirect(list_enrollments)
+            else:
+                messages.error(request, 'You cannot Cancel this enrorllment now. Payment has already been made')
+                return redirect(list_enrollments)
+
+        elif descx == 'fee payment':
+            pass
+            # trans.delete()
+        else:
+            return HttpResponse(trans.descx)
+            # return redirect(list_enrollments)
+    else:
+        messages.warning(request, 'The Transaction you want to cancel does NOT exists.')
+        return redirect(list_enrollments)
 
 
 def financial_transactions(request, action, enr_id, inv_no, trans_id=0):
     sch_id = schools(request)['sch_id']
 
     if action == 'delete':
-        delete_financial_Transaction(request, sch_id, trans_id)
+        cancel_financial_Transaction(request, sch_id, trans_id)
 
     # -- Debit Student with the Fee Amount
     if action == 'update':
@@ -591,9 +622,7 @@ def student_payment(request, stud_id):
     inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
 
     if request.method == 'POST':
-        trans_id = create_next_tranaction(request, desc='payment', sch_id=sch_id)
-        print('Trans-ID')
-        print(trans_id)
+        trans_id = create_next_tranaction(request, desc='fee payment', sch_id=sch_id)
         cur_sesx_id = get_cur_session(sch_id)
         # NOTE: The 'replace' is used to remove any comma in the amt_paid text before converting to flaat else error
         amt_paying = float(request.POST['amt_paid'].replace(',', ''))
