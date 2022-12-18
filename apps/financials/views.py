@@ -221,8 +221,6 @@ def cancel_enrollment(request, enr_id, inv_no, trans_id):
     if trans.descx == 'enrollment':
 
         for inv in trans.invoice.all():
-            print('Invoice Date')
-            print(inv.trans_date)
             break
 
         stud_id = inv.student_id
@@ -239,9 +237,7 @@ def cancel_enrollment(request, enr_id, inv_no, trans_id):
             except:
                 messages.error(request, 'The operation was not successful. ')
         else:
-            print('Date not Match: ')
-            messages.info(request,
-                          'The action carried was NOT successful.  Cancellation can be done only on the date of enrollment')
+            messages.info(request, 'You cannot cancel this transaction today.  Cancellation can be done only on the date of enrollment')
 
     return redirect('list-enrollments')
 
@@ -367,73 +363,79 @@ def create_tranaction(request, desc, sch_id, stud_id=0):
 
 @transaction.atomic
 def cancel_financial_transaction(request, sch_id, trans_id):
-    print(f'school_id: {sch_id}')
 
-    trans = FinancialTransactions.objects.get(school_id=sch_id, transaction=trans_id)
-    if trans:
-        descx = trans.descx
-        if descx == 'enrollment':
-            for tr in trans.enrollment.all():
-                print(tr.status)
-                status = tr.status
-                recipt_no = tr.last_rcpt_no
-                stud_id = tr.student_id
-                break
+    try:
+        trans = FinancialTransactions.objects.get(school_id=sch_id, transaction=trans_id)
+        if trans:
+            descx = trans.descx
+            if descx == 'enrollment':
+                for tr in trans.enrollment.all():
+                    status = tr.status
+                    recipt_no = tr.last_rcpt_no
+                    stud_id = tr.student_id
+                    break
 
-            if recipt_no is None:
-                #  Cancel Enrollment, If no payment has been made for Enrolled Student.
-                updated = Students.objects.filter(school_id=sch_id, id=stud_id).update(reg_steps=2, reg_status='pending')
-                if updated:
-                    trans.delete()
-                    messages.success(request, 'Student Enrolled Cancelled Successfully.')
+                if recipt_no is None:
+                    #  Cancel Enrollment, If no payment has been made for Enrolled Student.
+                    updated = Students.objects.filter(school_id=sch_id, id=stud_id).update(reg_steps=2, reg_status='pending')
+                    if updated:
+                        trans.delete()
+                        messages.success(request, 'Student Enrolled Cancelled Successfully.')
+                    else:
+                        messages.error(request, 'Cancellation of Student Enrolled Failed.')
+                    return redirect(list_enrollments)
                 else:
-                    messages.error(request, 'Cancellation of Student Enrolled Failed.')
-                return redirect(list_enrollments)
+                    messages.error(request, 'You cannot Cancel this enrorllment now. Payment has already been made')
+                    return redirect(list_enrollments)
+
+            elif descx == 'fee payment':
+                stud_id = trans.student_id
+                trans.delete()
+
+                f1 = Q(school_id=sch_id) & Q(student_id=stud_id)
+                pmt_counts = FeesPayments.objects.filter(f1).count()
+                due = FeesAccounts.objects.filter(school_id=sch_id, student_id=stud_id).aggregate(balance=Sum('amount'))
+                last = FeesPayments.objects.filter(f1).values('receipt_no').order_by('receipt_no').last()
+                print(last)
+                if last is None:
+                    last = {'receipt_no': None}
+
+                if pmt_counts > 0 and due['balance'] > 0:
+                    status = 'paying'
+                    status_inv = 'pp'
+                elif pmt_counts > 0:
+                    status = 'paid'
+                    status_inv = 'pf'
+                else:
+                    status = 'enrolled'
+                    status_inv = 'np'
+                    Students.objects.filter(school_id=sch_id, id=stud_id).update(reg_status=status)
+
+                enrlmt = Enrollments.objects.filter(f1 & ~Q(status='close'))
+                print(enrlmt)
+                trans_id_enrlmt = enrlmt[0].transaction_id
+                enrlmt.update(status=status, last_rcpt_no=last["receipt_no"])
+                print('Enrollment')
+                print(enrlmt)
+
+                inv = Invoice.objects.filter(f1 & Q(transaction_id=trans_id_enrlmt))
+                inv.update(balance=due['balance'], status=status_inv)
+
+                print(f'Fees Payment Counts: {pmt_counts};  Status: {status}; Last Receipt No: {last["receipt_no"]}')
+                return HttpResponse(f'Fees Payment Counts: {pmt_counts}')
+
+            elif descx == 'wallet deposit':
+                trans.delete()
+                return HttpResponse(f'{trans.descx} transaction is cancelled.')
             else:
-                messages.error(request, 'You cannot Cancel this enrorllment now. Payment has already been made')
-                return redirect(list_enrollments)
-
-        elif descx == 'fee payment':
-            stud_id = trans.student_id
-            trans.delete()
-
-            f1 = Q(school_id=sch_id) & Q(student_id=stud_id)
-            pmt_counts = FeesPayments.objects.filter(f1).count()
-            due = FeesAccounts.objects.filter(school_id=sch_id, student_id=stud_id).aggregate(balance=Sum('amount'))
-            last = FeesPayments.objects.filter(f1).values('receipt_no').order_by('receipt_no').last()
-            print(last)
-            if last is None:
-                last = {'receipt_no': None}
-
-            if pmt_counts > 0 and due['balance'] > 0:
-                status = 'paying'
-                status_inv = 'pp'
-            elif pmt_counts > 0:
-                status = 'paid'
-                status_inv = 'pf'
-            else:
-                status = 'enrolled'
-                status_inv = 'np'
-                Students.objects.filter(school_id=sch_id, id=stud_id).update(reg_status=status)
-
-            enrlmt = Enrollments.objects.filter(f1 & ~Q(status='close'))
-            print(enrlmt)
-            trans_id_enrlmt = enrlmt[0].transaction_id
-            enrlmt.update(status=status, last_rcpt_no=last["receipt_no"])
-            print('Enrollment')
-            print(enrlmt)
-
-            inv = Invoice.objects.filter(f1 & Q(transaction_id=trans_id_enrlmt))
-            inv.update(balance=due['balance'], status=status_inv)
-
-            print(f'Fees Payment Counts: {pmt_counts};  Status: {status}; Last Receipt No: {last["receipt_no"]}')
-
-            return HttpResponse(f'Fees Payment Counts: {pmt_counts}')
+                return HttpResponse(trans.descx)
+                # return redirect(list_enrollments)
         else:
-            return HttpResponse(trans.descx)
-            # return redirect(list_enrollments)
-    else:
-        messages.warning(request, 'The Transaction you want to cancel does NOT exists.')
+            messages.warning(request, 'The Transaction you want to cancel does NOT exists.')
+            return redirect(list_enrollments)
+
+    except FinancialTransactions.DoesNotExist:
+        messages.error(request, 'The Transaction you want to cancel does NOT exists.')
         return redirect(list_enrollments)
 
 
@@ -524,9 +526,8 @@ def list_enrollments(request):
     context = {}
 
     # students_enrolled = Invoice.objects.filter(school=sch_id, enrolled__status='Enrolled').select_related('student', 'enrolled')
-    criteria1 = (Q(status='enrolled') | Q(status='paid') | Q(status='paying') | Q(status='returned')) & Q(
-        school_id=sch_id)
-    students_enrolled = Enrollments.objects.filter(criteria1).order_by('school_id', 'classroom_id', 'student__surname')
+    f1 = (Q(status='enrolled') | Q(status='paid') | Q(status='paying') | Q(status='returned')) & Q(school_id=sch_id)
+    students_enrolled = Enrollments.objects.filter(f1).order_by('school_id', 'classroom_id', 'student__surname')
 
     context = {'enrollments': students_enrolled}
     return render(request, 'student-enrolled-list.html', context)
@@ -604,7 +605,6 @@ def student_wallet(request, action, deposit_amt, sch_id, stud_id, trans_id=0):
         pmt.balance = acct.runing['balance']
         pmt.save()
     else:
-        print('Wallet Details Form is Not Valid.')
         messages.warning(request, form.errors)
         return {}
 
@@ -654,15 +654,16 @@ def student_payment(request, stud_id):
     inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
 
     if request.method == 'POST':
-        trans_id = create_tranaction(request, desc='fee payment', sch_id=sch_id, stud_id=stud_id)
         cur_sesx_id = get_cur_session(sch_id)
         # NOTE: The 'replace' is used to remove any comma in the amt_paid text before converting to flaat else error
         amt_paying = float(request.POST['amt_paid'].replace(',', ''))
 
         if pay_into['bank_name'] == 'Student Wallet':
-            student_wallet(request, 'credit', amt_paying,  sch_id, stud_id)
+            trans_id = create_tranaction(request, desc='wallet deposit', sch_id=sch_id, stud_id=stud_id)
+            student_wallet(request, 'credit', amt_paying,  sch_id, stud_id, trans_id)
             return redirect(wallet_account, stud_id=stud_id)
         else:
+            trans_id = create_tranaction(request, desc='fee payment', sch_id=sch_id, stud_id=stud_id)
             recpt_no = generate_receipt_no()
             inv_count = inv.count()
             # for i in inv:
@@ -764,7 +765,7 @@ def student_payment(request, stud_id):
 
         context = {'header': header, 'enrolled': enrolled, 'timeline': timeline, 'paymethods': paymethod, 'banks': bank,
                    'descx': pay_descx, 'student': wallet}
-        return render(request, 'financial/student-payment.html', context)
+        return render(request, 'student-payment.html', context)
 
 
 def process_invoice(amt_paying, inv, sch_id, stud_id):

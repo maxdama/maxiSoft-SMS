@@ -199,17 +199,16 @@
                         </div>
                     </div>
 
-                        <div class="card-footer card-transparent">
+                        <div class="card-footer card-transparent pt-3">
                             <div class="row d-flex justify-content-center text-center">
-                                 <div class="col-4 ">
-                                    <button class="btn btn-outline-dark btn-round btn-sm"  type="submit" name="save_and_add" value="save&add" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Save and Add Another</button>
+                                 <div class="col-2 ">
+                                    <!-- <button class="btn btn-outline-dark btn-round btn-sm"  type="submit" name="save_and_add" value="save&add" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Save and Add Another</button> -->
                                  </div>
-                                 <div class="col-4 ">
-                                     <button class="btn btn-outline-dark btn-round btn-sm" type="submit" name="save_and_list" value="save&list" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Finish and List Enrollment</button>
+                                 <div class="col-5 ">
+                                     <!-- <button class="btn btn-outline-dark btn-round btn-sm" type="submit" name="save_and_list" value="save&list" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Finish and List Enrollment</button> -->
+                                     <button class="btn btn-outline-dark btn-round btn-sm" id="save"  type="submit" name="save" value="paid" formaction="/financials/student-payment/{{enrolled.student_id}}" >Pay NOW</button>
                                  </div>
-                                  <div class="col-4 ">
-                                      <button class="btn btn-outline-dark btn-round btn-sm" id="save"  type="submit" name="save" value="paid" formaction="/financials/student-payment/{{enrolled.student_id}}" >Pay NOW</button>
-                                  </div>
+                                  <div class="col-2 "></div>
                              </div>
                         </div>
 
@@ -333,17 +332,8 @@
                 if(bank == ""){msg = msg + '\n >>   ---- Bank Entry ----'};
                 if(msg != ""){msg = msg + '\n\n Please fill required fields and Continue.'};
 
-                swal({
-				title: 'WAIT oo !!',
-				text: msg,
-				type: 'warning',
-				buttons:{
-					confirm: {
-						text : 'OK, Understood!',
-						className : 'btn btn-success'
-					}
-				}
-				})
+                show_sweet_msg('WAIT oo !!', msg)
+
             };
 
              $('#pay_method').change(function(){
@@ -357,7 +347,8 @@
 
                     acct_bal = $.parseNumber(acct_bal, {format:"#,###.00", locale:"us"});
                     if(acct_bal <= 0){
-                        alert('You can NOT Receive Payment from Student Wallet: \n Balance is not sufficient')
+                        msg = 'You can NOT Receive Payment from Student Wallet: \n Balance is not sufficient'
+                        show_sweet_msg('Payment Info', msg)
 
                         $("#pay_method").val('0').change();
                     } else {
@@ -377,8 +368,9 @@
 
                 if (pay_method === pay_into) {
                     $("#bank").val('0').change();
-                    alert('Wrong Selection: \n You can NOT receive payment from ' + pay_method +
-                        '\n and Pay into Student Wallet. ')
+                    msg = 'You can NOT receive payment from ' + pay_method +
+                        '\n and Pay into Student Wallet. '
+                    show_sweet_msg('Wrong Selection', msg)
 
                 } else if (pay_into === 'Student Wallet'){
                     let pay_meth = $("#pay_method option:selected").text()
@@ -401,20 +393,31 @@
                         balance = $.formatNumber(balance, {format:"#,###.00", locale:"us"});
                         due_amt = $.formatNumber(due_amt, {format:"#,###.00", locale:"us"});
 
-                        msg = 'The Amount being Paid is more than the Due Amount for the Student.\n' +
-                            'The Balance of ' + balance + ' shall be Credited to the Student Wallet.\n' +
-                            '\n' +
-                            'Do you want continue with the Payment'
-
-                        alert(msg)
+                        msg = 'The Amount being Paid is more than the Due Amount for this Student.' +
+                            'The excess of ' + balance + ' shall be Credited to the Student Wallet.'
+                        show_sweet_msg('Payment Info', msg)
                     } else if (amt_paying > due_amt && due_amt == 0 && msg===''){
                         msg = 'The student is not owing.\n Pay the money into the student Wallet'
-                        alert(msg)
+                        show_sweet_msg('Student Info', msg)
                         // $("#bank").val('5').change();
                     }
                 }
 
             });
+
+            function show_sweet_msg(title, msg_text, type='info', btn_text='OK, Understood') {
+                swal({
+				title: title,
+				text: msg_text,
+
+				buttons:{
+					confirm: {
+						text : btn_text,
+						className : 'btn btn-success'
+					}
+				}
+				})
+            }
 
 		});
 	</script>
