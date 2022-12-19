@@ -1,5 +1,8 @@
 import datetime
-from datetime import date
+import io
+import os, sys
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
 
 from django.contrib import messages
 from django.db import transaction, IntegrityError
@@ -14,6 +17,7 @@ from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms,
 from apps.students.models import Students
 from apps.utils import schools, get_cur_session, generate_reg_no
 from django.db.models import Q
+from apps.financials import receipts
 
 
 # Create your views here.
@@ -635,6 +639,11 @@ def get_or_create_bank_accounts(sch_id, status):
     return bank
 
 
+def create_pdf_receipt(trans_id):
+    print('Creating PDF Receipt')
+    return HttpResponse('Creating PDF Receipt')
+
+
 @transaction.atomic
 def student_payment(request, stud_id):
     sch_id = schools(request)['sch_id']
@@ -733,6 +742,10 @@ def student_payment(request, stud_id):
                     msg = msg1
                     if msg2: msg = msg + msg2
                     messages.success(request, msg)
+
+                    if x == inv_count:
+                        payment_receipt(request, sch_id=sch_id, receipt_id=recpt_no )
+                        return redirect(payment_receipt, sch_id=sch_id, receipt_id=recpt_no)
 
                 else:
                     print(payment.errors)
@@ -870,3 +883,39 @@ def wallet_account(request, stud_id, **kwargs):
             context = {}
         # print(wallet.accounts.all())
         return render(request, 'wallet-accounts.html', context)
+
+
+def payment_receipt(request, sch_id, receipt_id):
+    if request.method == 'POST':
+        from reportlab.lib.pagesizes import letter
+        from apps.financials.pdf_templates import pdf_receipts
+        # Create a file-like buffer to receive PDF data.
+        buffer = io.BytesIO()
+        print('Request Object:')
+        print(request)
+        # Create the PDF object, using the buffer as its "file."
+        #p = canvas.Canvas(buffer)
+        my_path = 'd:\\py2pdf\\ngs_receipt.pdf'
+        c = canvas.Canvas('ngs_receipt.pdf', pagesize=letter)
+        # c = canvas.Canvas(buffer, pagesize=letter)
+        c = pdf_receipts(1, c)  # run the template
+
+        c.showPage()
+        c.save()
+
+        print('----- Payment Receipt Generated')
+        return HttpResponse('----- Payment Receipt Generated in your Application root foleder')
+
+        # FileResponse sets the Content-Disposition header so that browsers
+        # present the option to save the file.
+
+        # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=False, content_type='application/pdf')
+        # buffer.seek(0)
+        # return FileResponse(buffer, as_attachment=True, filename='ngs_receipt.pdf')
+        # os.startfile('ngs_receipt.pdf', 'open')
+    else:
+        context={}
+
+        print('Request method is GET')
+        return render(request, 'payment-receipt.html', context)
+        return HttpResponse('GETTING Payment Receipts . . . ')

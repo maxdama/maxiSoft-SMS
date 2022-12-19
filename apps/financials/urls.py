@@ -16,5 +16,6 @@ urlpatterns = [
     path('student-payment/<int:stud_id>', views.student_payment, name='payment-entry'),
     path('wallet-account/<int:stud_id>', views.wallet_account, name='wallet_account'),
     path('cancel-transaction/<int:sch_id>/<int:trans_id>', views.cancel_financial_transaction, name='wallet_account'),
+    path('payment-receipt/<int:sch_id>/<int:receipt_id>', views.payment_receipt, name='payment-receipt'),
 
 ]
