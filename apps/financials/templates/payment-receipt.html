@@ -1,0 +1,64 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Payment Receipt{% endblock title %}
+
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% load humanize %}
+{% block content %}
+
+    <div class="content">
+        <div class="page-inner">
+
+            <div class="page-header">
+                <h3 class="font-weight-bold" >Payment Receipt</h3>
+
+            </div>
+            <div class="container justify-content-start border ">
+
+                <div class="row border">
+
+                    <div class="col col-sm-5 border">
+                        First Column Width = 5
+                        <div class="card d-flex">
+                            <div class="card-header">
+                                <div><span class="text-small">Date:</span> <span class="font-weight-normal">12 Dec 2022 </span> </div>
+                                <div><span class="text-small">Name:</span> <span class=" fw-extrabold">Samuel Okon </span> </div>
+                                <div><span class="text-small">Class:</span> <span class=" fw-extrabold">JSS 1A </span> </div>
+
+                            </div>
+                            <div class="card-body"></div>
+
+                        </div>
+                    </div>
+                    <div class="col  border">
+                        Second Column
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr["success"]('{{ message }}', 'Very Good . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+{% endblock javascripts %}

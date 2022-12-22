@@ -1,0 +1,156 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Guardians{% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style class="">
+	.swal-title {
+      margin: 0px;
+      font-size: 23px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+        text-align: -moz-center;
+    }
+
+    .swal-text {
+      background-color: rgb(255, 255, 255);
+      padding: 17px;
+      border: 1px solid rgba(240, 225, 161, 0.94);
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+      font-size: 17px;
+    }
+
+    .swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 4px solid #E9EEF1;
+      overflow: hidden;
+    }
+</style>
+
+{% endblock stylesheets %}
+
+{% load humanize %}
+{% block content %}
+
+	<div class="content">
+		<div class="page-inner">
+
+			<div class="page-header">
+				<h4 class="page-title">Wallet Accounts</h4>
+				<ul class="breadcrumbs">
+					<li class="nav-home">
+						<a href="#">
+							<i class="flaticon-home"></i>
+						</a>
+					</li>
+					<li class="separator">
+						<i class="flaticon-right-arrow"></i>
+					</li>
+					<li class="nav-item">
+						<a href="#">Tables</a>
+					</li>
+					<li class="separator">
+						<i class="flaticon-right-arrow"></i>
+					</li>
+					<li class="nav-item">
+						<a href="#">Datatables</a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="row ">
+				<div class="col-md-12">
+
+					<div class="card d-flex">
+
+						<div class="card-header">
+							<div class=" align-items-center">
+								<h4 class="card-title fw-extrabold">{{wallet.student}} </h4>
+								<div class="row">
+								<div class="  col-6"><span class="text">Class: {{class_room}}</span></div>
+								<div class=" col-3 offset-3 pl-3 fw-bold">Balance: <span class="pl-3 ">{{wallet.wallet.balance|floatformat:2|intcomma}}</span> </div>
+								</div>
+							</div>
+						</div>
+
+						<div class="card-body">
+							<!--  Table Starts Here   -->
+							<div class="table-responsive-sm">
+								<table id="add-row" class="display table table-striped table-hover table-responsive-sm " >
+
+									<thead>
+										<tr>
+											<th>S/N</th>
+											<th>Trans Date</th>
+											<th>Instrument</th>
+											<th>Amount</th>
+											<th>Runing <br> Balance</th>
+											<th>Trans <br> Type</th>
+										</tr>
+									</thead>
+
+									<tbody>
+										{% for acct in wallet.accounts.all %}
+											<tr height="25px">
+												<td class="text-center">{{ forloop.counter }}</td>
+												<td class="text-center">{{acct.pmt_date|date:'d/m/Y'}}</td>
+												<td>{{acct.pay_method}}</td>
+												<td class="text-right pr-2">{{acct.amt_paid|floatformat:2|intcomma}}</td>
+												<td class="text-right pr-2">{{acct.runing.balance|floatformat:2|intcomma}}</td>
+												<td>{{acct.tr_type|capfirst}}</td>
+
+											</tr>
+										{% endfor %}
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+
+     {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'success'%}
+                <script type=text/javascript>toastr["success"]('{{ message }}', 'Very Good . . . ')</script>
+            {% elif message.tags == 'info' %}
+                <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
+            {% elif message.tags == 'warning' %}
+                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
+            {% elif message.tags == 'error' %}
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+	<!-- Atlantis DEMO methods, don't include it in your project! -->
+	<script src="/static/assets/js/setting-demo2.js"></script>
+
+	<script>
+
+
+	</script>
+
+	<script type="text/javascript"  >
+
+		$(document).ready(function() {
+
+		});
+
+	</script>
+
+{% endblock javascripts %}
