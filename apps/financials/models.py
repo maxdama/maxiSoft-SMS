@@ -210,6 +210,7 @@ class Invoice(models.Model):
     invoice_no = models.BigIntegerField(null=True, blank=True)
     descx = models.CharField(max_length=250)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, null=True, blank=True)
@@ -261,6 +262,8 @@ class FeesPayments(models.Model):
     pmt_date = models.DateField()
     school = models.ForeignKey(SchoolProfiles, on_delete=models.RESTRICT, unique=False)
     student = models.ForeignKey(Students, on_delete=models.RESTRICT, unique=False,  related_name='payments')
+    invoice = models.ForeignKey(Invoice, on_delete=models.RESTRICT, related_name='payments', unique=False,
+                                null=True, blank=True)
     enrolled = models.ForeignKey(Enrollments, on_delete=models.RESTRICT, related_name='payments', unique=False,
                                  null=False, blank=True)
     classroom = models.ForeignKey(ClassRooms, on_delete=models.RESTRICT, related_name='payments', unique=False,
@@ -274,6 +277,15 @@ class FeesPayments(models.Model):
     bank = models.ForeignKey(Banks, on_delete=models.RESTRICT, related_name='payments', unique=False)
     status = models.CharField(max_length=15, null=True, blank=True)
     transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE,  blank=True, related_name='payments')
+
+    @property
+    def runing(self):  # Calculate Runing Balance for the specified Client
+        f1 = Q(school_id=self.school) & Q(student_id=self.student) & (Q(doc_type='receipt') | Q(doc_type='invoice'))
+        f2 = Q(doc_no__lte=self.receipt_no)
+        bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2))
+        if bal is None:
+            bal = {'balance': 0.00}
+        return bal
 
     def __str__(self):
         return str(self.pmt_date) + ' ' + str(self.receipt_no) + ' ' + str(self.invoice_no) + ' ' + str(self.pmt_descx) \
@@ -338,7 +350,7 @@ class WalletPayments(models.Model):
     transaction = models.ForeignKey(FinancialTransactions, on_delete=models.CASCADE, blank=True)
 
     def __str__(self):
-        return str(self.id) + ' ' + str(self.student) + ' ' + str(self.pmt_date) + ' ' + str(self.pay_method) \
+        return str(self.payment_id) + ' ' + str(self.student) + ' ' + str(self.pmt_date) + ' ' + str(self.pay_method) \
                + ' ' + str(self.amt_paid)
 
     class Meta:

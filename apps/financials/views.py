@@ -1,6 +1,9 @@
 import datetime
 import io
 import os, sys
+from time import sleep
+
+import psutil as psutil
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
 
@@ -426,7 +429,7 @@ def cancel_financial_transaction(request, sch_id, trans_id):
                 inv.update(balance=due['balance'], status=status_inv)
 
                 print(f'Fees Payment Counts: {pmt_counts};  Status: {status}; Last Receipt No: {last["receipt_no"]}')
-                return HttpResponse(f'Fees Payment Counts: {pmt_counts}')
+                return HttpResponse(f'Fees Payment Counts: {pmt_counts}. Transaction is Cancelled')
 
             elif descx == 'wallet deposit':
                 trans.delete()
@@ -639,9 +642,36 @@ def get_or_create_bank_accounts(sch_id, status):
     return bank
 
 
-def create_pdf_receipt(trans_id):
-    print('Creating PDF Receipt')
-    return HttpResponse('Creating PDF Receipt')
+def print_pdf_receipt(request, sch_id, receipt_no):
+    # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=True, content_type='application/pdf')
+
+    if request.GET.get('btn_print'):
+        print('correct')
+        print(request.GET['btn_print'])
+        print('Printing PDF Receipt')
+        file_path = "c:\\Users\\Administrator\\Downloads\\ngs_receipt.pdf"
+        try:
+            os.startfile("ngs_receipt.pdf", "print")
+            # Sleeping the program for 5 seconds so as to account the
+            # steady processing of the print operation.
+            sleep(5)
+            for p in psutil.process_iter():  # Close Acrobat after printing the PDF
+                if 'AcroRd' in str(p):
+                    print('Killing Acrobat Reader')
+                    p.kill()
+            return HttpResponse('Printing PDF Receipt')
+        except:
+            messages.error(request, 'ALERT: Receipt could not be printed! Please ensure  \
+            that associated PDF reader software is installed in the client system.')
+            return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
+
+    elif request.GET.get('btn_preview'):
+        os.startfile("ngs_receipt.pdf", "open")
+        # Sleeping the program for 5 seconds so as to account the
+        # steady processing of the print operation.
+        sleep(5)
+        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
+        return HttpResponse('Previewing PDF Receipt')
 
 
 @transaction.atomic
@@ -660,7 +690,7 @@ def student_payment(request, stud_id):
         pay_into = {'bank_name': ''}
 
     f1 = Q(student_id=stud_id) & Q(school_id=sch_id) & (Q(status='np') | Q(status='pp'))
-    inv = Invoice.objects.values('invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
+    inv = Invoice.objects.values('id', 'invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
 
     if request.method == 'POST':
         cur_sesx_id = get_cur_session(sch_id)
@@ -673,7 +703,7 @@ def student_payment(request, stud_id):
             return redirect(wallet_account, stud_id=stud_id)
         else:
             trans_id = create_tranaction(request, desc='fee payment', sch_id=sch_id, stud_id=stud_id)
-            recpt_no = generate_receipt_no()
+            receipt_no = generate_receipt_no()  # Generate the next Receipt No
             inv_count = inv.count()
             # for i in inv:
             for x, i in enumerate(inv, start=1):
@@ -695,7 +725,7 @@ def student_payment(request, stud_id):
                     fee_acct.amount = -abs(inv_p['amt_paid'])
                     fee_acct.tr_type = 'cr'
                     fee_acct.doc_type = 'receipt'
-                    fee_acct.doc_no = recpt_no
+                    fee_acct.doc_no = receipt_no
                     fee_acct.transaction_id = trans_id
                     fee_acct.save()
 
@@ -709,8 +739,9 @@ def student_payment(request, stud_id):
                     pmt = payment.save(commit=False)
 
                     pmt.session_id = cur_sesx_id['sesx_id']
+                    pmt.invoice_id = i['id']
                     pmt.invoice_no = inv_no
-                    pmt.receipt_no = recpt_no
+                    pmt.receipt_no = receipt_no
                     pmt.status = status
                     pmt.pmt_descx = inv_p['descx']
                     pmt.amt_paid = inv_p['amt_paid']
@@ -723,7 +754,7 @@ def student_payment(request, stud_id):
                         enr_status = 'paid'
 
                     Invoice.objects.filter(school=sch_id, invoice_no=inv_no).update(balance=inv_bal, status=status)
-                    Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=recpt_no, status=enr_status)
+                    Enrollments.objects.filter(school=sch_id, id=enr_id).update(last_rcpt_no=receipt_no, status=enr_status)
                     updated = Students.objects.filter(school=sch_id, id=stud_id).update(reg_status='active')
 
                     msg1 = ''
@@ -744,8 +775,8 @@ def student_payment(request, stud_id):
                     messages.success(request, msg)
 
                     if x == inv_count:
-                        payment_receipt(request, sch_id=sch_id, receipt_id=recpt_no )
-                        return redirect(payment_receipt, sch_id=sch_id, receipt_id=recpt_no)
+                        payment_receipt(request, sch_id=sch_id, receipt_id=receipt_no) # Prepare PDF Receipt
+                        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no) # Pre Receipt Print
 
                 else:
                     print(payment.errors)
@@ -915,7 +946,19 @@ def payment_receipt(request, sch_id, receipt_id):
         # os.startfile('ngs_receipt.pdf', 'open')
     else:
         context={}
+        f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_id)
+        pmts = FeesPayments.objects.filter(f1)
+        total = FeesPayments.objects.filter(f1).aggregate(amt_paid=Sum('amt_paid'))
+        if total['amt_paid'] is None:
+            total = {'amt_paid': 0.00}
+        print(total)
+        trans_id = pmts.last().transaction_id
+        wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
+        print(wallet_credited)
+        amt_paid = None
+        if wallet_credited:
+            amt_paid = wallet_credited.amt_paid
+        context = {'pmts': pmts, 'total': total, 'wallet_credited': amt_paid}
 
-        print('Request method is GET')
         return render(request, 'payment-receipt.html', context)
         return HttpResponse('GETTING Payment Receipts . . . ')

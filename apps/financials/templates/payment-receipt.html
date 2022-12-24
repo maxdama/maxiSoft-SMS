@@ -17,23 +17,88 @@
             </div>
             <div class="container justify-content-start border ">
 
-                <div class="row border">
+                <div class="row ">
 
-                    <div class="col col-sm-5 border">
-                        First Column Width = 5
-                        <div class="card d-flex">
-                            <div class="card-header">
-                                <div><span class="text-small">Date:</span> <span class="font-weight-normal">12 Dec 2022 </span> </div>
-                                <div><span class="text-small">Name:</span> <span class=" fw-extrabold">Samuel Okon </span> </div>
-                                <div><span class="text-small">Class:</span> <span class=" fw-extrabold">JSS 1A </span> </div>
+                    <div class="col col-sm-5 ">
 
+                        <div class="card shadow border ">
+                            <div class="card-header mb-0 pb-1">
+                                <div><span class="text-small">Date:</span> <span class="font-weight-normal">{{pmts.first.pmt_date}} </span> </div>
+                                <div><span class="text-small">Name:</span>
+                                    <span class=" fw-extrabold">{{pmts.first.student.surname}} {{pmts.first.student.first_name}} {{pmts.first.student.middle_name}}</span>
+                                    {% if pmts %}
+                                    </span> <span class=" text-small ">({{pmts.first.classroom.class_abr}}{{pmts.first.classroom.arm}}) </span>
+                                    {% endif %}
+                                </div>
+                                <div class="float-right"><span class="text-small">Due Fees:</span> <span class="font-weight-normal">{{pmts.last.runing.balance|floatformat:2|intcomma}}</span> </div>
                             </div>
-                            <div class="card-body"></div>
+
+                            <div class="card-body pt-1">
+                                <div class=" text-sm-center"> <span class="text-small">Receipt No: {{pmts.first.receipt_no}}</span> <span></span> </div>
+                                <div class="border-bottom text-left"> <span class="text-small">Payment Details:</span>  </div>
+
+                                <div class="table-responsive table-light table-sm   ">
+                                    <table class="text-small ">
+                                    <thead>
+                                        <tr class="text-center ">
+                                            <th >Description</th>
+                                            <th>Inv Amt</th>
+                                            <th>Discount</th>
+                                            <th>Paid</th>
+                                            <th>Bal.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="">
+                                        {% for pmt in pmts %}
+                                        <tr>
+                                            <td class="border ">{{pmt.pmt_descx}}</td>
+                                            <td class="border text-right">{{pmt.invoice.amount|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{pmt.invoice.discount|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{pmt.amt_paid|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{pmt.runing.balance|floatformat:2|intcomma}}</td>
+                                        </tr>
+                                        {% endfor %}
+
+                                    </tbody>
+                                </table>
+
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    {% if wallet_credited %}
+                                    <div class="col-10 border-bottom"> <span class="text-small float-right ">Wallet Credited: {{wallet_credited|floatformat:2|intcomma}}</span></div>
+                                    {% endif %}
+                                    <div class="col-10 border-bottom font-weight-bold "> <span class="text-small float-right">Total Amount Paid: {{total.amt_paid|floatformat:2|intcomma}}</span></div>
+                                </div>
+                            </div>
 
                         </div>
                     </div>
-                    <div class="col  border">
-                        Second Column
+                    <div class="col  border align-content-sm-center  ">
+                        <form action="" class="">
+                            <div class="row pl-3 "><span class="page-header ">Receipt Actions</span></div>
+                            <div><span class="small type-active"> You can do Print Preview of the this Receipt, Print  or Cancel the receipt</span></div>
+                            <p>
+                            <div class="row pl-lg-5 ">
+                                <button
+                                        class="btn btn-sm btn-outline-success btn-round  w-25 "
+                                        type="submit" name="btn_print" value="123"
+                                        formaction="/financials/print-receipt/1/1">
+                                    Print Receipt
+                                </button>
+                            </div>
+                            <p>
+                            <div class="row pl-lg-5">
+                                <button
+                                    class="btn btn-sm btn-outline-success btn-round  w-25 "
+                                    type="submit" name="btn_preview" value="123"
+                                    formaction="/financials/print-receipt/1/1">
+                                    Preview
+                                </button>
+                            </div>
+                        <div class="row">Cancel</div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -54,7 +119,7 @@
             {% elif message.tags == 'info' %}
                 <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
             {% elif message.tags == 'warning' %}
-                <script type=text/javascript>toastr.warning('{{ message }}', 'Warning . . . ')</script>
+                <script type=text/javascript>toastr.warning('{{ message }}')</script>
             {% elif message.tags == 'error' %}
                 <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
