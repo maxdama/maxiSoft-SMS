@@ -75,29 +75,38 @@
 
                         </div>
                     </div>
-                    <div class="col  border align-content-sm-center  ">
+                    <div class="col col-sm-4 border align-content-sm-center  ">
                         <form action="" class="">
                             <div class="row pl-3 "><span class="page-header ">Receipt Actions</span></div>
                             <div><span class="small type-active"> You can do Print Preview of the this Receipt, Print  or Cancel the receipt</span></div>
                             <p>
                             <div class="row pl-lg-5 ">
                                 <button
-                                        class="btn btn-sm btn-outline-success btn-round  w-25 "
+                                        class="btn btn-sm btn-outline-success btn-round w-50  "
                                         type="submit" name="btn_print" value="123"
                                         formaction="/financials/print-receipt/1/1">
-                                    Print Receipt
+                                    Direct Print
                                 </button>
                             </div>
                             <p>
                             <div class="row pl-lg-5">
                                 <button
-                                    class="btn btn-sm btn-outline-success btn-round  w-25 "
+                                    class="btn btn-sm btn-outline-success btn-round w-50 "
                                     type="submit" name="btn_preview" value="123"
                                     formaction="/financials/print-receipt/1/1">
-                                    Preview
+                                    Print Preview
                                 </button>
                             </div>
-                        <div class="row">Cancel</div>
+                            <p>
+                            <div class="row pl-lg-5">
+                                <button
+                                    class="btn btn-xs btn-outline-success btn-round warning w-50 "
+                                    type="submit" name="btn_preview" value="123"
+                                    formaction="/financials/print-receipt/1/1">
+                                    Cancel Receipt
+                                </button>
+                            </div>
+
                         </form>
                     </div>
                 </div>

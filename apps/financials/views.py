@@ -1,10 +1,8 @@
 import datetime
-import io
-import os, sys
+import os
 from time import sleep
 
 import psutil as psutil
-from django.http import FileResponse
 from reportlab.pdfgen import canvas
 
 from django.contrib import messages
@@ -20,7 +18,6 @@ from apps.settings.models import AcademicSessions, AcademicTimeLine, ClassRooms,
 from apps.students.models import Students
 from apps.utils import schools, get_cur_session, generate_reg_no
 from django.db.models import Q
-from apps.financials import receipts
 
 
 # Create your views here.
@@ -642,36 +639,59 @@ def get_or_create_bank_accounts(sch_id, status):
     return bank
 
 
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponseNotFound
+
+
+def pdf_print_preview(request, sch_id, receipt_no):
+    """
+    THIS FUNCTION IS FOR TESTING
+    Test Result is good. The function can be used to download or display PDF file
+
+    The FileSystemStorage sets the base_url to the project’s MEDIA_ROOT.
+    That means the file should be save in apps.media folder
+    """
+    fs = FileSystemStorage()
+    filename = 'ngs_receipt.pdf'
+    if fs.exists(filename):
+        with fs.open(filename) as pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            # response['Content-Disposition'] = 'attachment; filename="nsg_receipt.pdf"'
+            response['Content-Disposition'] = 'inline; filename="nsg_receipt.pdf"'
+            return response
+    else:
+        return HttpResponseNotFound('The requested pdf was not found in our server.')
+
+
+
 def print_pdf_receipt(request, sch_id, receipt_no):
     # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=True, content_type='application/pdf')
 
     if request.GET.get('btn_print'):
-        print('correct')
         print(request.GET['btn_print'])
         print('Printing PDF Receipt')
         file_path = "c:\\Users\\Administrator\\Downloads\\ngs_receipt.pdf"
         try:
-            os.startfile("ngs_receipt.pdf", "print")
+            os.startfile("ngs_receipt.pdf", "print") # Print the file in the application root directory
             # Sleeping the program for 5 seconds so as to account the
             # steady processing of the print operation.
-            sleep(5)
+            sleep(45)
             for p in psutil.process_iter():  # Close Acrobat after printing the PDF
                 if 'AcroRd' in str(p):
                     print('Killing Acrobat Reader')
                     p.kill()
-            return HttpResponse('Printing PDF Receipt')
+            #return HttpResponse('Printing PDF Receipt')
         except:
             messages.error(request, 'ALERT: Receipt could not be printed! Please ensure  \
             that associated PDF reader software is installed in the client system.')
-            return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
+
+        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
 
     elif request.GET.get('btn_preview'):
         os.startfile("ngs_receipt.pdf", "open")
-        # Sleeping the program for 5 seconds so as to account the
-        # steady processing of the print operation.
-        sleep(5)
+        sleep(10)
         return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
-        return HttpResponse('Previewing PDF Receipt')
+        # return HttpResponse('Previewing PDF Receipt')
 
 
 @transaction.atomic
@@ -919,17 +939,12 @@ def wallet_account(request, stud_id, **kwargs):
 def payment_receipt(request, sch_id, receipt_id):
     if request.method == 'POST':
         from reportlab.lib.pagesizes import letter
-        from apps.financials.pdf_templates import pdf_receipts
-        # Create a file-like buffer to receive PDF data.
-        buffer = io.BytesIO()
-        print('Request Object:')
-        print(request)
-        # Create the PDF object, using the buffer as its "file."
-        #p = canvas.Canvas(buffer)
+        from apps.pdf_templates import pdf_receipt_template
+
         my_path = 'd:\\py2pdf\\ngs_receipt.pdf'
         c = canvas.Canvas('ngs_receipt.pdf', pagesize=letter)
         # c = canvas.Canvas(buffer, pagesize=letter)
-        c = pdf_receipts(1, c)  # run the template
+        c = pdf_receipt_template(c, sch_id, receipt_id)  # run the template
 
         c.showPage()
         c.save()
@@ -939,11 +954,10 @@ def payment_receipt(request, sch_id, receipt_id):
 
         # FileResponse sets the Content-Disposition header so that browsers
         # present the option to save the file.
-
         # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=False, content_type='application/pdf')
         # buffer.seek(0)
         # return FileResponse(buffer, as_attachment=True, filename='ngs_receipt.pdf')
-        # os.startfile('ngs_receipt.pdf', 'open')
+
     else:
         context={}
         f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_id)
@@ -961,4 +975,4 @@ def payment_receipt(request, sch_id, receipt_id):
         context = {'pmts': pmts, 'total': total, 'wallet_credited': amt_paid}
 
         return render(request, 'payment-receipt.html', context)
-        return HttpResponse('GETTING Payment Receipts . . . ')
+        # return HttpResponse('GETTING Payment Receipts . . . ')
