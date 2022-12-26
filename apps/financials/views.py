@@ -666,13 +666,16 @@ def pdf_print_preview(request, sch_id, receipt_no):
 
 def print_pdf_receipt(request, sch_id, receipt_no):
     # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=True, content_type='application/pdf')
+    sch = SchoolProfiles.objects.get(sch_id=sch_id)
+    file_name = f"{sch.name_abr}-receipt-{receipt_no}"
+    receipt = file_name.lower()
 
     if request.GET.get('btn_print'):
         print(request.GET['btn_print'])
-        print('Printing PDF Receipt')
+        print(receipt)
         file_path = "c:\\Users\\Administrator\\Downloads\\ngs_receipt.pdf"
         try:
-            os.startfile("ngs_receipt.pdf", "print") # Print the file in the application root directory
+            os.startfile(receipt, "print") # Print the file in the application root directory
             # Sleeping the program for 5 seconds so as to account the
             # steady processing of the print operation.
             sleep(45)
@@ -688,7 +691,7 @@ def print_pdf_receipt(request, sch_id, receipt_no):
         return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
 
     elif request.GET.get('btn_preview'):
-        os.startfile("ngs_receipt.pdf", "open")
+        os.startfile(receipt, "open")
         sleep(10)
         return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
         # return HttpResponse('Previewing PDF Receipt')
@@ -941,10 +944,14 @@ def payment_receipt(request, sch_id, receipt_id):
         from reportlab.lib.pagesizes import letter
         from apps.pdf_templates import pdf_receipt_template
 
+        sch = SchoolProfiles.objects.get(sch_id=sch_id)
+        file_name = f"{sch.name_abr}-receipt-{receipt_id}"
+        # print(file_name.lower())
+        file_name = file_name.lower()
         my_path = 'd:\\py2pdf\\ngs_receipt.pdf'
-        c = canvas.Canvas('ngs_receipt.pdf', pagesize=letter)
+        c = canvas.Canvas(file_name, pagesize=letter)
         # c = canvas.Canvas(buffer, pagesize=letter)
-        c = pdf_receipt_template(c, sch_id, receipt_id)  # run the template
+        c = pdf_receipt_template(c, sch, receipt_id)  # run the template
 
         c.showPage()
         c.save()
@@ -961,18 +968,21 @@ def payment_receipt(request, sch_id, receipt_id):
     else:
         context={}
         f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_id)
-        pmts = FeesPayments.objects.filter(f1)
+        fees = FeesPayments.objects.filter(f1)
         total = FeesPayments.objects.filter(f1).aggregate(amt_paid=Sum('amt_paid'))
         if total['amt_paid'] is None:
             total = {'amt_paid': 0.00}
         print(total)
-        trans_id = pmts.last().transaction_id
+        trans_id = fees.last().transaction_id
         wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
-        print(wallet_credited)
-        amt_paid = None
+        print(request)
+        wallet_amt = 0
         if wallet_credited:
-            amt_paid = wallet_credited.amt_paid
-        context = {'pmts': pmts, 'total': total, 'wallet_credited': amt_paid}
+            wallet_amt = wallet_credited.amt_paid
+
+        tot_amt_paid = total['amt_paid'] + wallet_amt
+
+        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt}
 
         return render(request, 'payment-receipt.html', context)
         # return HttpResponse('GETTING Payment Receipts . . . ')

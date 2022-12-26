@@ -23,24 +23,24 @@
 
                         <div class="card shadow border ">
                             <div class="card-header mb-0 pb-1">
-                                <div><span class="text-small">Date:</span> <span class="font-weight-normal">{{pmts.first.pmt_date}} </span> </div>
+                                <div><span class="text-small">Date:</span> <span class="font-weight-normal">{{fees.first.pmt_date}} </span> </div>
                                 <div><span class="text-small">Name:</span>
-                                    <span class=" fw-extrabold">{{pmts.first.student.surname}} {{pmts.first.student.first_name}} {{pmts.first.student.middle_name}}</span>
-                                    {% if pmts %}
-                                    </span> <span class=" text-small ">({{pmts.first.classroom.class_abr}}{{pmts.first.classroom.arm}}) </span>
+                                    <span class=" fw-extrabold">{{fees.first.student.surname}} {{fees.first.student.first_name}} {{fees.first.student.middle_name}}</span>
+                                    {% if fees %}
+                                    </span> <span class=" text-small ">({{fees.first.classroom.class_abr}}{{fees.first.classroom.arm}}) </span>
                                     {% endif %}
                                 </div>
-                                <div class="float-right"><span class="text-small">Due Fees:</span> <span class="font-weight-normal">{{pmts.last.runing.balance|floatformat:2|intcomma}}</span> </div>
+                                <div class="float-right"><span class="text-small">Due Fees:</span> <span class="font-weight-normal">{{fees.last.runing.balance|floatformat:2|intcomma}}</span> </div>
                             </div>
 
                             <div class="card-body pt-1">
-                                <div class=" text-sm-center"> <span class="text-small">Receipt No: {{pmts.first.receipt_no}}</span> <span></span> </div>
+                                <div class=" text-sm-center"> <span class="text-small">Receipt No: {{fees.first.receipt_no}}</span> <span></span> </div>
                                 <div class="border-bottom text-left"> <span class="text-small">Payment Details:</span>  </div>
 
                                 <div class="table-responsive table-light table-sm   ">
                                     <table class="text-small ">
                                     <thead>
-                                        <tr class="text-center ">
+                                        <tr class="text-center text-secondary ">
                                             <th >Description</th>
                                             <th>Inv Amt</th>
                                             <th>Discount</th>
@@ -49,18 +49,25 @@
                                         </tr>
                                     </thead>
                                     <tbody class="">
-                                        {% for pmt in pmts %}
+                                        {% for fee in fees %}
                                         <tr>
-                                            <td class="border ">{{pmt.pmt_descx}}</td>
-                                            <td class="border text-right">{{pmt.invoice.amount|floatformat:2|intcomma}}</td>
-                                            <td class="border text-right">{{pmt.invoice.discount|floatformat:2|intcomma}}</td>
-                                            <td class="border text-right">{{pmt.amt_paid|floatformat:2|intcomma}}</td>
-                                            <td class="border text-right">{{pmt.runing.balance|floatformat:2|intcomma}}</td>
+                                            <td class="border ">{{fee.pmt_descx}}</td>
+                                            <td class="border text-right">{{fee.invoice.amount|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{fee.invoice.discount|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{fee.amt_paid|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{fee.runing.balance|floatformat:2|intcomma}}</td>
                                         </tr>
                                         {% endfor %}
 
                                     </tbody>
                                 </table>
+                                 <p>
+                                    <div class="text-small">
+                                        <span class=" text-secondary pr-1 ">Payment method:</span><span class="">{{fees.first.pay_method.pay_method}}</span>
+                                        
+                                    </div>
+
+
 
                                 </div>
                             </div>
@@ -69,7 +76,10 @@
                                     {% if wallet_credited %}
                                     <div class="col-10 border-bottom"> <span class="text-small float-right ">Wallet Credited: {{wallet_credited|floatformat:2|intcomma}}</span></div>
                                     {% endif %}
-                                    <div class="col-10 border-bottom font-weight-bold "> <span class="text-small float-right">Total Amount Paid: {{total.amt_paid|floatformat:2|intcomma}}</span></div>
+                                    <div class="col-10 border-bottom  text-right ">
+                                        <span class="text-small text-secondary  ">Total Amount Paid: </span>
+                                        <span class="text-right text-small pr-1 font-weight-bold">{{total_amt_paid|floatformat:2|intcomma}}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -84,7 +94,7 @@
                                 <button
                                         class="btn btn-sm btn-outline-success btn-round w-50  "
                                         type="submit" name="btn_print" value="123"
-                                        formaction="/financials/print-receipt/1/1">
+                                        formaction="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}">
                                     Direct Print
                                 </button>
                             </div>
@@ -92,8 +102,8 @@
                             <div class="row pl-lg-5">
                                 <button
                                     class="btn btn-sm btn-outline-success btn-round w-50 "
-                                    type="submit" name="btn_preview" value="123"
-                                    formaction="/financials/print-receipt/1/1">
+                                    type="submit" name="btn_preview" value="ngs_receipt-{{fees.first.receipt_no}}"
+                                    formaction="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}">
                                     Print Preview
                                 </button>
                             </div>
@@ -101,8 +111,8 @@
                             <div class="row pl-lg-5">
                                 <button
                                     class="btn btn-xs btn-outline-success btn-round warning w-50 "
-                                    type="submit" name="btn_preview" value="123"
-                                    formaction="/financials/print-receipt/1/1">
+                                    type="submit" name="btn_cancel" value="ngs_receipt-{{fees.first.receipt_no}}"
+                                    formaction="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}">
                                     Cancel Receipt
                                 </button>
                             </div>
