@@ -210,7 +210,7 @@ class Invoice(models.Model):
     invoice_no = models.BigIntegerField(null=True, blank=True)
     descx = models.CharField(max_length=250)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, null=True, blank=True)
