@@ -74,9 +74,9 @@ def pdf_receipt_template(c, sch, receipt_no):
     # Middle Template
     c.setFillColorRGB(0, 0, 1)  # Blue font colour for Receipt
     c.drawString(4.60 * inch, 8.25 * inch, 'Due Fees:')
-    c.drawString(0 * inch, 7.7 * inch, 'Received From:')
+    c.drawString(0 * inch, 7.7 * inch, 'Fee Payment For:')
     c.line(1.12 * inch, 7.66 * inch, 6.29 * inch, 7.66 * inch)  # horizontal line on Receive from
-    c.drawString(4.39 * inch, 7.7 * inch, 'the sum of:')
+    c.drawString(4.39 * inch, 7.7 * inch, 'Amount Paid:')
     # Middle Data
     c.setFont("Times-Roman", 12)
     c.setFillColorRGB(0, 0, 0)  # Black font colour for Receipt
@@ -161,6 +161,7 @@ def pdf_receipt_template(c, sch, receipt_no):
     c.setFont("Times-Roman", 10)
     c.setFillColorRGB(0, 0, 0)  # Blue font colour for Receipt
     c.drawString(0 * inch, (bvp-(1.0*yu)) * inch, dt_today)  # Date Printed
+    bvp = (bvp - 0.05)
     c.setFont("Helvetica", 8)
     c.setFillColorRGB(0, 0, 1)  # Blue font colour for Receipt
     c.drawString(4.9 * inch, bvp * inch, 'Prepared By:')  # Prepared By Header

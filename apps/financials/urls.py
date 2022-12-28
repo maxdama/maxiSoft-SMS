@@ -15,7 +15,7 @@ urlpatterns = [
     path('student-re-enrollment/<int:stud_id>', views.student_re_enrollment, name="re-enrollment"),
     path('student-payment/<int:stud_id>', views.student_payment, name='payment-entry'),
     path('wallet-account/<int:stud_id>', views.wallet_account, name='wallet_account'),
-    path('cancel-transaction/<int:sch_id>/<int:trans_id>', views.cancel_financial_transaction, name='wallet_account'),
+    path('cancel-transaction/<int:sch_id>/<int:trans_id>', views.cancel_financial_transaction, name='cancel-transaction'),
     path('payment-receipt/<int:sch_id>/<int:receipt_id>', views.payment_receipt, name='payment-receipt'),
     path('print-receipt/<int:sch_id>/<int:receipt_no>', views.print_pdf_receipt, name='print-receipt'),
 

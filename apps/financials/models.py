@@ -280,8 +280,8 @@ class FeesPayments(models.Model):
 
     @property
     def runing(self):  # Calculate Runing Balance for the specified Client
-        f1 = Q(school_id=self.school) & Q(student_id=self.student) & (Q(doc_type='receipt') | Q(doc_type='invoice'))
-        f2 = Q(doc_no__lte=self.receipt_no)
+        f1 = Q(school_id=self.school_id)  & Q(student_id=self.student_id) # & (Q(doc_type='receipt') | Q(doc_type='invoice'))
+        f2 = (Q(doc_no__lte=self.receipt_no) & Q(doc_type='receipt')) | Q(doc_type='invoice')
         bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2))
         if bal is None:
             bal = {'balance': 0.00}

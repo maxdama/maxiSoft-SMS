@@ -21,6 +21,9 @@ from django.db.models import Q
 
 
 # Create your views here.
+from core.settings import CORE_DIR
+
+
 def financial_package_list(request, *args, **kwargs):
     context = {}
     school = schools(request)
@@ -395,6 +398,7 @@ def cancel_financial_transaction(request, sch_id, trans_id):
             elif descx == 'fee payment':
                 stud_id = trans.student_id
                 trans.delete()
+                print(f'Transaction No: {trans_id} is deleted')
 
                 f1 = Q(school_id=sch_id) & Q(student_id=stud_id)
                 pmt_counts = FeesPayments.objects.filter(f1).count()
@@ -426,7 +430,12 @@ def cancel_financial_transaction(request, sch_id, trans_id):
                 inv.update(balance=due['balance'], status=status_inv)
 
                 print(f'Fees Payment Counts: {pmt_counts};  Status: {status}; Last Receipt No: {last["receipt_no"]}')
-                return HttpResponse(f'Fees Payment Counts: {pmt_counts}. Transaction is Cancelled')
+                messages.success(request, 'The Transaction is cancelled Successfully')
+                if last["receipt_no"] is None:
+                    return redirect(list_enrollments)
+                else:
+                    return redirect(payment_receipt, sch_id=sch_id, receipt_id=last["receipt_no"])  # Pre Receipt Print
+                # return HttpResponse(f'Fees Payment Counts: {pmt_counts}. Transaction is Cancelled')
 
             elif descx == 'wallet deposit':
                 trans.delete()
@@ -669,13 +678,17 @@ def print_pdf_receipt(request, sch_id, receipt_no):
     sch = SchoolProfiles.objects.get(sch_id=sch_id)
     file_name = f"{sch.name_abr}-receipt-{receipt_no}"
     receipt = file_name.lower()
+    receipt_path = os.path.join(CORE_DIR, 'apps\\financials\\documents\\' + receipt)
+    print('Printing Receipt . . .')
+    print(request)
 
     if request.GET.get('btn_print'):
         print(request.GET['btn_print'])
         print(receipt)
         file_path = "c:\\Users\\Administrator\\Downloads\\ngs_receipt.pdf"
+
         try:
-            os.startfile(receipt, "print") # Print the file in the application root directory
+            os.startfile(receipt_path, "print") # Print the file in the application root directory
             # Sleeping the program for 5 seconds so as to account the
             # steady processing of the print operation.
             sleep(45)
@@ -686,15 +699,20 @@ def print_pdf_receipt(request, sch_id, receipt_no):
             #return HttpResponse('Printing PDF Receipt')
         except:
             messages.error(request, 'ALERT: Receipt could not be printed! Please ensure  \
-            that associated PDF reader software is installed in the client system.')
+            that associated PDF reader software is installed in this system.')
 
         return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
 
     elif request.GET.get('btn_preview'):
-        os.startfile(receipt, "open")
-        sleep(10)
+        try:
+            os.startfile(receipt_path, "open")
+            sleep(10)
+            # return HttpResponse('Previewing PDF Receipt')
+        except FileNotFoundError as e:
+            messages.error(request, e.strerror)
+        except:
+            messages.error(request, 'ALERT: Receipt could not be preview or printed! ')
         return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
-        # return HttpResponse('Previewing PDF Receipt')
 
 
 @transaction.atomic
@@ -785,7 +803,6 @@ def student_payment(request, stud_id):
                     if updated:
                         msg1 = 'Student Fee Payment is successful. '
 
-
                     # Credit student Wallet with excess balance
                     if amt_paying > 0 and inv_count == x and status == 'pf':
                         created = student_wallet(request, 'credit', amt_paying, sch_id, stud_id, trans_id)
@@ -799,7 +816,7 @@ def student_payment(request, stud_id):
 
                     if x == inv_count:
                         payment_receipt(request, sch_id=sch_id, receipt_id=receipt_no) # Prepare PDF Receipt
-                        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no) # Pre Receipt Print
+                        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no) # Pre Receipt Preview
 
                 else:
                     print(payment.errors)
@@ -945,11 +962,12 @@ def payment_receipt(request, sch_id, receipt_id):
         from apps.pdf_templates import pdf_receipt_template
 
         sch = SchoolProfiles.objects.get(sch_id=sch_id)
-        file_name = f"{sch.name_abr}-receipt-{receipt_id}"
+        receipt = f"{sch.name_abr}-receipt-{receipt_id}"
+        receipt = receipt.lower()
+        receipt_path = os.path.join(CORE_DIR, 'apps\\financials\\documents\\' + receipt)
         # print(file_name.lower())
-        file_name = file_name.lower()
         my_path = 'd:\\py2pdf\\ngs_receipt.pdf'
-        c = canvas.Canvas(file_name, pagesize=letter)
+        c = canvas.Canvas(receipt_path, pagesize=letter)
         # c = canvas.Canvas(buffer, pagesize=letter)
         c = pdf_receipt_template(c, sch, receipt_id)  # run the template
 
@@ -966,23 +984,26 @@ def payment_receipt(request, sch_id, receipt_id):
         # return FileResponse(buffer, as_attachment=True, filename='ngs_receipt.pdf')
 
     else:
-        context={}
+        """ PRE RECEIPT PRINT/PREVIEW """
+
+        context = {}
         f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_id)
         fees = FeesPayments.objects.filter(f1)
         total = FeesPayments.objects.filter(f1).aggregate(amt_paid=Sum('amt_paid'))
         if total['amt_paid'] is None:
             total = {'amt_paid': 0.00}
-        print(total)
-        trans_id = fees.last().transaction_id
-        wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
-        print(request)
+
         wallet_amt = 0
-        if wallet_credited:
-            wallet_amt = wallet_credited.amt_paid
+        if fees:
+            trans_id = fees.last().transaction_id
+            stud_id = fees.first().student_id
+            wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
+            stud_pmts = FeesPayments.objects.filter(school_id=sch_id, student_id=stud_id).order_by('pmt_date', 'id')
+
+            if wallet_credited:
+                wallet_amt = wallet_credited.amt_paid
 
         tot_amt_paid = total['amt_paid'] + wallet_amt
 
-        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt}
-
+        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts}
         return render(request, 'payment-receipt.html', context)
-        # return HttpResponse('GETTING Payment Receipts . . . ')

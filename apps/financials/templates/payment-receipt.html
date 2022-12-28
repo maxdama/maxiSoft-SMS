@@ -3,6 +3,35 @@
 {% block title %}Payment Receipt{% endblock title %}
 
 {% block stylesheets %}
+<style class="">
+    .swal-title {
+      margin: 0px;
+      font-size: 23px;
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.21);
+      margin-bottom: 28px;
+        text-align: -moz-center;
+    }
+
+.swal-text {
+      background-color: rgb(255, 255, 255);
+      padding: 17px;
+      border: 1px solid rgba(240, 225, 161, 0.94);
+      display: block;
+      margin: 22px;
+      text-align: center;
+      color: #61534e;
+      font-size: 17px;
+    }
+
+.swal-footer {
+      background-color: rgb(245, 248, 250);
+      margin-top: 32px;
+      border-top: 4px solid #E9EEF1;
+      overflow: hidden;
+    }
+
+</style>
+
 {% endblock stylesheets %}
 
 {% load humanize %}
@@ -15,13 +44,13 @@
                 <h3 class="font-weight-bold" >Payment Receipt</h3>
 
             </div>
-            <div class="container justify-content-start border ">
+            <div class="container justify-content-start  ">
 
                 <div class="row ">
 
-                    <div class="col col-sm-5 ">
+                    <div class="col col-sm-5 shadow border-bottom">
 
-                        <div class="card shadow border ">
+                        <div class="card shadow border mb-5 mt-4 ">
                             <div class="card-header mb-0 pb-1">
                                 <div><span class="text-small">Date:</span> <span class="font-weight-normal">{{fees.first.pmt_date}} </span> </div>
                                 <div><span class="text-small">Name:</span>
@@ -35,16 +64,16 @@
 
                             <div class="card-body pt-1">
                                 <div class=" text-sm-center"> <span class="text-small">Receipt No: {{fees.first.receipt_no}}</span> <span></span> </div>
-                                <div class="border-bottom text-left"> <span class="text-small">Payment Details:</span>  </div>
+                                <div class="border-bottom text-left"> <span class="text-small font-italic ">Payment Details:</span>  </div>
 
-                                <div class="table-responsive table-light table-sm   ">
+                                <div class="table-responsive table-light table-sm ">
                                     <table class="text-small ">
                                     <thead>
                                         <tr class="text-center text-secondary ">
                                             <th >Description</th>
-                                            <th>Inv Amt</th>
+                                            <th>Invoice Amount</th>
                                             <th>Discount</th>
-                                            <th>Paid</th>
+                                            <th>Amt Paid</th>
                                             <th>Bal.</th>
                                         </tr>
                                     </thead>
@@ -58,17 +87,12 @@
                                             <td class="border text-right">{{fee.runing.balance|floatformat:2|intcomma}}</td>
                                         </tr>
                                         {% endfor %}
-
                                     </tbody>
-                                </table>
-                                 <p>
+                                    </table>
+                                    <p>
                                     <div class="text-small">
                                         <span class=" text-secondary pr-1 ">Payment method:</span><span class="">{{fees.first.pay_method.pay_method}}</span>
-                                        
                                     </div>
-
-
-
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -82,43 +106,100 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
-                    <div class="col col-sm-4 border align-content-sm-center  ">
-                        <form action="" class="">
-                            <div class="row pl-3 "><span class="page-header ">Receipt Actions</span></div>
-                            <div><span class="small type-active"> You can do Print Preview of the this Receipt, Print  or Cancel the receipt</span></div>
+
+                    <div class="col col-sm-3 shadow border-right border-bottom  align-content-sm-center  ">
+
+                        <form action="" class="" method="GET" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {% if fees %}
+                            <div class="row pl-3 pb-2 border-bottom">
+                                <span class="text-info text-small ">Transaction ID: {{fees.first.school_id}}\{{fees.first.transaction_id}}</span>
+                            </div>
+
+                            <div><span class="small type-active"> PDF Receipt Options</span></div>
+
                             <p>
-                            <div class="row pl-lg-5 ">
-                                <button
-                                        class="btn btn-sm btn-outline-success btn-round w-50  "
-                                        type="submit" name="btn_print" value="123"
-                                        formaction="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}">
-                                    Direct Print
-                                </button>
+                            <div class="row pl-lg-4">
+                                <span class="small">  The student receipt is ready. You can
+                                    <a href="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}?btn_print='receipt-{{fees.first.receipt_no}}'"
+                                       type="submit" class=""
+                                       value="ngs-receipt-{{fees.first.receipt_no}}">Send To Printer
+                                    </a> directly.
+                                </span>
+                            </div>
+
+                            <p>
+                            <div class="row pl-lg-4">
+                                <span class="small">  You may want to
+                                    <a href="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}?btn_preview='ngs-receipt-{{fees.first.receipt_no}}'"
+                                       type="submit" class="">Preview and Print
+                                    </a> it.
+                                </span>
+                            </div>
+
+                            <p>
+                             <div class="row pl-lg-4 small ">
+                                <span class="pr-1">Send to parent by <a href="/financials/mail-and-print/{{fees.first.student_id}}">Mailing and Print</a>
+                                     at once.</span>
+                            </div>
+
+                             <p>
+                             <div class="row pl-lg-4 small ">
+                                <span class="pr-1">You can just  <a href="/financials/mail-and-print/{{fees.first.student_id}}">Mail Receipt</a>
+                                    to Parent or Student .</span>
+                            </div>
+
+                            <p>
+
+                            <div class="row pl-lg-4">
+                                <span class="small">  If you made a mistake you can
+                                    <a href="/financials/cancel-transaction/{{fees.first.school_id}}/{{fees.first.transaction_id}}"
+                                       type="submit" class="" id="btn_cancel"
+                                       value="ngs-receipt-{{fees.first.receipt_no}}">Cancel this Transaction
+                                    </a> .
+                                </span>
                             </div>
                             <p>
-                            <div class="row pl-lg-5">
-                                <button
-                                    class="btn btn-sm btn-outline-success btn-round w-50 "
-                                    type="submit" name="btn_preview" value="ngs_receipt-{{fees.first.receipt_no}}"
-                                    formaction="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}">
-                                    Print Preview
-                                </button>
+                            <div class="row pl-lg-4 small ">
+                                <span class="pr-1">You can <a href="/financials/student-payment/{{fees.first.student_id}}">Receive Payment</a>
+                                    again for this student.</span>
                             </div>
-                            <p>
-                            <div class="row pl-lg-5">
-                                <button
-                                    class="btn btn-xs btn-outline-success btn-round warning w-50 "
-                                    type="submit" name="btn_cancel" value="ngs_receipt-{{fees.first.receipt_no}}"
-                                    formaction="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}">
-                                    Cancel Receipt
-                                </button>
-                            </div>
+
+                            {% endif %}
 
                         </form>
                     </div>
+
+                    <div class="col align-content-center ">
+                        <div class=" small pl-4">Previous Payments:</div>
+
+                         <div class="table-responsive table-hover table-sm pl-4 ">
+                             <table class="text-small border ">
+                                    <thead>
+                                        <tr class="text-center text-secondary ">
+                                            <th >Trans Date</th>
+                                            <th>Receipt No</th>
+                                            <th>Amt Paid</th>
+                                            <th>Balance.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="">
+                                        {% for pmt in pmts %}
+                                        <tr>
+                                            <td class="border ">{{pmt.pmt_date}}</td>
+                                            <td class="border text-right">{{pmt.receipt_no}}</td>
+                                            <td class="border text-right">{{pmt.amt_paid|floatformat:2|intcomma}}</td>
+                                            <td class="border text-right">{{pmt.runing.balance|floatformat:2|intcomma}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+
+                             </table>
+                         </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -144,5 +225,51 @@
             {% endif %}
         {% endfor %}
     {% endif %}
+
+    <script class="" type="text/javascript">
+        $(document).ready(function() {
+
+            $('#btn_cancel').click(function(e) {
+                e.preventDefault();
+
+                let url = $(this).attr('href');
+                let title = 'Confirm! . . ';
+                let msg = "Are you very sure you want to cancel this transaction?"
+
+                confirm_cancellation(title, msg, url);
+            });
+
+            function confirm_cancellation(title, msg, url)
+			{
+				swal({
+				title: title,
+				text: msg,
+				type: 'warning',
+				buttons:{
+					confirm: {
+						text : 'YES, Confirmed!',
+						className : 'btn btn-success'
+					},
+					cancel: {
+						text: 'NO, Stop!',
+						visible: true,
+						className: 'btn btn-danger'
+					}
+				}
+				}).then((confirmed) => {
+					if (confirmed) {
+                        // form.submit();
+                        location.href = url
+
+					} else {
+						swal.close();
+					}
+				});
+			};
+
+
+        });
+
+    </script>
 
 {% endblock javascripts %}
