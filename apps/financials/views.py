@@ -998,13 +998,17 @@ def payment_receipt(request, sch_id, receipt_id):
         if fees:
             trans_id = fees.last().transaction_id
             stud_id = fees.first().student_id
+            f2 = Q(school_id=sch_id) & Q(student_id=stud_id)
+            stud_pmts = FeesPayments.objects.filter(f2).order_by('pmt_date', 'id')
+            tot_due_fee = Invoice.objects.filter(f2).aggregate(due_fee=Sum('amount'))
+            due_date = Invoice.objects.filter(f2).values('due_date').order_by('due_date').last()
 
-            stud_pmts = FeesPayments.objects.filter(school_id=sch_id, student_id=stud_id).order_by('pmt_date', 'id')
+            print(due_date, tot_due_fee)
 
             # Get the Previous Total Payments for the specified invoice no excluding the current receipt no
-            f2 = Q(school_id=sch_id) & Q(student_id=stud_id) & Q(invoice_no__in=inv_nos) & ~Q(receipt_no=receipt_id)
-            prv_fees_paid = FeesPayments.objects.filter(f2).aggregate(fees_paid=Sum('amt_paid'))
-            print(prv_fees_paid)
+            f3 = Q(school_id=sch_id) & Q(student_id=stud_id) & Q(invoice_no__in=inv_nos) & ~Q(receipt_no=receipt_id)
+            prv_fees_paid = FeesPayments.objects.filter(f3).aggregate(fees_paid=Sum('amt_paid'))
+            # print(prv_fees_paid)
 
             wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
             if wallet_credited:
@@ -1012,5 +1016,6 @@ def payment_receipt(request, sch_id, receipt_id):
 
         tot_amt_paid = total['amt_paid'] + wallet_amt
 
-        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts, 'previous': prv_fees_paid}
+        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts,
+                   'previous': prv_fees_paid, 'due_date': due_date, 'total': tot_due_fee}
         return render(request, 'payment-receipt.html', context)
