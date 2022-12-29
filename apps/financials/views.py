@@ -976,34 +976,41 @@ def payment_receipt(request, sch_id, receipt_id):
 
         print('----- Payment Receipt Generated')
         return HttpResponse('----- Payment Receipt Generated in your Application root foleder')
-
         # FileResponse sets the Content-Disposition header so that browsers
         # present the option to save the file.
         # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=False, content_type='application/pdf')
         # buffer.seek(0)
         # return FileResponse(buffer, as_attachment=True, filename='ngs_receipt.pdf')
-
     else:
-        """ PRE RECEIPT PRINT/PREVIEW """
+        """ PRE RECEIPT PRINT PREVIEW """
 
         context = {}
         f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_id)
-        fees = FeesPayments.objects.filter(f1)
+        fees = FeesPayments.objects.filter(f1).order_by('invoice_no')
         total = FeesPayments.objects.filter(f1).aggregate(amt_paid=Sum('amt_paid'))
         if total['amt_paid'] is None:
             total = {'amt_paid': 0.00}
+
+        # Get the distinct invoice_no in FeesPayment for the specified receipt No
+        inv_nos = FeesPayments.objects.filter(f1).values('invoice_no').order_by("invoice_no").distinct()
 
         wallet_amt = 0
         if fees:
             trans_id = fees.last().transaction_id
             stud_id = fees.first().student_id
-            wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
+
             stud_pmts = FeesPayments.objects.filter(school_id=sch_id, student_id=stud_id).order_by('pmt_date', 'id')
 
+            # Get the Previous Total Payments for the specified invoice no excluding the current receipt no
+            f2 = Q(school_id=sch_id) & Q(student_id=stud_id) & Q(invoice_no__in=inv_nos) & ~Q(receipt_no=receipt_id)
+            prv_fees_paid = FeesPayments.objects.filter(f2).aggregate(fees_paid=Sum('amt_paid'))
+            print(prv_fees_paid)
+
+            wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
             if wallet_credited:
                 wallet_amt = wallet_credited.amt_paid
 
         tot_amt_paid = total['amt_paid'] + wallet_amt
 
-        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts}
+        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts, 'previous': prv_fees_paid}
         return render(request, 'payment-receipt.html', context)

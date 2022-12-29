@@ -40,31 +40,43 @@
     <div class="content">
         <div class="page-inner">
 
-            <div class="page-header">
-                <h3 class="font-weight-bold" >Payment Receipt</h3>
-
+            <div class="row ">
+                <div class="col-lg-5 pb-0 ">
+                    <h3 class="font-weight-bold "  >Payment Receipt</h3>
+                </div>
+                <div class="col-3  pr-0 pb-xl-2 ">
+                    <!--  Close button at the TOP Right Corner. Closes the form to Enrollment List -->
+                    <button id="close" class=" btn  btn-outline-primary  btn-rounded btn-xs float-lg-right alert-primary "  type="button" >X</button>
+                </div>
             </div>
             <div class="container justify-content-start  ">
 
                 <div class="row ">
 
-                    <div class="col col-sm-5 shadow border-bottom">
+                    <div class="col col-sm-5 shadow border-bottom ">
 
                         <div class="card shadow border mb-5 mt-4 ">
                             <div class="card-header mb-0 pb-1">
-                                <div><span class="text-small">Date:</span> <span class="font-weight-normal">{{fees.first.pmt_date}} </span> </div>
+                                <div class=" text-sm-center"> <span class="pb-2 text-small font-weight-bold float-right">Receipt No: {{fees.first.receipt_no}}</span> <span></span> </div>
+                                <div><span class="text-small">Date:</span> <span class="text-small font-weight-normal">{{fees.first.pmt_date}} </span> </div>
                                 <div><span class="text-small">Name:</span>
                                     <span class=" fw-extrabold">{{fees.first.student.surname}} {{fees.first.student.first_name}} {{fees.first.student.middle_name}}</span>
                                     {% if fees %}
                                     </span> <span class=" text-small ">({{fees.first.classroom.class_abr}}{{fees.first.classroom.arm}}) </span>
                                     {% endif %}
                                 </div>
-                                <div class="float-right"><span class="text-small">Due Fees:</span> <span class="font-weight-normal">{{fees.last.runing.balance|floatformat:2|intcomma}}</span> </div>
+                                <div class="float-right"><span class="text-small">Due Fees:</span> <span class="text-small font-weight-bold text-danger">{{fees.last.runing.balance|floatformat:2|intcomma}}</span> </div>
+                                <div class="">
+                                        <span class="text-small">Total Amount Received: </span>
+                                        <span class="text-right text-small pr-1 font-weight-bold text-success">{{total_amt_paid|floatformat:2|intcomma}}</span>
+                                </div>
+                                <div class="text-small ">
+                                        <span class=" text-secondary pr-1 ">Method:</span><span class="">{{fees.first.pay_method.pay_method}}</span>
+                                    </div>
                             </div>
 
                             <div class="card-body pt-1">
-                                <div class=" text-sm-center"> <span class="text-small">Receipt No: {{fees.first.receipt_no}}</span> <span></span> </div>
-                                <div class="border-bottom text-left"> <span class="text-small font-italic ">Payment Details:</span>  </div>
+                                <div class="border-bottom text-left pt-1"> <span class="text-small font-italic ">Payment Details:</span>  </div>
 
                                 <div class="table-responsive table-light table-sm ">
                                     <table class="text-small ">
@@ -73,8 +85,8 @@
                                             <th >Description</th>
                                             <th>Invoice Amount</th>
                                             <th>Discount</th>
-                                            <th>Amt Paid</th>
-                                            <th>Bal.</th>
+                                            <th>Fee Paid</th>
+                                            <th>Balance.</th>
                                         </tr>
                                     </thead>
                                     <tbody class="">
@@ -89,27 +101,25 @@
                                         {% endfor %}
                                     </tbody>
                                     </table>
-                                    <p>
-                                    <div class="text-small">
-                                        <span class=" text-secondary pr-1 ">Payment method:</span><span class="">{{fees.first.pay_method.pay_method}}</span>
+                                    <div class="text-small text-center pt-2 pl-4 border">
+                                        <span class="text-secondary pl-lg-5">Previous Fees paid:</span>
+                                        <span class="pl-lg-4">{{previous.fees_paid|floatformat:2|intcomma}}</span>
                                     </div>
+
+                                    {% if wallet_credited %}
+                                    <div class="col-7 border pt-1 float-right"> <span class="text-small  ">Wallet Credited: {{wallet_credited|floatformat:2|intcomma}}</span></div>
+                                    {% endif %}
+
+
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <div class="row">
-                                    {% if wallet_credited %}
-                                    <div class="col-10 border-bottom"> <span class="text-small float-right ">Wallet Credited: {{wallet_credited|floatformat:2|intcomma}}</span></div>
-                                    {% endif %}
-                                    <div class="col-10 border-bottom  text-right ">
-                                        <span class="text-small text-secondary  ">Total Amount Paid: </span>
-                                        <span class="text-right text-small pr-1 font-weight-bold">{{total_amt_paid|floatformat:2|intcomma}}</span>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
 
-                    <div class="col col-sm-3 shadow border-right border-bottom  align-content-sm-center  ">
+                    <div class="col col-sm-3 shadow border-right border-bottom  align-content-sm-center   ">
 
                         <form action="" class="" method="GET" enctype="multipart/form-data">
                             {% csrf_token %}
@@ -118,7 +128,7 @@
                                 <span class="text-info text-small ">Transaction ID: {{fees.first.school_id}}\{{fees.first.transaction_id}}</span>
                             </div>
 
-                            <div><span class="small type-active"> PDF Receipt Options</span></div>
+                            <div><span class="small pl-2"> PDF Receipt Options</span></div>
 
                             <p>
                             <div class="row pl-lg-4">
@@ -173,22 +183,25 @@
                     </div>
 
                     <div class="col align-content-center ">
-                        <div class=" small pl-4">Previous Payments:</div>
+                        <div class="card shadow border mb-5 mt-4 ">
+                            <div class="card-header mb-0 pb-1">
+                                <div class=" small pl-4">Previous Payments:</div>
+                            </div>
 
-                         <div class="table-responsive table-hover table-sm pl-4 ">
+                            <div class="table-responsive table-hover table-sm pl-4 ">
                              <table class="text-small border ">
                                     <thead>
                                         <tr class="text-center text-secondary ">
                                             <th >Trans Date</th>
                                             <th>Receipt No</th>
                                             <th>Amt Paid</th>
-                                            <th>Balance.</th>
+                                            <th>Runing Bal</th>
                                         </tr>
                                     </thead>
                                     <tbody class="">
                                         {% for pmt in pmts %}
                                         <tr>
-                                            <td class="border ">{{pmt.pmt_date}}</td>
+                                            <td class="border ">{{pmt.pmt_date|date:'d-m-Y'}}</td>
                                             <td class="border text-right">{{pmt.receipt_no}}</td>
                                             <td class="border text-right">{{pmt.amt_paid|floatformat:2|intcomma}}</td>
                                             <td class="border text-right">{{pmt.runing.balance|floatformat:2|intcomma}}</td>
@@ -198,6 +211,11 @@
 
                              </table>
                          </div>
+
+                            <div class="card-footer">
+                            </div>
+
+                        </div>
                     </div>
 
                 </div>
@@ -228,6 +246,12 @@
 
     <script class="" type="text/javascript">
         $(document).ready(function() {
+
+            // It redirect to the URL when the close button at the TOP Right corner is clicked
+             $("#close").click(function(){
+                 location.href='/financials/student-enrolled-list'
+             });
+
 
             $('#btn_cancel').click(function(e) {
                 e.preventDefault();
