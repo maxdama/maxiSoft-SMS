@@ -185,13 +185,13 @@
                     <div class="col align-content-center ">
                         <div class="card shadow border mb-5 mt-4 ">
                             <div class="card-header mb-0 pb-1">
-                                <div class=" small pl-4">Previous Payments:</div>
+                                <div class=" small  pl-2  ">Statements:</div>
                             </div>
 
                             <div class="table-responsive table-hover table-sm pl-4 ">
                              <table class="text-small border ">
                                     <thead>
-                                        <div class="text-small border pr-4">
+                                        <div class="text-small pt-1 pb-sm-1 pr-4">
                                             <span class="text-info  ">Due Date: {{due_date.due_date|date:'d-m-Y'}}</span>
                                             <span class="float-right text-info">Total Dues: {{total.due_fee|floatformat:2|intcomma}}</span>
                                         </div>
@@ -206,7 +206,7 @@
                                         {% for pmt in pmts %}
                                         <tr>
                                             <td class="border ">{{pmt.pmt_date|date:'d-m-Y'}}</td>
-                                            <td class="border text-right">{{pmt.receipt_no}}</td>
+                                            <td class="border text-center">{{pmt.receipt_no}}</td>
                                             <td class="border text-right">{{pmt.amt_paid|floatformat:2|intcomma}}</td>
                                             <td class="border text-right text-danger">{{pmt.runing.balance|floatformat:2|intcomma}}</td>
                                         </tr>
