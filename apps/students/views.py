@@ -246,9 +246,6 @@ def continue_registration(request, reg_id, reg_step):
     if sch_id == 0:
         return redirect("logout")
 
-    print('Reg Step:')
-    print(reg_step)
-
     try:
         student = Students.objects.get(id=reg_id, reg_steps=reg_step)
         timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
@@ -266,7 +263,7 @@ def continue_registration(request, reg_id, reg_step):
                 if guardian:
                     context = {'guardian': guardian, 'student': student, 'timeline': timeline}
 
-                return render(request, "financial/student-enrollment.html", context)
+                return render(request, "student-enrollment.html", context)
 
             except gm.Guardians.DoesNotExist:
                 oprx_type = 'new-entry'
@@ -284,13 +281,13 @@ def continue_registration(request, reg_id, reg_step):
                 # raise Http404
 
         elif reg_step == 2:
-            return render(request, "financial/student-enrollment.html", context)
+            return render(request, "student-enrollment.html", context)
 
         elif reg_step == 3:
             context = {
                 'student': student, 'timeline': timeline
             }
-            return render(request, "financial/student-enrollment.html", context)
+            return render(request, "student-enrollment.html", context)
 
     except Students.DoesNotExist:
         return HttpResponse('Student Record Does not exists')

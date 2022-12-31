@@ -41,11 +41,11 @@
         <div class="page-inner">
 
             <div class="row ">
-                <div class="col-lg-5 pb-0 ">
+                <div class="col-6 pb-0 border-bottom shadow-sm mb-2">
                     <h3 class="font-weight-bold "  >Payment Receipt</h3>
                 </div>
-                <div class="col-3  pr-0 pb-xl-2 ">
-                    <!--  Close button at the TOP Right Corner. Closes the form to Enrollment List -->
+                <div class="col-6  pr-4 pb-xl-2 border-bottom shadow-sm mb-2">
+                    <!--  Close button in the TOP Right Corner. Closes the form to Enrollment List -->
                     <button id="close" class=" btn  btn-outline-primary  btn-rounded btn-xs float-lg-right alert-primary "  type="button" >X</button>
                 </div>
             </div>
@@ -102,15 +102,13 @@
                                     </tbody>
                                     </table>
                                     <div class="text-small text-center pt-2 pl-4 border">
-                                        <span class="text-secondary pl-lg-5">Previous Fees paid:</span>
+                                        <span class="text-secondary pl-lg-5">Previous Payments:</span>
                                         <span class="pl-lg-4">{{previous.fees_paid|floatformat:2|intcomma}}</span>
                                     </div>
 
                                     {% if wallet_credited %}
-                                    <div class="col-7 border pt-1 float-right"> <span class="text-small  ">Wallet Credited: {{wallet_credited|floatformat:2|intcomma}}</span></div>
+                                    <div class="col-7 border pt-1 pr-4 float-right"> <span class="text-small pl-3 ">Wallet Credited: {{wallet_credited|floatformat:2|intcomma}}</span></div>
                                     {% endif %}
-
-
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -119,7 +117,7 @@
                         </div>
                     </div>
 
-                    <div class="col col-sm-3 shadow border-right border-bottom  align-content-sm-center   ">
+                    <div class="col col-sm-2 shadow  border-bottom  align-content-sm-center   ">
 
                         <form action="" class="" method="GET" enctype="multipart/form-data">
                             {% csrf_token %}
@@ -128,52 +126,50 @@
                                 <span class="text-info text-small ">Transaction ID: {{fees.first.school_id}}\{{fees.first.transaction_id}}</span>
                             </div>
 
-                            <div><span class="small pl-2"> PDF Receipt Options</span></div>
+                            <div><span class="small pl-2 font-weight-bold border-bottom"> PDF Receipt Options</span></div>
 
                             <p>
-                            <div class="row pl-lg-4">
+                            <div class="row pl-lg-4 border-bottom ">
                                 <span class="small">  The student receipt is ready. You can
-                                    <a href="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}?btn_print='receipt-{{fees.first.receipt_no}}'"
+                                    <a href="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.student_id}}/{{fees.first.receipt_no}}?btn_print='receipt-{{fees.first.receipt_no}}'"
                                        type="submit" class=""
                                        value="ngs-receipt-{{fees.first.receipt_no}}">Send To Printer
                                     </a> directly.
                                 </span>
                             </div>
-
                             <p>
-                            <div class="row pl-lg-4">
+                            <div class="row pl-lg-4 border-bottom">
                                 <span class="small">  You may want to
-                                    <a href="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.receipt_no}}?btn_preview='ngs-receipt-{{fees.first.receipt_no}}'"
+                                    <a href="/financials/print-receipt/{{fees.first.school_id}}/{{fees.first.student_id}}/{{fees.first.receipt_no}}?btn_preview='ngs-receipt-{{fees.first.receipt_no}}'"
                                        type="submit" class="">Preview and Print
                                     </a> it.
                                 </span>
                             </div>
-
                             <p>
-                             <div class="row pl-lg-4 small ">
-                                <span class="pr-1">Send to parent by <a href="/financials/mail-and-print/{{fees.first.student_id}}">Mailing and Print</a>
-                                     at once.</span>
+                             <div class="row pl-lg-4 small border-bottom">
+                                <span class="pr-1"><a href="/financials/mail-and-print/{{fees.first.student_id}}">Print and Mail</a>
+                                     to parent at once.</span>
                             </div>
 
                              <p>
-                             <div class="row pl-lg-4 small ">
-                                <span class="pr-1">You can just  <a href="/financials/mail-and-print/{{fees.first.student_id}}">Mail Receipt</a>
-                                    to Parent or Student .</span>
+                             <div class="row pl-lg-4 small border-bottom">
+                                <span class="pr-1">Just  <a href="/financials/mail-and-print/{{fees.first.student_id}}">Mail Receipt</a>
+                                    to Parent Only.</span>
                             </div>
 
                             <p>
 
-                            <div class="row pl-lg-4">
+                            <div class="row pl-lg-4 border-bottom  ">
                                 <span class="small">  If you made a mistake you can
                                     <a href="/financials/cancel-transaction/{{fees.first.school_id}}/{{fees.first.transaction_id}}"
                                        type="submit" class="" id="btn_cancel"
-                                       value="ngs-receipt-{{fees.first.receipt_no}}">Cancel this Transaction
+                                       value="receipt-{{fees.first.receipt_no}}">Cancel this Transaction
                                     </a> .
                                 </span>
                             </div>
                             <p>
-                            <div class="row pl-lg-4 small ">
-                                <span class="pr-1">You can <a href="/financials/student-payment/{{fees.first.student_id}}">Receive Payment</a>
+                            <div class="row pl-lg-4 small border-top border-bottom mb-2 ">
+                                <span class="pr-1"> <a href="/financials/student-payment/{{fees.first.student_id}}">Receive Payment</a>
                                     again for this student.</span>
                             </div>
 
@@ -182,31 +178,33 @@
                         </form>
                     </div>
 
-                    <div class="col align-content-center ">
+                    <div class="col align-content-center col-sm-5 shadow-sm ">
                         <div class="card shadow border mb-5 mt-4 ">
                             <div class="card-header mb-0 pb-1">
-                                <div class=" small  pl-2  ">Statements:</div>
+                                <div class=" small  pl-0  ">Statements:</div>
                             </div>
 
-                            <div class="table-responsive table-hover table-sm pl-4 ">
-                             <table class="text-small border ">
+                            <div class="table-responsive table-hover table-sm pl-3 ">
+                             <table class="text-small border " id="fee_trans">
                                     <thead>
                                         <div class="text-small pt-1 pb-sm-1 pr-4">
                                             <span class="text-info  ">Due Date: {{due_date.due_date|date:'d-m-Y'}}</span>
-                                            <span class="float-right text-info">Total Dues: {{total.due_fee|floatformat:2|intcomma}}</span>
+                                            <span class="float-right text-danger">Total Fees Due: {{total.due_fee|floatformat:2|intcomma}}</span>
                                         </div>
                                         <tr class="text-center text-secondary ">
-                                            <th >Trans Date</th>
+                                            <th class="nowrap">Trans Date</th>
+                                            <th >Session</th>
                                             <th>Receipt No</th>
                                             <th>Amt Paid</th>
-                                            <th>Runing Bal</th>
+                                            <th class="text-warning">Runing Bal </th>
                                         </tr>
                                     </thead>
-                                    <tbody class="">
+                                    <tbody class="recall">
                                         {% for pmt in pmts %}
                                         <tr>
                                             <td class="border ">{{pmt.pmt_date|date:'d-m-Y'}}</td>
-                                            <td class="border text-center">{{pmt.receipt_no}}</td>
+                                            <td class="border ">{{pmt.enrolled.timeline.descx}} Term-{{pmt.invoice.session.term_id}}</td>
+                                            <td class="border text-center receipt_no">{{pmt.receipt_no}}</td>
                                             <td class="border text-right">{{pmt.amt_paid|floatformat:2|intcomma}}</td>
                                             <td class="border text-right text-danger">{{pmt.runing.balance|floatformat:2|intcomma}}</td>
                                         </tr>
@@ -239,7 +237,7 @@
             {% if message.tags == 'success'%}
                 <script type=text/javascript>toastr["success"]('{{ message }}', 'Very Good . . . ')</script>
             {% elif message.tags == 'info' %}
-                <script type=text/javascript>toastr.info('{{ message }}', 'Information . . . ')</script>
+                <script type=text/javascript>toastr.info('{{ message }}')</script>
             {% elif message.tags == 'warning' %}
                 <script type=text/javascript>toastr.warning('{{ message }}')</script>
             {% elif message.tags == 'error' %}
@@ -256,6 +254,16 @@
                  location.href='/financials/student-enrolled-list'
              });
 
+              $("#fee_trans tr").click(function(){
+                   // get the current row
+                  let currentRow=$(this).closest("tr"); // Get the current row that is click
+                  let receipt_no = currentRow.find('.receipt_no').html(); // find receipt_no on the current row
+
+                  if(receipt_no){  // Do noothing if the transaction header (header row) is selected
+                      location.href='/financials/payment-receipt-preview/{{fees.first.school_id}}/' + receipt_no +  '?recall=1'
+                  }
+
+              });
 
             $('#btn_cancel').click(function(e) {
                 e.preventDefault();

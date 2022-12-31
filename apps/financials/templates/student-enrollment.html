@@ -126,7 +126,7 @@
                                         <select class="no-bd form-control input-border-bottom" id="class_id" name="classroom" style="font-weight:bold;" required >
                                             <option value=""></option>
                                             {% for cls in classes %}
-                                                <option value={{cls.id}}>{{cls.class_abr}} - {{cls.arm}}  ({{timeline.descx}})</option>
+                                                <option value={{cls.id}}>{{cls.class_abr}}{{cls.arm}} ({{timeline.descx}})</option>
                                             {% endfor %}
                                         </select>
                                         <label for="class_id" class="placeholder pl-1">Batch Placement:</label>
@@ -234,10 +234,8 @@
     <script type="text/javascript"  >
 
 		$(document).ready(function() {
-
             //document.getElementById('trans_date').valueAsDate = new Date(); // Get the current Date and assigned
             document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
-
 		});
 
 		$(document).ready(function() {
@@ -318,9 +316,8 @@
 
             function x_proc(fee_id, ses_id, ses_text, class_id, class_text){
 
-                let descx_text = 'Admission into ' + class_text + '  - ' + ses_text
+                let descx_text = 'Admission ' + class_text + ' ' + ses_text
                 $('#descx').val(descx_text)
-                //alert('Fee Package Change: ' + '\n' + ses_id + ': ' + ses_text + '\n' + class_id + ' : ' + class_text + '\n' + 'Fee Package ID ' + fee_id );
 
                 let addr = '{% url "get_inv_amt" pkg_id=0 %}'.replace('0',fee_id)
                 $.ajax(

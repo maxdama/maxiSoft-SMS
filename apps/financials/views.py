@@ -252,23 +252,28 @@ def cancel_enrollment(request, enr_id, inv_no, trans_id):
 @transaction.atomic
 def student_enrolled_update(request, enr_id, inv_no):
     sch_id = schools(request)['sch_id']
+    print(f'Enrollment ID: {enr_id}; School ID:  {sch_id}; Invoice No:  {inv_no}')
 
     if request.method == 'POST':
-        enrolled = Enrollments.objects.get(school=sch_id, id=enr_id)
+        enrolled = Enrollments.objects.get(school_id=sch_id, id=enr_id)
+        # print(f'Transaction: {enrolled.transaction_id}')
         enrlmt_frm = EnrollmentForm(request.POST, instance=enrolled)
+        print(f'Transaction: {enrolled.transaction_id}')
+        trans_id = enrolled.transaction_id
 
         if enrlmt_frm.is_valid():
             status = 'enrolled'
-            enrolled = enrlmt_frm.save(commit=False)
-            enrolled.status = status
-            enrolled.save()
+            enrlmt = enrlmt_frm.save(commit=False)
+            enrlmt.status = status
+            enrlmt.transaction_id = trans_id
+            enrlmt.save()
 
-            financial_transactions(request, 'update', enrolled.id, inv_no)
+            financial_transactions(request, 'update', enrlmt.id, inv_no)
             # Update Student Status to Enrolled
             reg_id = request.POST['student']
             stud = Students.objects.filter(id=reg_id).update(reg_status=status, reg_steps=3)
 
-            context = {"enrolled": enrolled}
+            context = {"enrolled": enrlmt}
             messages.success(request, 'Student Enrolled Updated')
         else:
             messages.info(request, enrlmt_frm.errors)
@@ -434,8 +439,8 @@ def cancel_financial_transaction(request, sch_id, trans_id):
                 if last["receipt_no"] is None:
                     return redirect(list_enrollments)
                 else:
-                    return redirect(payment_receipt, sch_id=sch_id, receipt_id=last["receipt_no"])  # Pre Receipt Print
-                # return HttpResponse(f'Fees Payment Counts: {pmt_counts}. Transaction is Cancelled')
+                    return redirect(preview_payments, sch_id=sch_id, receipt_no=last["receipt_no"])
+                    # return redirect(payment_receipt, sch_id=sch_id, receipt_id=last["receipt_no"], action='preview')  # Pre Receipt Print
 
             elif descx == 'wallet deposit':
                 trans.delete()
@@ -460,8 +465,9 @@ def financial_transactions(request, action, enr_id, inv_no, trans_id=0):
 
     # -- Debit Student with the Fee Amount
     if action == 'update':
-        fee_acct = FeesAccounts.objects.get(school=sch_id, invoice_no=inv_no)
+        fee_acct = FeesAccounts.objects.get(school=sch_id, doc_type='invoice', doc_no=inv_no)
         fee_form = FeesAccountsForm(request.POST, instance=fee_acct)
+        trans_id = fee_acct.transaction_id
     else:
         fee_form = FeesAccountsForm(request.POST or None)
     if fee_form.is_valid():
@@ -673,46 +679,38 @@ def pdf_print_preview(request, sch_id, receipt_no):
 
 
 
-def print_pdf_receipt(request, sch_id, receipt_no):
-    # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=True, content_type='application/pdf')
+def print_pdf_receipt(request, sch_id, stud_id=0, receipt_no=0):
     sch = SchoolProfiles.objects.get(sch_id=sch_id)
-    file_name = f"{sch.name_abr}-receipt-{receipt_no}"
-    receipt = file_name.lower()
-    receipt_path = os.path.join(CORE_DIR, 'apps\\financials\\documents\\' + receipt)
-    print('Printing Receipt . . .')
-    print(request)
+    receipt_name = f"receipt-{sch_id}{stud_id}.pdf".lower()
+    file_name = os.path.join(CORE_DIR, 'apps\\financials\\documents\\' + receipt_name)
+
+    create_pdf_receipt(file_name, sch, stud_id=stud_id, receipt_id=receipt_no)  # Create PDF Receipt file
 
     if request.GET.get('btn_print'):
-        print(request.GET['btn_print'])
-        print(receipt)
-        file_path = "c:\\Users\\Administrator\\Downloads\\ngs_receipt.pdf"
-
         try:
-            os.startfile(receipt_path, "print") # Print the file in the application root directory
+            os.startfile(file_name, "print") # Print the file in the file_name location
             # Sleeping the program for 5 seconds so as to account the
             # steady processing of the print operation.
-            sleep(45)
-            for p in psutil.process_iter():  # Close Acrobat after printing the PDF
-                if 'AcroRd' in str(p):
-                    print('Killing Acrobat Reader')
-                    p.kill()
-            #return HttpResponse('Printing PDF Receipt')
+            sleep(5)
+            # for p in psutil.process_iter():  # Close Acrobat after printing the PDF
+            #    if 'AcroRd' in str(p):
+            #        p.kill()
         except:
             messages.error(request, 'ALERT: Receipt could not be printed! Please ensure  \
             that associated PDF reader software is installed in this system.')
 
-        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
+        return redirect(preview_payments, sch_id=sch_id, receipt_no=receipt_no)  # HTML Receipt Payment Preview
 
     elif request.GET.get('btn_preview'):
         try:
-            os.startfile(receipt_path, "open")
-            sleep(10)
-            # return HttpResponse('Previewing PDF Receipt')
+            os.startfile(file_name, "open")
+            # sleep(15)
         except FileNotFoundError as e:
             messages.error(request, e.strerror)
         except:
             messages.error(request, 'ALERT: Receipt could not be preview or printed! ')
-        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no)  # Pre Receipt Print
+
+        return redirect(preview_payments,  sch_id=sch_id, receipt_no=receipt_no)  #  HTML Receipt Payment Preview
 
 
 @transaction.atomic
@@ -769,10 +767,7 @@ def student_payment(request, stud_id):
                     fee_acct.doc_no = receipt_no
                     fee_acct.transaction_id = trans_id
                     fee_acct.save()
-
-                    print('FeesAccounts Form is Valid')
                 else:
-                    print('FeesAccounts Form IS NOT Valid')
                     messages.error(request, form.errors)
 
                 payment = FeePaymentForm(request.POST or None)
@@ -815,8 +810,7 @@ def student_payment(request, stud_id):
                     messages.success(request, msg)
 
                     if x == inv_count:
-                        payment_receipt(request, sch_id=sch_id, receipt_id=receipt_no) # Prepare PDF Receipt
-                        return redirect(payment_receipt, sch_id=sch_id, receipt_id=receipt_no) # Pre Receipt Preview
+                        return redirect(preview_payments, sch_id=sch_id, receipt_no=receipt_no)  # HTML Receipt Payment Preview
 
                 else:
                     print(payment.errors)
@@ -834,7 +828,6 @@ def student_payment(request, stud_id):
         try:
             timeline = AcademicTimeLine.objects.get(status='active', sch_id=sch_id)
             wallet_bal = Wallets.objects.get(school=sch_id, student=stud_id).wallet['balance']
-            # wallet_bal = WalletAccounts.objects.filter(school=sch_id, student=stud_id).aggregate(balance=Sum('amt_paid'))['balance']
             if wallet_bal is None: wallet_bal = 0.00
             wallet = {'wallet_bal': wallet_bal}
         except:
@@ -886,7 +879,7 @@ def process_invoice(amt_paying, inv, sch_id, stud_id):
         if pay_count == 0:
             inv_descx = 'Full Payment: - ' + inv_descx
         else:
-            inv_descx = 'Balance Payment: - ' + inv_descx
+            inv_descx = 'Bal Payment: - ' + inv_descx
 
     result = {'invoice_no': inv_no, 'inv_bal': inv_bal, 'amt_paid': amt_paid, 'status': status,
               'pay_bal': amt_paying, 'descx': inv_descx}
@@ -956,66 +949,54 @@ def wallet_account(request, stud_id, **kwargs):
         return render(request, 'wallet-accounts.html', context)
 
 
-def payment_receipt(request, sch_id, receipt_id):
-    if request.method == 'POST':
-        from reportlab.lib.pagesizes import letter
-        from apps.pdf_templates import pdf_receipt_template
+def create_pdf_receipt(file_name, sch, receipt_id, stud_id):
+    from reportlab.lib.pagesizes import letter
+    from apps.pdf_templates import pdf_receipt_template
 
-        sch = SchoolProfiles.objects.get(sch_id=sch_id)
-        receipt = f"{sch.name_abr}-receipt-{receipt_id}"
-        receipt = receipt.lower()
-        receipt_path = os.path.join(CORE_DIR, 'apps\\financials\\documents\\' + receipt)
-        # print(file_name.lower())
-        my_path = 'd:\\py2pdf\\ngs_receipt.pdf'
-        c = canvas.Canvas(receipt_path, pagesize=letter)
-        # c = canvas.Canvas(buffer, pagesize=letter)
-        c = pdf_receipt_template(c, sch, receipt_id)  # run the template
+    c = canvas.Canvas(file_name, pagesize=letter)
+    c = pdf_receipt_template(c, sch, receipt_id)  # run the template
 
-        c.showPage()
-        c.save()
+    c.showPage()
+    c.save()
 
-        print('----- Payment Receipt Generated')
-        return HttpResponse('----- Payment Receipt Generated in your Application root foleder')
-        # FileResponse sets the Content-Disposition header so that browsers
-        # present the option to save the file.
-        # return FileResponse(open('ngs_receipt.pdf', 'rb'), as_attachment=False, content_type='application/pdf')
-        # buffer.seek(0)
-        # return FileResponse(buffer, as_attachment=True, filename='ngs_receipt.pdf')
-    else:
-        """ PRE RECEIPT PRINT PREVIEW """
 
-        context = {}
-        f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_id)
-        fees = FeesPayments.objects.filter(f1).order_by('invoice_no')
-        total = FeesPayments.objects.filter(f1).aggregate(amt_paid=Sum('amt_paid'))
-        if total['amt_paid'] is None:
-            total = {'amt_paid': 0.00}
+def preview_payments(request, sch_id=0, receipt_no=0):
+    """ HTML RECEIPT Print Preview and Statements """
 
-        # Get the distinct invoice_no in FeesPayment for the specified receipt No
-        inv_nos = FeesPayments.objects.filter(f1).values('invoice_no').order_by("invoice_no").distinct()
+    f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_no)
+    fees = FeesPayments.objects.filter(f1).order_by('invoice_no')
+    total = FeesPayments.objects.filter(f1).aggregate(amt_paid=Sum('amt_paid'))
 
-        wallet_amt = 0
-        if fees:
-            trans_id = fees.last().transaction_id
-            stud_id = fees.first().student_id
-            f2 = Q(school_id=sch_id) & Q(student_id=stud_id)
-            stud_pmts = FeesPayments.objects.filter(f2).order_by('pmt_date', 'id')
-            tot_due_fee = Invoice.objects.filter(f2).aggregate(due_fee=Sum('amount'))
-            due_date = Invoice.objects.filter(f2).values('due_date').order_by('due_date').last()
+    if total['amt_paid'] is None:
+        total = {'amt_paid': 0.00}
 
-            print(due_date, tot_due_fee)
+    # Get the distinct invoice_no in FeesPayment for the specified receipt No
+    inv_nos = FeesPayments.objects.filter(f1).values('invoice_no').order_by("invoice_no").distinct()
 
-            # Get the Previous Total Payments for the specified invoice no excluding the current receipt no
-            f3 = Q(school_id=sch_id) & Q(student_id=stud_id) & Q(invoice_no__in=inv_nos) & ~Q(receipt_no=receipt_id)
-            prv_fees_paid = FeesPayments.objects.filter(f3).aggregate(fees_paid=Sum('amt_paid'))
-            # print(prv_fees_paid)
+    wallet_amt = 0
+    if fees:
+        trans_id = fees.last().transaction_id
+        stud_id = fees.first().student_id
+        f2 = Q(school_id=sch_id) & Q(student_id=stud_id)
+        stud_pmts = FeesPayments.objects.filter(f2).order_by('pmt_date', 'id')
+        tot_due_fee = Invoice.objects.filter(f2).aggregate(due_fee=Sum('amount'))
+        due_date = Invoice.objects.filter(f2).values('due_date').order_by('due_date').last()
 
-            wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
-            if wallet_credited:
-                wallet_amt = wallet_credited.amt_paid
+        # Get the Previous Total Payments for the specified invoice no excluding the current receipt no
+        f3 = Q(school_id=sch_id) & Q(student_id=stud_id) & Q(invoice_no__in=inv_nos) & Q(receipt_no__lt=receipt_no)
+        prv_fees_paid = FeesPayments.objects.filter(f3).order_by('receipt_no').aggregate(fees_paid=Sum('amt_paid'))
 
-        tot_amt_paid = total['amt_paid'] + wallet_amt
+        wallet_credited = WalletPayments.objects.filter(transaction_id=trans_id).first()
+        if wallet_credited:
+            wallet_amt = wallet_credited.amt_paid
 
-        context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts,
-                   'previous': prv_fees_paid, 'due_date': due_date, 'total': tot_due_fee}
-        return render(request, 'payment-receipt.html', context)
+        if request.GET.get('recall'):
+            print(request.GET.get('recall'))
+            messages.info(request, f'The transaction with Receipt No: {receipt_no} is Re-Called')
+
+    tot_amt_paid = total['amt_paid'] + wallet_amt
+
+    context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts,
+               'previous': prv_fees_paid, 'due_date': due_date, 'total': tot_due_fee}
+    return render(request, 'payment-receipt-preview.html', context)
+

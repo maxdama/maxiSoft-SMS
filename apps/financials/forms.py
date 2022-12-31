@@ -20,7 +20,7 @@ class EnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollments
         fields = '__all__'
-        exclude = ['status', 'first_inv_no']
+        exclude = ['status', 'first_inv_no', 'transaction_id']
 
 
 class FeesAccountsForm(forms.ModelForm):

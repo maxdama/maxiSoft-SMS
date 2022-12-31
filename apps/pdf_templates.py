@@ -7,7 +7,7 @@ from datetime import date
 
 from apps.financials.models import FeesPayments, WalletPayments
 from apps.settings.models import SchoolProfiles
-from core import settings
+# from core import settings
 from core.settings import CORE_DIR
 
 
@@ -15,7 +15,7 @@ def pdf_receipt_template(c, sch, receipt_no):
     dt_today = date.today().strftime('%d-%b-%Y')
 
     sch_id = sch.sch_id
-    s = SchoolProfiles.objects.get(sch_id=sch_id)
+    # sch = SchoolProfiles.objects.get(sch_id=sch_id)
     f1 = Q(school_id=sch_id) & Q(receipt_no=receipt_no)
     fees = FeesPayments.objects.filter(f1)
 
@@ -37,18 +37,18 @@ def pdf_receipt_template(c, sch, receipt_no):
     c.translate(inch, inch)
     # logo_path = "D:\\Projects\\maxiSoft-SMS\\apps\\media\\images\\ngscrest.jpg"
     # logo_path = settings.CORE_DIR + "\\apps" + s.sch_logo.url
-    logo_path = os.path.join(CORE_DIR, 'apps' + s.sch_logo.url)
+    logo_path = os.path.join(CORE_DIR, 'apps' + sch.sch_logo.url) # Absolute Path
 
     print('Logo Path:')
     print(logo_path)
     # canvas.drawImage(self, image, x, y, width=None, height=None, mask=None)
     c.drawImage(logo_path, 5.5 * inch, 8.6*inch, 0.6*inch, 0.5*inch)
     c.setFont("Helvetica", 14)
-    c.drawString(0, 9.25 * inch, s.sch_name)
+    c.drawString(0, 9.25 * inch, sch.sch_name)
     c.setFont("Helvetica", 9)
-    c.drawString(0, 9*inch, s.sch_addr)
-    c.drawString(0, 8.80 * inch, f"Email: {s.email}")
-    c.drawString(0, 8.60 * inch, f"Mobile: {s.phone_no}")
+    c.drawString(0, 9*inch, sch.sch_addr)
+    c.drawString(0, 8.80 * inch, f"Email: {sch.email}")
+    c.drawString(0, 8.60 * inch, f"Mobile: {sch.phone_no}")
 
     c.setStrokeColorRGB(0, 0, 0)  # line colour
     c.setLineWidth(0.1)  # Set Line Width for all line except it is change within the code

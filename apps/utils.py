@@ -62,7 +62,6 @@ def get_cur_session(sch_id):
     last_term = last_sessx['term_id']
 
     if term is not None:
-        # print('School Period Payment')
         cur_term = term['term_id']
         sessx = AcademicSessions.objects.filter(term_id=cur_term, status='Active', sch_id=sch_id).values('id').last()
         sesx_id = sessx['id']

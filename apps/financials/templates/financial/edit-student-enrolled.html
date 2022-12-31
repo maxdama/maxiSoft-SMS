@@ -126,9 +126,9 @@
                                     <div class="form-floating-label">
 
                                         <select class="no-bd form-control input-border-bottom" id="class_id" name="classroom" style="font-weight:bold;" required >
-                                            <option selected hidden value="{{enrolled.classroom.id}}">{{enrolled.classroom.class_abr}} - {{enrolled.classroom.arm}}</option>
+                                            <option selected hidden value="{{enrolled.classroom.id}}">{{enrolled.classroom.class_abr}}{{enrolled.classroom.arm}}</option>
                                             {% for cls in classes %}
-                                                <option value={{cls.id}}>{{cls.class_abr}} - {{cls.arm}}  ({{timeline.descx}})</option>
+                                                <option value={{cls.id}}>{{cls.class_abr}}{{cls.arm}} ({{timeline.descx}})</option>
                                             {% endfor %}
                                         </select>
                                         <label for="class_id" class="placeholder pl-1">Batch Placement:</label>
@@ -314,7 +314,7 @@
 
             function x_proc(fee_id, ses_id, ses_text, class_id, class_text){
 
-                let descx_text = 'Admission into ' + class_text + '  - ' + ses_text
+                let descx_text = 'Admission ' + class_text + ' ' + ses_text
                 $('#descx').val(descx_text)
                 //alert('Fee Package Change: ' + '\n' + ses_id + ': ' + ses_text + '\n' + class_id + ' : ' + class_text + '\n' + 'Fee Package ID ' + fee_id );
 
