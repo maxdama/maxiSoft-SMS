@@ -109,24 +109,20 @@ class Enrollments(models.Model):
 
     @property  # Total Amount Due
     def tot_amt(self):
-        # tot_amt = 25000
         # Calculate Total Amount Due of the Student in the current row
         qf1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
         qf2 = (Q(invoice__status='np') | Q(invoice__status='pp'))
-        due_amt = Enrollments.objects.filter(qf1).aggregate(due=Sum('invoice__balance', filter=qf2))
-        # print(due_amt['due'])
+        # due_amt = Enrollments.objects.filter(qf1).aggregate(due=Sum(F('invoice__balance')-F('invoice__discount'), filter=qf2))
+        due_amt = Enrollments.objects.filter(qf1).aggregate(due=Sum(F('invoice__balance'), filter=qf2))
         if due_amt['due'] is None:
             due_amt = {'due': 0.00}
         return due_amt
 
     @property  # Due Date
     def due(self):
-        due_dt = '20-03-2022'
-        query_criteria = Q(reg_no=self.reg_no) & Q(school_id=self.school) & \
-                         (Q(invoice__status='np') | Q(invoice__status='pp')) & Q(timeline_id=self.timeline) & Q(
+        f1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & (Q(invoice__status='np') | Q(invoice__status='pp')) & Q(timeline_id=self.timeline) & Q(
             session_id=self.session)
-        due_dt = Enrollments.objects.filter(query_criteria).values(date=F('invoice__due_date')).order_by(
-            'invoice__due_date').first()
+        due_dt = Enrollments.objects.filter(f1).values(date=F('invoice__due_date')).order_by('invoice__due_date').first()
         if due_dt is None:
             due_dt = {'date': date.today()}
         return due_dt
@@ -134,21 +130,19 @@ class Enrollments(models.Model):
     @property
     def last_inv(self):  # Last Invoice Amount
         # Get the Last Invoice Amount issued to Student in Invoice Table
-        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id=self.timeline) & Q(
-            session_id=self.session)
-        last_paid = Enrollments.objects.filter(crit).values(amt=F('invoice__amount')).order_by(
+        f1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id=self.timeline) & Q(session_id=self.session)
+        last_paid = Enrollments.objects.filter(f1).values(amt=F('invoice__amount')).order_by(
             'invoice__invoice_no').last()
         if last_paid['amt'] is None:
             last_paid = {'amt': 0.00}
         # print(last_paid)
-        return last_paid
+        return
 
     @property  # Term Cumulative payment
     def term_pmt(self):  # Get the Cumulative payment of the term for the specified Student
-        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
-        crit1 = Q(payments__session_id=self.session_id) & Q(payments__student_id=self.student_id) & Q(
-            payments__school_id=self.school_id)
-        last_paid = Enrollments.objects.filter(crit).aggregate(amt=Sum('payments__amt_paid', filter=crit1))
+        f1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        f2 = Q(payments__session_id=self.session_id) & Q(payments__student_id=self.student_id) & Q(payments__school_id=self.school_id)
+        last_paid = Enrollments.objects.filter(f1).aggregate(amt=Sum('payments__amt_paid', filter=f2))
         if last_paid['amt'] is None:
             last_paid = {'amt': 0.00}
         # print(last_paid)
@@ -157,10 +151,9 @@ class Enrollments(models.Model):
     @property  # Last Payment Amount
     def last_pmt(self):
         # Get the Last Amount Paid in Payments Table for the specified Student and Class
-        crit = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
-        crit1 = Q(payments__receipt_no=self.last_rcpt_no) & Q(payments__student_id=self.student_id) & Q(
-            payments__school_id=self.school_id)
-        last_paid = Enrollments.objects.filter(crit).aggregate(amt=Sum('payments__amt_paid', filter=crit1))
+        f1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
+        f2 = Q(payments__receipt_no=self.last_rcpt_no) & Q(payments__student_id=self.student_id) & Q(payments__school_id=self.school_id)
+        last_paid = Enrollments.objects.filter(f1).aggregate(amt=Sum('payments__amt_paid', filter=f2))
         if last_paid['amt'] is None:
             last_paid = {'amt': 0.00}
         # print(last_paid)
@@ -169,19 +162,13 @@ class Enrollments(models.Model):
     @property  # Last Payment Date
     def last_paymt(self):
         # Get the last payment date of every student of the current academic year
-        # last_pmt_dt = '20-03-2022'
-        criteria = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
-        # last_pmt_dt = Enrollments.objects.filter(criteria).values(date=F('payments__pmt_date')).order_by('payments__pmt_date').last()
+        f1 = Q(reg_no=self.reg_no) & Q(school_id=self.school) & Q(timeline_id__lte=self.timeline)
         try:
-            last_pmt_dt = Enrollments.objects.filter(criteria).values(date=F('payments__pmt_date')) \
-                .exclude(payments__pmt_date__isnull=True).order_by('payments__pmt_date').last()
-
-            # print(last_pmt_dt)
+            last_pmt_dt = Enrollments.objects.filter(f1).values(date=F('payments__pmt_date')).exclude(payments__pmt_date__isnull=True).order_by('payments__pmt_date').last()
             if last_pmt_dt['date'] is None:
                 last_pmt_dt = {'date': date.today()}
         except:
             last_pmt_dt = {'date': date.today()}
-
         return last_pmt_dt
 
     def __str__(self):
@@ -211,6 +198,7 @@ class Invoice(models.Model):
     descx = models.CharField(max_length=250)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True, blank=True)
+    disc_perc = models.DecimalField(max_digits=6, decimal_places=1, default=0, null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     due_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, null=True, blank=True)
@@ -282,7 +270,7 @@ class FeesPayments(models.Model):
     def runing(self):  # Calculate Runing Balance for the specified Client
         f1 = Q(school_id=self.school_id)  & Q(student_id=self.student_id) # & (Q(doc_type='receipt') | Q(doc_type='invoice'))
         f2 = (Q(doc_no__lte=self.receipt_no) & Q(doc_type='receipt')) | Q(doc_type='invoice')
-        bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2))
+        bal = FeesAccounts.objects.filter(f1).order_by('trans_date', 'id').aggregate(balance=Sum('amount', filter=f2)-self.invoice.discount)
         if bal is None:
             bal = {'balance': 0.00}
         return bal

@@ -105,7 +105,7 @@
 
                         <div class="">
 
-                            <div class="row d-flex justify-content-center "  >
+                            <div class="row d-flex justify-content-center ">
 
                                 <div class="col-sm-2 ">
                                     <div class="form-floating-label">
@@ -146,19 +146,23 @@
                                         <label for="fee_pkg" class="placeholder pl-1">Fee Package:</label>
                                     </div>
                                 </div>
-
                             </div>
-                            <hr class=" mb-0">
-                            <span class="text-small fw-extrabold font-italic pl-4">Auto </span> <span class="pl-2 fw-bold">Invoice No: </span>
-                            <span class="pl-1">
-                                <input  size="11" name="invoice_no" id="invoice_no" value="" tabindex="10" type="text" readonly class="no-bd" placeholder="" required >
-                            </span>
 
+                            <div class="border-top">
+                                <span class="text-small fw-extrabold font-italic pl-4">Auto </span> <span class="pl-2 fw-bold">Invoice No: </span>
+                                <span class="pl-1">
+                                    <input  size="11" name="invoice_no" id="invoice_no" value="" tabindex="10" type="text" readonly class="no-bd" placeholder="" required >
+                                </span>
+                            </div>
+
+                            <div class="text-small text-right border-bottom ml-5 mr-5 pr-3 pb-1">
+                                Discount %: <input type="text" class="" size="4" id="discount_perc" name="disc_perc">
+                                Discount Amount: <input type="text" id="discount_amt" name="discount" class="" size="7">
+                            </div>
                             <p>
                             <div class="row ">
 
                                 <div class="col-md-1 font-weight-bold text-left">
-
                                 </div>
                                 <div class="col-md-7 font-weight-bold text-left">
                                     <span class="label pl-2">Description:</span>
@@ -217,22 +221,22 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
+
     {% if messages %}
         {% for message in messages %}
             {% if message.tags == 'success'%}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Successfull . . . ')</script>
+                <script type=text/javascript>toastr.success('{{ message }}', 'Very Good . . . ')</script>
             {% elif message.tags == 'info' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Information . . . ')</script>
+                <script type=text/javascript>toastr.info('{{ message }}')</script>
             {% elif message.tags == 'warning' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Warning . . . ')</script>
+                <script type=text/javascript>toastr.warning('{{ message }}')</script>
             {% elif message.tags == 'error' %}
-                <script type=text/javascript>toastr.{{ message.tags }}('{{ message }}', 'Error . . . ')</script>
+                <script type=text/javascript>toastr.error('{{ message }}')</script>
             {% endif %}
         {% endfor %}
     {% endif %}
 
-    <script type="text/javascript"  >
-
+    <script type="text/javascript">
 		$(document).ready(function() {
             //document.getElementById('trans_date').valueAsDate = new Date(); // Get the current Date and assigned
             document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
@@ -240,8 +244,43 @@
 
 		$(document).ready(function() {
 
-            // document.getElementById('trans_date').valueAsDate = new Date(); // Get the current Date and assigned
+            $("#discount_perc").blur(function(){
+                $(this).css("textAlign", "center");
+                let amt = $('#amount').val()
+                let perc = $(this).val()
+                let inv_amt = $.parseNumber(amt, {format:"#,###.00", locale:"us"});
 
+                if(inv_amt > 0 && perc != "") {
+                     // Calculate Discount
+                    disc_amt = perc/100 * inv_amt
+                    disc_amt = $.formatNumber(disc_amt, {format:"#,###.00", locale:"us"});
+                    $("#discount_amt").val(disc_amt)
+                    $("#discount_amt").css("textAlign", "right");
+                } else {
+                    $("#discount_amt").val('0.00')
+                }
+            });
+
+            $("#discount_amt").blur(function(){
+                // $(this).parseNumber({format:"#,###.00", locale:"us"}
+                let amt = $('#amount').val()
+                let disc_amt = $(this).val()
+                let inv_amt = $.parseNumber(amt, {format:"#,###.00", locale:"us"})
+
+                if(inv_amt > 0 && disc_amt > 0) {
+                    // Calculate Discount Percentage
+                    disc_perc = disc_amt/inv_amt * 100
+                    disc_perc = $.formatNumber(disc_perc, {format:"#,###.0", locale:"us"});
+                    $("#discount_perc").val(disc_perc)
+                    $("#discount_perc").css("textAlign", "center");
+                } else {
+                    $("#discount_perc").val('')
+                }
+                $(this).formatNumber({format:"#,###.00", locale:"us"})
+                $(this).css("textAlign", "right");
+            });
+
+            // document.getElementById('trans_date').valueAsDate = new Date(); // Get the current Date and assigned
             // It redirect the URL when the close button at the TOP Right corner is clicked
              $("#close").click(function(){
                  location.href='/financials/student-enrolled-list'
@@ -339,7 +378,6 @@
                             $( '#amount' ).val(inv_amt);
                             $( '#invoice_no' ).val(inv_no);
                             $( '#reg_no' ).val(reg_no);
-
                             $("#amount").css("textAlign", "right");
                         },
                         error: function(xhr, status, error)
@@ -369,7 +407,5 @@
         });
 
 	</script>
-
-
 
 {% endblock javascripts %}

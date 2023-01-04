@@ -34,7 +34,7 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = '__all__'
-        exclude = ['package', 'due_date', 'balance', 'status', 'amount']
+        exclude = ['package', 'due_date', 'balance', 'status', 'amount', 'discount']
 
 
 class FeePaymentForm(forms.ModelForm):

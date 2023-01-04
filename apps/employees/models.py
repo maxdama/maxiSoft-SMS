@@ -38,7 +38,7 @@ class Employees(models.Model):
     school = models.ForeignKey(SchoolProfiles, on_delete=models.CASCADE, null=True, blank=True, unique=False)
     department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, blank=True, unique=False)
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, unique=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, null=True, blank=True, related_name='employee')
     staff_no = models.CharField(max_length=25, unique=True, null=False, blank=True, db_index=True)
     title = models.CharField(max_length=10, blank=True, null=True)
     surname = models.CharField(max_length=30, unique=False, blank=True)

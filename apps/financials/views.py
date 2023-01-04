@@ -217,7 +217,7 @@ def new_student_enrollment(request, reg_id):
         context = {
             'student': student, 'timeline': timeline, 'classes': classes, 'fees': fees, 'sessions': sessions
         }
-        return render(request, 'financial/student-enrollment.html', context)
+        return render(request, 'student-enrollment.html', context)
 
 
 @transaction.atomic
@@ -302,7 +302,7 @@ def student_enrolled_update(request, enr_id, inv_no):
 
         context = {'header': header, 'enrolled': enrolled, 'sessions': sessions, 'timeline': timeline,
                    'classes': classes, 'fees': fees, 'inv': invoice}
-        return render(request, 'financial/edit-student-enrolled.html', context)
+        return render(request, 'edit-student-enrolled.html', context)
 
 
 def student_re_enrollment(request, stud_id):
@@ -402,12 +402,30 @@ def cancel_financial_transaction(request, sch_id, trans_id):
 
             elif descx == 'fee payment':
                 stud_id = trans.student_id
-                trans.delete()
-                print(f'Transaction No: {trans_id} is deleted')
-
                 f1 = Q(school_id=sch_id) & Q(student_id=stud_id)
+
+                """ Get the distinct Invoice Nos for the transaction you are cancelling from FeesPayment
+                   Get the total discount sum from Invoice with Invoice Nos : using in keyword
+               """
+                inv_nos = []
+                invoices = FeesPayments.objects.filter(f1 & Q(transaction_id=trans_id)).values('invoice_no').distinct()
+
+                for x, inv in enumerate(invoices, start=0):
+                    inv_nos.append(inv['invoice_no'])
+
+                tot_disc = Invoice.objects.filter(f1 & Q(invoice_no__in=inv_nos)).aggregate(discount=Sum('discount'))
+                print("Discount:")
+                print(tot_disc['discount'])
+                total_discount = tot_disc['discount']
+
+                trans.delete() # Delete all the corresponding transaction
+                print(f'Transaction No: {trans_id} is deleted')
+                print('Invoice Nos:')
+                print(inv_nos)
+
                 pmt_counts = FeesPayments.objects.filter(f1).count()
                 due = FeesAccounts.objects.filter(school_id=sch_id, student_id=stud_id).aggregate(balance=Sum('amount'))
+                due_balance = due['balance'] - total_discount
                 last = FeesPayments.objects.filter(f1).values('receipt_no').order_by('receipt_no').last()
                 print(last)
                 if last is None:
@@ -432,7 +450,7 @@ def cancel_financial_transaction(request, sch_id, trans_id):
                 print(enrlmt)
 
                 inv = Invoice.objects.filter(f1 & Q(transaction_id=trans_id_enrlmt))
-                inv.update(balance=due['balance'], status=status_inv)
+                inv.update(balance=due_balance, status=status_inv)
 
                 print(f'Fees Payment Counts: {pmt_counts};  Status: {status}; Last Receipt No: {last["receipt_no"]}')
                 messages.success(request, 'The Transaction is cancelled Successfully')
@@ -493,14 +511,15 @@ def financial_transactions(request, action, enr_id, inv_no, trans_id=0):
         invoice_form = InvoiceForm(request.POST or None)
     if invoice_form.is_valid():
         inv = invoice_form.save(commit=False)
-        # NOTE: The replace is used to remove any comma in the amt_paid text before converting to flaot else error
-        inv.amount = float(request.POST['amount'].replace(',', ''))
+        discount = float(request.POST['discount'].replace(',', ''))
+        inv.amount = float(request.POST['amount'].replace(',', '')) # REPLACE remove any comma in the amt_paid text
         inv.due_date = ap_due_date(request)
-        inv.balance = inv.amount
+        inv.balance = (inv.amount - discount)
         inv.enrolled_id = enr_id
         inv.package_id = request.POST['fee_pkg']
         inv.status = 'np'
         inv.transaction_id = trans_id
+        inv.discount = discount
         inv.save()
     else:
         messages.error(request, invoice_form.errors)
@@ -684,33 +703,32 @@ def print_pdf_receipt(request, sch_id, stud_id=0, receipt_no=0):
     receipt_name = f"receipt-{sch_id}{stud_id}.pdf".lower()
     file_name = os.path.join(CORE_DIR, 'apps\\financials\\documents\\' + receipt_name)
 
-    create_pdf_receipt(file_name, sch, stud_id=stud_id, receipt_id=receipt_no)  # Create PDF Receipt file
+    receipt_created = create_pdf_receipt(request, file_name, sch, stud_id=stud_id, receipt_id=receipt_no)  # Create PDF Receipt file
 
-    if request.GET.get('btn_print'):
-        try:
-            os.startfile(file_name, "print") # Print the file in the file_name location
-            # Sleeping the program for 5 seconds so as to account the
-            # steady processing of the print operation.
-            sleep(5)
-            # for p in psutil.process_iter():  # Close Acrobat after printing the PDF
-            #    if 'AcroRd' in str(p):
-            #        p.kill()
-        except:
-            messages.error(request, 'ALERT: Receipt could not be printed! Please ensure  \
-            that associated PDF reader software is installed in this system.')
+    if receipt_created:
+        if request.GET.get('btn_print'):
+            try:
+                os.startfile(file_name, "print") # Print the file in the file_name location
+                # Sleeping the program for 5 seconds so as to account the
+                # steady processing of the print operation.
+                sleep(5)
+                # for p in psutil.process_iter():  # Close Acrobat after printing the PDF
+                #    if 'AcroRd' in str(p):
+                #        p.kill()
+            except:
+                messages.error(request, 'ALERT: Receipt could not be printed! Please ensure  \
+                that associated PDF reader software is installed in this system.')
 
-        return redirect(preview_payments, sch_id=sch_id, receipt_no=receipt_no)  # HTML Receipt Payment Preview
+        elif request.GET.get('btn_preview'):
+            try:
+                os.startfile(file_name, "open")
+                # sleep(15)
+            except FileNotFoundError as e:
+                messages.error(request, e.strerror)
+            except:
+                messages.error(request, 'ALERT: Receipt could not be preview or printed! ')
 
-    elif request.GET.get('btn_preview'):
-        try:
-            os.startfile(file_name, "open")
-            # sleep(15)
-        except FileNotFoundError as e:
-            messages.error(request, e.strerror)
-        except:
-            messages.error(request, 'ALERT: Receipt could not be preview or printed! ')
-
-        return redirect(preview_payments,  sch_id=sch_id, receipt_no=receipt_no)  #  HTML Receipt Payment Preview
+    return redirect(preview_payments,  sch_id=sch_id, receipt_no=receipt_no)  #  HTML Receipt Payment Preview
 
 
 @transaction.atomic
@@ -729,7 +747,7 @@ def student_payment(request, stud_id):
         pay_into = {'bank_name': ''}
 
     f1 = Q(student_id=stud_id) & Q(school_id=sch_id) & (Q(status='np') | Q(status='pp'))
-    inv = Invoice.objects.values('id', 'invoice_no', 'descx', 'amount', 'balance').filter(f1).order_by('invoice_no')
+    inv = Invoice.objects.values('id', 'invoice_no', 'descx', 'amount', 'discount', 'balance').filter(f1).order_by('invoice_no')
 
     if request.method == 'POST':
         cur_sesx_id = get_cur_session(sch_id)
@@ -857,6 +875,7 @@ def process_invoice(amt_paying, inv, sch_id, stud_id):
     """
     inv_no = inv['invoice_no']
     inv_bal = float(inv['balance'])
+    inv_disc = float(inv['discount'])
     inv_descx = inv['descx']
 
     if amt_paying >= inv_bal:
@@ -949,15 +968,25 @@ def wallet_account(request, stud_id, **kwargs):
         return render(request, 'wallet-accounts.html', context)
 
 
-def create_pdf_receipt(file_name, sch, receipt_id, stud_id):
+def create_pdf_receipt(request, file_name, sch, receipt_id, stud_id):
     from reportlab.lib.pagesizes import letter
     from apps.pdf_templates import pdf_receipt_template
 
-    c = canvas.Canvas(file_name, pagesize=letter)
-    c = pdf_receipt_template(c, sch, receipt_id)  # run the template
+    receipt = canvas.Canvas(file_name, pagesize=letter)
+    receipt = pdf_receipt_template(request, receipt, sch, receipt_id)  # run the template
+    result = False
 
-    c.showPage()
-    c.save()
+    receipt.showPage()
+    try:
+        receipt.save()
+        result = True
+    except PermissionError as e:
+        if e.strerror == 'Permission denied':
+            messages.error(request, 'A previous receipt for this student is open. To Preview or Print another one, you have to close the previous one.')
+        else:
+            messages.error(request, e.strerror)
+
+    return result
 
 
 def preview_payments(request, sch_id=0, receipt_no=0):
@@ -979,7 +1008,7 @@ def preview_payments(request, sch_id=0, receipt_no=0):
         stud_id = fees.first().student_id
         f2 = Q(school_id=sch_id) & Q(student_id=stud_id)
         stud_pmts = FeesPayments.objects.filter(f2).order_by('pmt_date', 'id')
-        tot_due_fee = Invoice.objects.filter(f2).aggregate(due_fee=Sum('amount'))
+        tot_sum = Invoice.objects.filter(f2).aggregate(due_fee=Sum(F('amount')-F('discount')), discount=Sum('discount'))
         due_date = Invoice.objects.filter(f2).values('due_date').order_by('due_date').last()
 
         # Get the Previous Total Payments for the specified invoice no excluding the current receipt no
@@ -997,6 +1026,6 @@ def preview_payments(request, sch_id=0, receipt_no=0):
     tot_amt_paid = total['amt_paid'] + wallet_amt
 
     context = {'fees': fees, 'total_amt_paid': tot_amt_paid, 'wallet_credited': wallet_amt, 'pmts': stud_pmts,
-               'previous': prv_fees_paid, 'due_date': due_date, 'total': tot_due_fee}
+               'previous': prv_fees_paid, 'due_date': due_date, 'total': tot_sum}
     return render(request, 'payment-receipt-preview.html', context)
 

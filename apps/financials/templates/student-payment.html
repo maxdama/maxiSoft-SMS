@@ -78,7 +78,7 @@
                                 <div class=" col-md-5 form-floating-label ">
                                     <div class="">
                                     <input id="studnames" type="text" name="studentnames" value="{{enrolled.student.surname}} {{enrolled.student.first_name}} {{enrolled.student.middle_name}}" class="form-control no-bd" style="font-weight:bold; font-size: 18px;"  required>
-                                    <label for="studnames" class="placeholder pl-3">Student Making Payment</label>
+                                    <label for="studnames" class="placeholder pl-3">Payment For:</label>
                                     </div>
                                     <div class="pl-3">
                                         Wallet Bal: <input id="wallet_bal" type="text" class="no-bd pl-2"  value="{{student.wallet_bal|floatformat:2|intcomma}}" readonly>
@@ -248,8 +248,10 @@
             // It uses the JQueryNumberFormat plugin that was downloaded and placed in
             // the static/assets/js/plugin/number-format folder
             $("#amount_paying").blur(function(){
+
                 $(this).parseNumber({format:"#,###.00", locale:"us"});
                 $(this).formatNumber({format:"#,###.00", locale:"us"})
+                $(this).css("textAlign", "right");
                 //var number = $(this).val()
                 //number = $.formatNumber(number, {format:"#,###.00", locale:"us"});
                 //$(this).val(number);

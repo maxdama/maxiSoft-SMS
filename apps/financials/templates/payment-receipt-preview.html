@@ -67,7 +67,7 @@
                                 </div>
                                 <div class="float-right"><span class="text-small">Due Fees:</span> <span class="text-small font-weight-bold text-danger">{{fees.last.runing.balance|floatformat:2|intcomma}}</span> </div>
                                 <div class="">
-                                        <span class="text-small">Total Amount Received: </span>
+                                        <span class="text-small">Amount Received: </span>
                                         <span class="text-right text-small pr-1 font-weight-bold text-success">{{total_amt_paid|floatformat:2|intcomma}}</span>
                                 </div>
                                 <div class="text-small ">
@@ -187,9 +187,23 @@
                             <div class="table-responsive table-hover table-sm pl-3 ">
                              <table class="text-small border " id="fee_trans">
                                     <thead>
-                                        <div class="text-small pt-1 pb-sm-1 pr-4">
-                                            <span class="text-info  ">Due Date: {{due_date.due_date|date:'d-m-Y'}}</span>
-                                            <span class="float-right text-danger">Total Fees Due: {{total.due_fee|floatformat:2|intcomma}}</span>
+                                        <div class="text-small pt-1 pb-sm-1 pr-4 ">
+                                            {% if total.discount %}
+                                            <div class="row">
+                                                <div class="col text-right">
+                                                <span class="text-success ">Total Discount: {{total.discount|floatformat:2|intcomma}}</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            <div class="row">
+                                                <div class="col">
+                                                    <span class="text-info">Due Date: {{due_date.due_date|date:'d-m-Y'}}</span>
+                                                </div>
+                                                <div class="col">
+                                                     <span class="float-right text-danger">Total Fees Due: {{total.due_fee|floatformat:2|intcomma}}</span>
+                                                </div>
+                                            </div>
+
                                         </div>
                                         <tr class="text-center text-secondary ">
                                             <th class="nowrap">Trans Date</th>
