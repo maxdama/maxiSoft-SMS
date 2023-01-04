@@ -197,7 +197,7 @@ def new_student_enrollment(request, reg_id):
             return redirect('list-enrollments')
 
         elif request.POST.get("save_and_add"):
-            return redirect("new_registeration")
+            return redirect("new-registeration")
         else:
             # return redirect('/index.html') # Directs to home page -- working
             return redirect('home')
@@ -284,7 +284,7 @@ def student_enrolled_update(request, enr_id, inv_no):
             return redirect('list-enrollments')
 
         elif request.POST.get("save_and_add"):
-            return redirect("new_registeration")
+            return redirect("new-registeration")
         else:
             # return redirect('/index.html') # Directs to home page -- working
             return redirect('home')
@@ -336,7 +336,7 @@ def student_re_enrollment(request, stud_id):
             return redirect('list-enrollments')
 
         elif request.POST.get("save_and_add"):
-            return redirect("new_registeration")
+            return redirect("new-registeration")
         else:
             return redirect('home')
     else:

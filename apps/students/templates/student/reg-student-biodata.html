@@ -225,7 +225,7 @@
                                      </div>
 
                                      <div class="col-4 ">
-                                        <button class="btn btn-full btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new_registration" >
+                                        <button class="btn btn-full btn-outline-success btn-sm btn-round"  type="submit" name="save_pause" value="save&pause" formaction="/students/new-registration" >
                                             {% if student.reg_status|lower == 'enrolled' %}
                                                 UPDATE
                                             {% else %}
@@ -235,7 +235,7 @@
                                      </div>
                                       <div class="col-4 ">
                                           {% if student.reg_status|lower == 'pending' or student.reg_status is None %}
-                                         <button class="btn btn-full btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new_registration" >
+                                         <button class="btn btn-full btn-outline-success  btn-sm btn-round  " type="submit" name="save_continue" value="save&continue" formaction="/students/new-registration" >
                                                 SAVE & CONTINUE . . .
                                          </button>
                                           {% endif %}

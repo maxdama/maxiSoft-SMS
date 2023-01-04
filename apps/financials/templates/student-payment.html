@@ -13,8 +13,8 @@
 <div class="content">
     <div class="page-inner">
 
-        <div class="page-header">
-            <h3 class="font-weight-bold" >{{header}}</h3>
+        <div class="page-header border-bottom shadow pl-3 pt-1 pb-0 text-secondary  ">
+            <h4 class="font-weight-bold " >{{header}}</h4>
             <ul class="breadcrumbs">
                 <li class="nav-home">
                     <a href="#">
@@ -39,11 +39,11 @@
         <form action="" class="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="container d-flex justify-content-center">
+            <div class="container d-flex justify-content-center shadow-sm pt-4 border-bottom ">
                 <div class="col col-md-10 ">
-                    <div class="card">
+                    <div class="card shadow">
 
-                        <div class="card-header">
+                        <div class="card-header ">
 
                             <div class="row float-sm-right " >
                                 <div class="col-sm-4 form-group" >
@@ -55,7 +55,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-10">
-                                    <h5 class=""><strong>Student Payment Entry: </strong><br>
+                                    <h5 class="text-secondary"><strong>Student Payment Entry: </strong><br>
                                     Session: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
                                 </div>
                                 <div class="col-2">
@@ -78,7 +78,7 @@
                                 <div class=" col-md-5 form-floating-label ">
                                     <div class="">
                                     <input id="studnames" type="text" name="studentnames" value="{{enrolled.student.surname}} {{enrolled.student.first_name}} {{enrolled.student.middle_name}}" class="form-control no-bd" style="font-weight:bold; font-size: 18px;"  required>
-                                    <label for="studnames" class="placeholder pl-3">Payment For:</label>
+                                    <label for="studnames" class="placeholder pl-3 text-info">Payment For:</label>
                                     </div>
                                     <div class="pl-3">
                                         Wallet Bal: <input id="wallet_bal" type="text" class="no-bd pl-2"  value="{{student.wallet_bal|floatformat:2|intcomma}}" readonly>
@@ -86,7 +86,7 @@
                                 </div>
 
                                 <div class="col-md-3  " style="width:auto">
-                                    <span class="gen-id ">Registration No:</span>
+                                    <span class="gen-id text-info">Registration No:</span>
                                     <div class="row">
                                         <div class="col-md-12 form-group w_90 pl-3  p-0 m-0">
                                             <input id="reg_no" name="reg_no" value="{{enrolled.reg_no}}" readonly type="text" class="no-bd  pt-0 mt-0" style="font-weight:bold;" required>
@@ -102,7 +102,7 @@
                                             <option selected hidden value="{{enrolled.classroom.id}}">{{enrolled.classroom.class_abr}} - {{enrolled.classroom.arm}}</option>
 
                                         </select>
-                                        <label for="class_id" class="placeholder pl-1">Batch:</label>
+                                        <label for="class_id" class="placeholder pl-1 text-info">Batch:</label>
                                     </div>
                                 </div>
 
@@ -116,10 +116,11 @@
                             <div class="row d-flex justify-content-center "  >
 
                                 <div class="col-md-3 font-weight-bold text-left">
-                                    <span class="pl-2 ">Due Amount</span>
+                                    <span class="pl-2 text-info">Due Amount</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due|floatformat:2|intcomma}}" tabindex="10" type="text" readonly class="no-bd"  >
+                                              <input  name="due_amount" id="due_amount" value="{{enrolled.tot_amt.due|floatformat:2|intcomma}}"
+                                                      tabindex="10" type="text" readonly class="no-bd text-danger pl-4"  >
                                           </div>
                                       </div>
                                 </div>
@@ -134,12 +135,12 @@
                                                 <option value="{{pm.id}}">{{pm.pay_method}}</option>
                                             {% endfor %}
                                         </select>
-                                        <label for="pay_method" class="placeholder pl-0">* Payment Method:</label>
+                                        <label for="pay_method" class="placeholder pl-0 text-info">* Payment Method:</label>
                                     </div>
                                 </div>
 
                                 <div class="col-md-3 font-weight-bold text-left">
-                                    <span class="pl-2 ">Instrument No</span>
+                                    <span class="pl-2 text-info">Instrument No</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
                                               <input name="instrument_no" id="instr_no" value="" tabindex="10" type="text" class="form-control form-control-sm  no-bd" placeholder=""  >
@@ -151,7 +152,7 @@
                                  <!-- Date of Payment -->
                                      <div class="form-group form-floating-label">
                                          <input  type="date" id="trans_date" class="no-bd form-control" name="pmt_date" required >
-                                         <label for="trans_date" class="placeholder pl-3">* Date</label>
+                                         <label for="trans_date" class="placeholder pl-3 text-info">* Date</label>
                                      </div>
                                 </div>
 
@@ -162,7 +163,7 @@
                             <div class="row ">
 
                                 <div class="col-md-6 font-weight-bold text-left">
-                                    <span class="label pl-2">Payment Description:</span>
+                                    <span class="label pl-2 text-info">Payment Description:</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
                                               <input  name="pmt_descx" id="descx" value="{{descx}}" tabindex="10" type="text" class="form-control form-control-sm" placeholder="Payment - 1st Term 2022 Tuition Fee" required >
@@ -171,25 +172,26 @@
                                 </div>
 
                                 <div class="col-md-3 font-weight-bold text-left">
-                                    <span class="pl-1 ">* Amount Paying</span>
+                                    <span class="pl-1 text-info">* Amount Paying</span>
                                       <div class="row">
-                                          <div class="col-md-12 pl-4 text-right ">
-                                              <input  name="amt_paid" id="amount_paying" value="{{inv.amount}}" tabindex="10" type="text"  class="form-control form-control-sm  " placeholder="" required >
+                                          <div class="col-md-12 pr-4 text-right ">
+                                              <input  name="amt_paid" id="amount_paying" value="{{inv.amount}}" tabindex="10" type="text"
+                                                      class="form-control form-control-sm fw-bold text-success" size="8" placeholder="" required >
                                           </div>
                                       </div>
                                 </div>
 
 
-                                <div class="col-md-3 font-weight-bold text-left ">
-                                    <div class="form-floating-label">
+                                <div class="col-md-3 font-weight-bold text-left pt-2 ">
+                                    <div class="form-floating-label ">
 
-                                        <select class="no-bd form-control input-border-bottom" id="bank" name="bank" style="font-weight:bold;" required >
+                                        <select class="no-bd form-control input-border-bottom " id="bank" name="bank" style="font-weight:bold;" required >
                                             <option></option>
                                             {% for pt in banks %}
                                                 <option value="{{pt.id}}">{{pt.bank_name}}</option>
                                             {% endfor %}
                                         </select>
-                                        <label for="bank" class="placeholder pl-0">* Pay into:</label>
+                                        <label for="bank" class="placeholder pl-0 text-info pt-1">* Pay into:</label>
                                     </div>
                                 </div>
                             </div>
@@ -197,14 +199,15 @@
                         </div>
                     </div>
 
-                        <div class="card-footer card-transparent pt-3">
+                        <div class="card-footer card-transparent pt-3 pb-4">
                             <div class="row d-flex justify-content-center text-center">
                                  <div class="col-2 ">
                                     <!-- <button class="btn btn-outline-dark btn-round btn-sm"  type="submit" name="save_and_add" value="save&add" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Save and Add Another</button> -->
                                  </div>
                                  <div class="col-5 ">
                                      <!-- <button class="btn btn-outline-dark btn-round btn-sm" type="submit" name="save_and_list" value="save&list" formaction="/financials/update-enrollment/{{enrolled.pk}}/{{inv.invoice_no}}" >Finish and List Enrollment</button> -->
-                                     <button class="btn btn-outline-success btn-round btn-sm" id="save"  type="submit" name="save" value="paid" formaction="/financials/student-payment/{{enrolled.student_id}}" >Pay NOW</button>
+                                     <button class="btn btn-outline-info btn-round btn-sm w-75 shadow" id="save"  type="submit" name="save" value="paid"
+                                             formaction="/financials/student-payment/{{enrolled.student_id}}" >Pay NOW</button>
                                  </div>
                                   <div class="col-2 "></div>
                              </div>

@@ -39,7 +39,7 @@
         <form action="" class="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="container d-flex justify-content-center shadow-lg pt-4 rounded ">
+            <div class="container d-flex justify-content-center border shadow pt-4 ">
                 <div class="col col-md-10 ">
                     <div class="card">
 
@@ -58,8 +58,8 @@
                             <!-- <h5 class=""><strong>Enrollment and Invoicing: </strong><br> Academic Year: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5> -->
                             <div class="row">
                                 <div class="col-10">
-                                    <h5 class=""><strong>Batch Placement and Invoicing: </strong><br>
-                                        Academic Year: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
+                                    <h5 class=""><strong>Batch Placement and Invoice: </strong><br>
+                                        Academic Year: <span class="pr-4">  {{timeline.descx}}</span>  </h5>
                                 </div>
                                 <div class="col-2">
                                     <!--  Close button at the TOP Right Corner. Closes the form to Employee List -->
@@ -161,21 +161,11 @@
 
                              <div class="text-small text-right border-bottom ml-5 mr-5 pr-3 pb-1">
                                 Discount %: <input type="text" class="" size="4" id="discount_perc" name="disc_perc" value="{{inv.disc_perc}}">
-                                Discount Amount: <input type="text" id="discount_amt" name="discount" class="" size="7" value="{{inv.discount}}">
+                                 <span class="pl-3  fw-bold">Discount Amount: </span>
+                                 <input type="text" id="discount_amt" name="discount" class="text-danger" size="7" value="{{inv.discount}}">
                             </div>
 
                             <div class="row mt-3 ml-3 pl-2">
-                                <!--
-                                <div class="col-md-2 font-weight-bold text-left">
-                                    <span class="pl-2 ">Invoice No</span>
-                                      <div class="row">
-                                          <div class="col-md-12 pl-4">
-                                              <input  name="invoice_no" id="invoice_no" value="{{inv.invoice_no}}" tabindex="10" type="text" readonly class="form-control form-control-sm" placeholder="" required >
-                                          </div>
-                                      </div>
-                                </div>
-                                -->
-
 
                                 <div class="col-md-7 font-weight-bold text-left">
                                     <span class="label pl-2">Description:</span>
@@ -190,7 +180,7 @@
                                     <span class="pl-4 text-center ml-5">Amount</span>
                                       <div class="row">
                                           <div class="col-md-12 text-right">
-                                              <input  name="amount" id="amount" value="{{inv.amount|intcomma}}" tabindex="10" type="text" readonly class="shadow-sm no-bd"  placeholder="0.00" size="15"  >
+                                              <input  name="amount" id="amount" value="{{inv.amount|intcomma}}" tabindex="10" type="text" readonly class="shadow-sm no-bd text-success fw-extrabold"  placeholder="0.00" size="15"  >
                                           </div>
                                       </div>
                                 </div>

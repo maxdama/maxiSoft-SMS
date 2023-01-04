@@ -13,8 +13,8 @@
 <div class="content">
     <div class="page-inner">
 
-        <div class="page-header">
-            <h3 class=" font-weight-bold ">New Student Enrollment</h3>
+        <div class="page-header pl-3 border shadow text-secondary">
+            <h4 class=" font-weight-bold ">New Student Enrollment</h4>
             <ul class="breadcrumbs">
                 <li class="nav-home">
                     <a href="#">
@@ -24,7 +24,7 @@
                 <li class="separator">
                     <i class="flaticon-right-arrow"></i>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item flaticon-list ">
                     <a href="list">Students</a>
                 </li>
                 <li class="separator">
@@ -39,7 +39,7 @@
         <form action="" class="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="container d-flex justify-content-center">
+            <div class="container d-flex justify-content-center shadow-sm pt-3">
                 <div class="col col-md-10 ">
                     <div class="card">
 
@@ -56,7 +56,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-10">
-                                    <h5 class=""><strong>Batch Placement and Invoicing: </strong><br>
+                                    <h5 class="text-info "><strong>Batch Placement and Invoice: </strong><br>
                                         Academic Year: &ensp; <span class="pr-5">  {{timeline.descx}}</span>  </h5>
                                 </div>
                                 <div class="col-2">
@@ -77,16 +77,17 @@
                                 </div>
 
                                 <div class="no-bd col-md-5 form-floating-label ">
-                                    <input id="studnames" type="text" style="font-weight:bold; font-size: 18px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}" class="form-control no-bd" name="studentnames" required>
-                                    <label for="studnames" class="placeholder pl-3">Student Names</label>
+                                    <input id="studnames" type="text" style="font-weight:bold; font-size: 18px;" value="{{student.surname}}, {{student.first_name}} {{student.middle_name}}"
+                                           class="form-control no-bd shadow-sm" name="studentnames " required>
+                                    <label for="studnames" class="placeholder pl-3 text-primary ">Student Names</label>
                                 </div>
 
                                 <div class="col-md-3  " style="width:auto">
-                                    <!-- <button type="button" class="btn btn-outline-dark  btn-xs gen-id">Reg-No (Auto Gen)</button> -->
-                                    <span class="gen-id ">Registration No:</span>
+                                    <span class="gen-id text-primary ">Registration No:</span>
                                     <div class="row">
                                         <div class="col-md-12 form-group w_90 pl-3  p-0 m-0">
-                                            <input id="reg_no" name="reg_no" value="{{student.student.reg_no}}" readonly="" type="text" class="no-bd pt-0 mt-0" style="font-weight:bold;" required>
+                                            <input id="reg_no" name="reg_no" value="{{student.student.reg_no}}" readonly="" type="text"
+                                                   class="no-bd pt-0 mt-0 shadow-sm" style="font-weight:bold;" required>
                                         </div>
                                     </div>
                                 </div>
@@ -95,7 +96,7 @@
                                  <!-- Date of Enrollment -->
                                      <div class="form-group form-floating-label">
                                          <input  type="date" id="trans_date" class="no-bd form-control" name="trans_date"  value="" required >
-                                         <label for="trans_date" class="placeholder pl-3">Enrollment Date</label>
+                                         <label for="trans_date" class="placeholder pl-3 text-primary">Enrollment Date</label>
                                      </div>
                                 </div>
                             </div>
@@ -116,7 +117,7 @@
                                                 <option value={{s.id}} >{{s.descx}}</option>
                                             {% endfor %}
                                         </select>
-                                        <label for="session" class="placeholder pl-1">Session:</label>
+                                        <label for="session" class="placeholder pl-1 text-primary">Session:</label>
                                     </div>
                                 </div>
 
@@ -129,7 +130,7 @@
                                                 <option value={{cls.id}}>{{cls.class_abr}}{{cls.arm}} ({{timeline.descx}})</option>
                                             {% endfor %}
                                         </select>
-                                        <label for="class_id" class="placeholder pl-1">Batch Placement:</label>
+                                        <label for="class_id" class="placeholder pl-1 text-primary">Batch Placement:</label>
                                     </div>
                                 </div>
 
@@ -143,41 +144,43 @@
                                             {% endfor %}
 
                                         </select>
-                                        <label for="fee_pkg" class="placeholder pl-1">Fee Package:</label>
+                                        <label for="fee_pkg" class="placeholder pl-1 text-primary">Fee Package:</label>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="border-top">
-                                <span class="text-small fw-extrabold font-italic pl-4">Auto </span> <span class="pl-2 fw-bold">Invoice No: </span>
-                                <span class="pl-1">
-                                    <input  size="11" name="invoice_no" id="invoice_no" value="" tabindex="10" type="text" readonly class="no-bd" placeholder="" required >
+                                <span class="text-small fw-extrabold font-italic pl-4 pb-1 shadow-sm">Auto </span> <span class="pl-2 pb-1 fw-bold shadow-sm">Invoice No: </span>
+                                <span class="">
+                                    <input  size="9" name="invoice_no" id="invoice_no" value="" tabindex="10" type="text" readonly class="no-bd shadow-sm pr-1" placeholder="" required >
                                 </span>
                             </div>
 
                             <div class="text-small text-right border-bottom ml-5 mr-5 pr-3 pb-1">
                                 Discount %: <input type="text" class="" size="4" id="discount_perc" name="disc_perc">
-                                Discount Amount: <input type="text" id="discount_amt" name="discount" class="" size="7">
+                                <span class="pr-3"></span>
+                                <span class="fw-bold">Discount: </span><input type="text" id="discount_amt" name="discount" class="text-danger" size="7">
+
                             </div>
                             <p>
                             <div class="row ">
 
-                                <div class="col-md-1 font-weight-bold text-left">
-                                </div>
-                                <div class="col-md-7 font-weight-bold text-left">
-                                    <span class="label pl-2">Description:</span>
+                                <div class="col-md-1 font-weight-bold text-left"></div>
+
+                                <div class="col-md-7 font-weight-bold text-left ">
+                                    <span class="label pl-2 text-primary">Description:</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="descx" id="descx" value="" tabindex="10" type="text" class="form-control form-control-sm" placeholder="Admission into JSS 1 2021/2022 - 1st Term" required >
+                                              <input  name="descx" id="descx" value="" tabindex="10" type="text" class="form-control form-control-sm shadow-sm" placeholder="Admission into JSS 1 2021/2022 - 1st Term" required >
                                           </div>
                                       </div>
                                 </div>
 
-                                <div class="col-md-3 font-weight-bold text-left">
-                                    <span class="pl-2 ">Amount</span>
+                                <div class="col-md-3 font-weight-bold  pl-5 ">
+                                    <span class="pl-3 text-primary">Amount:</span>
                                       <div class="row">
                                           <div class="col-md-12 pl-4">
-                                              <input  name="amount" id="amount" value="" tabindex="10" type="text" readonly class="" placeholder="0.00" size="18" >
+                                              <input  name="amount" id="amount" value="" tabindex="10" type="text" readonly class="shadow-sm no-bd fw-bold text-success pt-1 pb-1" placeholder="0.00" size="15" >
                                           </div>
                                       </div>
                                 </div>
@@ -190,13 +193,16 @@
                         <div class="card-action card-transparent">
                             <div class="row d-flex justify-content-center text-center">
                                  <div class="col-4 ">
-                                    <button class="btn btn-outline-dark btn-round btn-sm"  type="submit" name="save_and_add" value="save&add" formaction="/financials/new-enrollment/{{student.pk}}" >Save and Add Another</button>
+                                    <button class="btn btn-outline-info btn-round btn-sm w-75 shadow"  type="submit" name="save_and_add" value="save&add"
+                                            formaction="/financials/new-enrollment/{{student.pk}}" >Save and Add Another</button>
                                  </div>
                                  <div class="col-4 ">
-                                     <button class="btn btn-outline-dark btn-round btn-sm" type="submit" name="save_and_list" value="save&list" formaction="/financials/new-enrollment/{{student.pk}}" >Finish and List Enrollment</button>
+                                     <button class="btn btn-outline-info btn-round btn-sm w-75 shadow" type="submit" name="save_and_list" value="save&list"
+                                             formaction="/financials/new-enrollment/{{student.pk}}" >Finish and List Enrollment</button>
                                  </div>
                                   <div class="col-4 ">
-                                      <button class="btn btn-outline-dark btn-round btn-sm"  type="submit" name="save" value="save" formaction="/financials/new-enrollment/{{student.pk}}" >Finish</button>
+                                      <button class="btn btn-outline-info btn-round btn-sm w-75 shadow"  type="submit" name="save" value="save"
+                                              formaction="/financials/new-enrollment/{{student.pk}}" >Finish</button>
                                   </div>
                              </div>
                         </div>
@@ -207,20 +213,13 @@
             </div>
 
         </form>
-
-        <div class="">
-            <p class="">
-                <a href="/students/list" class="">List All Students</a>
-            </p>
-        </div>
-
     </div>
 </div>
 {% endblock content %}
 
+
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
-
 
     {% if messages %}
         {% for message in messages %}
@@ -237,12 +236,11 @@
     {% endif %}
 
     <script type="text/javascript">
-		$(document).ready(function() {
-            //document.getElementById('trans_date').valueAsDate = new Date(); // Get the current Date and assigned
-            document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
-		});
 
 		$(document).ready(function() {
+             $("#amount").css("textAlign", "right");
+
+             document.getElementById('trans_date').value = moment().format('YYYY-MM-DD');
 
             $("#discount_perc").blur(function(){
                 $(this).css("textAlign", "center");
